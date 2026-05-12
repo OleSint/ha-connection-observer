@@ -75,6 +75,7 @@ def _notify_selector(services: list[str]) -> selector.SelectSelector:
     return selector.SelectSelector(
         selector.SelectSelectorConfig(
             options=[selector.SelectOptionDict(value=s, label=s) for s in services],
+            multiple=True,
             custom_value=True,
         )
     )
@@ -143,6 +144,9 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         )
                     ),
                     vol.Optional(CONF_NOTIFY_RECONNECT, default=False): selector.BooleanSelector(),
+                    vol.Optional(CONF_EXCLUDED_ENTITIES, default=[]): selector.EntitySelector(
+                        selector.EntitySelectorConfig(multiple=True)
+                    ),
                 }
             ),
         )

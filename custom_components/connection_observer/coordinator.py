@@ -250,9 +250,16 @@ class ConnectionObserverCoordinator:
     # Notifications
     # ------------------------------------------------------------------
 
+    def _notify_services(self) -> list[str]:
+        """Return configured notify services as a list (supports legacy single string)."""
+        raw = self._cfg.get(CONF_NOTIFY_SERVICE, [])
+        if isinstance(raw, str):
+            return [raw] if raw else []
+        return [s for s in raw if s]
+
     async def _send_immediate(self, evt: DisconnectEvent) -> None:
-        service = self._cfg.get(CONF_NOTIFY_SERVICE)
-        if not service:
+        services = self._notify_services()
+        if not services:
             return
 
         lang = self._cfg.get(CONF_LANGUAGE, "en")
@@ -265,11 +272,11 @@ class ConnectionObserverCoordinator:
             title = "Connection Lost"
             msg = f"⚠️ {evt.device_name} ({evt.protocol}) lost connection at {time_str}."
 
-        await self._notify(service, title, msg)
+        await self._notify_all(services, title, msg)
 
     async def _send_reconnect(self, device_name: str) -> None:
-        service = self._cfg.get(CONF_NOTIFY_SERVICE)
-        if not service:
+        services = self._notify_services()
+        if not services:
             return
 
         lang = self._cfg.get(CONF_LANGUAGE, "en")
@@ -280,11 +287,11 @@ class ConnectionObserverCoordinator:
             title = "Connection Restored"
             msg = f"✅ {device_name} is back online."
 
-        await self._notify(service, title, msg)
+        await self._notify_all(services, title, msg)
 
     async def _send_summary(self) -> None:
-        service = self._cfg.get(CONF_NOTIFY_SERVICE)
-        if not service:
+        services = self._notify_services()
+        if not services:
             return
 
         pending = [ev for ev in self._events if not ev.included_in_summary]
@@ -324,14 +331,19 @@ class ConnectionObserverCoordinator:
                         f"• {ev.device_name} ({ev.protocol}): offline since {d_time} ⚠️ still offline"
                     )
 
-        await self._notify(service, title, "\n".join(lines))
+        await self._notify_all(services, title, "\n".join(lines))
 
         for ev in pending:
             ev.included_in_summary = True
         self._last_summary = dt_util.now()
         await self._save_store()
 
-    async def _notify(self, service: str, title: str, message: str) -> None:
+    async def _notify_all(self, services: list[str], title: str, message: str) -> None:
+        """Send notification to every configured service."""
+        for service in services:
+            await self._notify_one(service, title, message)
+
+    async def _notify_one(self, service: str, title: str, message: str) -> None:
         parts = service.split(".", 1)
         if len(parts) != 2:
             _LOGGER.error("Invalid notify service format: %s", service)
