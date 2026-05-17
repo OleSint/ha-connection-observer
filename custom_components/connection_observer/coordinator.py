@@ -11,7 +11,7 @@ from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import CoreState, Event, HomeAssistant, callback
 from homeassistant.helpers.device_registry import async_get as async_get_device_registry
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
-from homeassistant.helpers.event import async_call_later, async_track_time_change
+from homeassistant.helpers.event import async_call_later, async_track_point_in_time
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
@@ -81,6 +81,21 @@ def _parse_summary_time(time_str: str) -> tuple[int, int]:
         return 8, 0
 
 
+def _next_occurrence(now: datetime, hour: int, minute: int, day_ints: set[int]) -> datetime:
+    """Return the next datetime that matches hour/minute on one of the allowed weekdays."""
+    candidate = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    # If that time has already passed today, start looking from tomorrow
+    if candidate <= now:
+        candidate += timedelta(days=1)
+    # Walk forward up to 7 days to find a matching weekday
+    for _ in range(7):
+        if candidate.weekday() in day_ints:
+            return candidate
+        candidate += timedelta(days=1)
+    # Fallback: shouldn't happen when day_ints is non-empty
+    return now + timedelta(days=1)
+
+
 class ConnectionObserverCoordinator:
     """Manages event listeners, state tracking, and notifications."""
 
@@ -148,22 +163,37 @@ class ConnectionObserverCoordinator:
         )
 
     def _setup_summary_scheduler(self) -> None:
-        cfg = self._cfg
-        if not cfg.get(CONF_NOTIFY_SUMMARY):
+        if not self._cfg.get(CONF_NOTIFY_SUMMARY):
+            return
+        self._schedule_next_summary()
+
+    def _schedule_next_summary(self) -> None:
+        """Calculate the next run time and register a one-shot timer."""
+        if not self._cfg.get(CONF_NOTIFY_SUMMARY):
             return
 
-        hour, minute = _parse_summary_time(cfg.get(CONF_SUMMARY_TIME, "08:00"))
-        days: list[str] = cfg.get(CONF_SUMMARY_DAYS, [str(i) for i in range(7)])
+        hour, minute = _parse_summary_time(self._cfg.get(CONF_SUMMARY_TIME, "08:00"))
+        days: list[str] = self._cfg.get(CONF_SUMMARY_DAYS, [str(i) for i in range(7)])
         day_ints = {int(d) for d in days}
 
-        @callback
-        def _on_time(now: datetime) -> None:
-            if now.weekday() in day_ints:
-                self.hass.async_create_task(self._send_summary())
+        next_run = _next_occurrence(dt_util.now(), hour, minute, day_ints)
+        _LOGGER.debug("Connection Observer: next summary scheduled for %s", next_run)
 
-        self._unsub.append(
-            async_track_time_change(self.hass, _on_time, hour=hour, minute=minute, second=0)
-        )
+        @callback
+        def _fire(_now: datetime) -> None:
+            self.hass.async_create_task(self._run_summary_and_reschedule())
+
+        self._unsub.append(async_track_point_in_time(self.hass, _fire, next_run))
+
+    async def _run_summary_and_reschedule(self) -> None:
+        """Send summary, then immediately schedule the next one."""
+        try:
+            await self._send_summary()
+        except Exception:  # noqa: BLE001
+            _LOGGER.exception("Connection Observer: unexpected error in summary")
+        finally:
+            # Always reschedule — even if sending failed
+            self._schedule_next_summary()
 
     # ------------------------------------------------------------------
     # State change handling
@@ -205,9 +235,11 @@ class ConnectionObserverCoordinator:
     def _on_disconnect(self, entity_id: str, protocol: str) -> None:
         device_key, device_name = self._resolve_device(entity_id)
 
-        # Deduplicate: if there's already an open event for this device, skip
+        # Deduplicate: skip if there's already an open, not-yet-summarised event
+        # (Events already included in a summary are "closed" for dedup purposes,
+        # so a device that is still offline across two summary cycles gets a fresh entry)
         for ev in self._events:
-            if ev.device_key == device_key and ev.reconnected_at is None:
+            if ev.device_key == device_key and ev.reconnected_at is None and not ev.included_in_summary:
                 return
 
         evt = DisconnectEvent(
