@@ -81,6 +81,32 @@ KNOWN_PROTOCOLS: dict[str, str] = {
     "mikrotik": "MikroTik",
     "asusrouter": "ASUS Router",
     "synology_dsm": "Synology NAS",
+    # ── Heating / HVAC ───────────────────────────────────────────────────
+    "vicare": "Viessmann ViCare",
+    "vaillant": "Vaillant (myVaillant)",
+    "bosch_shc": "Bosch Smart Home",
+    "melcloud": "Mitsubishi MelCloud",
+    "nibe_heatpump": "NIBE Wärmepumpe",
+    # ── Solar / energy (extended) ────────────────────────────────────────
+    "huawei_solar": "Huawei Solar",
+    "enphase_envoy": "Enphase Envoy",
+    "goodwe": "GoodWe",
+    "growatt_server": "Growatt",
+    "ecoflow": "EcoFlow",
+    # ── Vacuum robots ────────────────────────────────────────────────────
+    "roborock": "Roborock",
+    "ecovacs": "ECOVACS",
+    "neato": "Neato Robotics",
+    # ── Household appliances ─────────────────────────────────────────────
+    "lg_thinq": "LG ThinQ",
+    "meross": "Meross",
+    "wemo": "Belkin WeMo",
+    # ── Gates & garage doors ─────────────────────────────────────────────
+    "myq": "myQ (Chamberlain / LiftMaster)",
+    "nice_go": "Nice G.O.",
+    # ── Local weather stations ───────────────────────────────────────────
+    "ecowitt": "Ecowitt",
+    "ambient_station": "Ambient Weather Station",
     # ── Garden & household ───────────────────────────────────────────────
     "husqvarna_automower": "Husqvarna Automower",
     "gardena_bluetooth": "GARDENA Bluetooth",
@@ -92,7 +118,7 @@ KNOWN_PROTOCOLS: dict[str, str] = {
     "roomba": "iRobot Roomba",
 }
 
-# Config keys
+# Config keys – notifications
 CONF_PROTOCOLS = "protocols"
 CONF_NOTIFY_SERVICE = "notify_service"
 CONF_NOTIFY_IMMEDIATE = "notify_immediate"
@@ -101,7 +127,24 @@ CONF_SUMMARY_TIME = "summary_time"
 CONF_SUMMARY_DAYS = "summary_days"
 CONF_NOTIFY_RECONNECT = "notify_reconnect"
 CONF_LANGUAGE = "language"
+
+# Config keys – advanced
 CONF_EXCLUDED_ENTITIES = "excluded_entities"
+CONF_ALERT_DELAY = "alert_delay"
+CONF_COOLDOWN = "cooldown"
+CONF_MIN_OFFLINE_DURATION = "min_offline_duration"
+CONF_INCLUDE_AREA = "include_area"
+CONF_INCLUDE_DEVICE_INFO = "include_device_info"
+CONF_REPAIRS_THRESHOLD = "repairs_threshold"  # hours offline before HA Repairs entry, 0 = off
+
+# Config keys – notification templates (empty string = use language default)
+CONF_TMPL_IMM_TITLE = "tmpl_imm_title"
+CONF_TMPL_IMM_MSG = "tmpl_imm_msg"
+CONF_TMPL_REC_TITLE = "tmpl_rec_title"
+CONF_TMPL_REC_MSG = "tmpl_rec_msg"
+CONF_TMPL_SUM_TITLE = "tmpl_sum_title"
+CONF_TMPL_SUM_LINE_RESOLVED = "tmpl_sum_resolved"
+CONF_TMPL_SUM_LINE_ONGOING = "tmpl_sum_ongoing"
 
 # Storage
 STORAGE_KEY = f"{DOMAIN}_events"
@@ -110,6 +153,10 @@ STORAGE_VERSION = 1
 # Languages
 LANG_EN = "en"
 LANG_DE = "de"
+LANG_FR = "fr"
+LANG_NL = "nl"
+LANG_ES = "es"
 
-# Startup grace period in seconds before tracking begins
+# Timing
 STARTUP_GRACE_SECONDS = 60
+WATCHDOG_INTERVAL_SECONDS = 300

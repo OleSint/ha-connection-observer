@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Connection Observer – Protokolle",
-        "description": "Wähle die Verbindungsprotokolle aus, die überwacht werden sollen. Es werden nur Protokolle angezeigt, die in deiner Home-Assistant-Instanz bereits eingerichtet sind.",
+        "description": "Wähle die Verbindungsprotokolle, die überwacht werden sollen. Es werden nur Protokolle angezeigt, die in deiner HA-Instanz bereits eingerichtet sind.",
         "data": {
           "protocols": "Zu überwachende Protokolle",
           "language": "Sprache der Benachrichtigungen"
@@ -11,16 +11,38 @@
       },
       "notifications": {
         "title": "Connection Observer – Benachrichtigungen",
-        "description": "Lege fest, wie und wann du Benachrichtigungen erhältst. Sofortbenachrichtigung und Zusammenfassung können gleichzeitig aktiv sein.",
+        "description": "Lege fest, wie und wann du Benachrichtigungen erhältst. Sofort und Zusammenfassung können gleichzeitig aktiv sein.",
         "data": {
-          "notify_service": "Benachrichtigungsdienst",
+          "notify_service": "Benachrichtigungsdienst(e)",
           "notify_immediate": "Sofortbenachrichtigung bei Verbindungsabbruch",
           "notify_summary": "Geplante Zusammenfassung",
           "summary_time": "Uhrzeit der Zusammenfassung",
           "summary_days": "Tage der Zusammenfassung",
           "notify_reconnect": "Benachrichtigung bei Wiederverbindung (opt-in)"
         }
+      },
+      "test": {
+        "title": "Connection Observer – Test",
+        "description": "Klicke auf **Weiter**, um eine Testbenachrichtigung an deinen ausgewählten Dienst zu senden. Deaktiviere das Kontrollkästchen, um diesen Schritt zu überspringen.",
+        "data": {
+          "send_test": "Testbenachrichtigung jetzt senden"
+        }
+      },
+      "advanced": {
+        "title": "Connection Observer – Erweitert",
+        "description": "Alle Felder sind optional. Wert 0 deaktiviert die jeweilige Funktion.",
+        "data": {
+          "alert_delay": "Verzögerung – Minuten offline bevor ein Ereignis erstellt wird (0 = sofort)",
+          "cooldown": "Mindestabstand zwischen Sofortbenachrichtigungen pro Gerät (0 = kein Limit)",
+          "min_offline_duration": "Mindestausfallzeit für die Zusammenfassung (0 = alle Ereignisse)",
+          "include_area": "Raum / Bereich in Benachrichtigungen anzeigen",
+          "include_device_info": "Hersteller & Modell in Benachrichtigungen anzeigen",
+          "excluded_entities": "Ausgeschlossene Entitäten (optional)"
+        }
       }
+    },
+    "error": {
+      "test_failed": "Testbenachrichtigung fehlgeschlagen. Prüfe, ob der Benachrichtigungsdienst korrekt eingerichtet ist, und versuche es erneut. Deaktiviere das Kontrollkästchen, um den Test zu überspringen und fortzufahren."
     },
     "abort": {
       "already_configured": "Connection Observer ist bereits eingerichtet.",
@@ -33,16 +55,44 @@
         "title": "Connection Observer – Einstellungen",
         "data": {
           "protocols": "Zu überwachende Protokolle",
-          "notify_service": "Benachrichtigungsdienst",
+          "notify_service": "Benachrichtigungsdienst(e)",
           "notify_immediate": "Sofortbenachrichtigung bei Verbindungsabbruch",
           "notify_summary": "Geplante Zusammenfassung",
           "summary_time": "Uhrzeit der Zusammenfassung",
           "summary_days": "Tage der Zusammenfassung",
           "notify_reconnect": "Benachrichtigung bei Wiederverbindung",
+          "alert_delay": "Verzögerung (Minuten, 0 = sofort)",
+          "cooldown": "Mindestabstand zwischen Benachrichtigungen pro Gerät (Minuten, 0 = kein Limit)",
+          "min_offline_duration": "Mindestausfallzeit für Zusammenfassung (Minuten, 0 = alle)",
+          "include_area": "Raum / Bereich in Benachrichtigungen anzeigen",
+          "include_device_info": "Hersteller & Modell in Benachrichtigungen anzeigen",
           "language": "Sprache der Benachrichtigungen",
-          "excluded_entities": "Ausgeschlossene Entitäten"
+          "excluded_entities": "Ausgeschlossene Entitäten",
+          "repairs_threshold": "HA-Reparaturen-Eintrag nach N Stunden offline (0 = deaktiviert)",
+          "tmpl_imm_title": "Vorlage: Titel der Sofortbenachrichtigung (leer = Standard)",
+          "tmpl_imm_msg": "Vorlage: Text der Sofortbenachrichtigung (leer = Standard)",
+          "tmpl_rec_title": "Vorlage: Titel der Wiederverbindungsbenachrichtigung (leer = Standard)",
+          "tmpl_rec_msg": "Vorlage: Text der Wiederverbindungsbenachrichtigung (leer = Standard)",
+          "tmpl_sum_title": "Vorlage: Titel der Zusammenfassung (leer = Standard)",
+          "tmpl_sum_resolved": "Vorlage: Zusammenfassungszeile – Gerät wieder online (leer = Standard)",
+          "tmpl_sum_ongoing": "Vorlage: Zusammenfassungszeile – Gerät noch offline (leer = Standard)"
+        },
+        "data_description": {
+          "tmpl_imm_title": "Variablen: {device_name} {protocol} {time} {area} {model}",
+          "tmpl_imm_msg": "Variablen: {device_name} {protocol} {time} {area} {model}",
+          "tmpl_rec_title": "Variablen: {device_name}",
+          "tmpl_rec_msg": "Variablen: {device_name}",
+          "tmpl_sum_title": "Variablen: {count}",
+          "tmpl_sum_resolved": "Variablen: {device_name} {area} {protocol} {time_offline} {time_online}",
+          "tmpl_sum_ongoing": "Variablen: {device_name} {area} {protocol} {time_offline}"
         }
       }
+    }
+  },
+  "issues": {
+    "device_offline": {
+      "title": "Gerät offline: {device_name}",
+      "description": "**{device_name}** ({protocol}) ist seit **{since}** offline.\n\nPrüfe das Gerät und seine Verbindung. Sobald es sich wieder verbindet, schließt Connection Observer dieses Problem automatisch."
     }
   }
 }

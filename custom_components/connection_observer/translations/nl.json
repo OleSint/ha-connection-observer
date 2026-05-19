@@ -1,0 +1,98 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connection Observer – Protocollen",
+        "description": "Selecteer de verbindingsprotocollen die je wilt bewaken. Alleen protocollen die al zijn geconfigureerd in jouw Home Assistant-instantie worden getoond.",
+        "data": {
+          "protocols": "Te bewaken protocollen",
+          "language": "Taal van meldingen"
+        }
+      },
+      "notifications": {
+        "title": "Connection Observer – Meldingen",
+        "description": "Kies hoe en wanneer je waarschuwingen ontvangt. De directe melding en de samenvatting kunnen tegelijkertijd actief zijn.",
+        "data": {
+          "notify_service": "Meldingsdienst(en)",
+          "notify_immediate": "Directe melding bij verbindingsverlies",
+          "notify_summary": "Geplande samenvatting",
+          "summary_time": "Tijd van samenvatting",
+          "summary_days": "Dagen van samenvatting",
+          "notify_reconnect": "Melding bij herverbinding (opt-in)"
+        }
+      },
+      "test": {
+        "title": "Connection Observer – Test",
+        "description": "Klik op **Verzenden** om een testmelding te sturen naar jouw geselecteerde dienst(en). Vink het vakje hieronder uit om deze stap over te slaan.",
+        "data": {
+          "send_test": "Testmelding nu verzenden"
+        }
+      },
+      "advanced": {
+        "title": "Connection Observer – Geavanceerd",
+        "description": "Alle velden zijn optioneel. De waarde 0 schakelt de betreffende functie uit.",
+        "data": {
+          "alert_delay": "Vertraging – minuten offline voordat een gebeurtenis wordt aangemaakt (0 = direct)",
+          "cooldown": "Minimale tijd tussen directe meldingen per apparaat (0 = geen limiet)",
+          "min_offline_duration": "Minimale offline-duur om in de samenvatting te verschijnen (0 = alle gebeurtenissen)",
+          "include_area": "Ruimte / zone opnemen in meldingen",
+          "include_device_info": "Fabrikant en model opnemen in meldingen",
+          "excluded_entities": "Uitgesloten entiteiten (optioneel)"
+        }
+      }
+    },
+    "error": {
+      "test_failed": "Testmelding mislukt. Controleer of de meldingsdienst correct is geconfigureerd en probeer het opnieuw. Vink het vakje uit om de test over te slaan en toch verder te gaan."
+    },
+    "abort": {
+      "already_configured": "Connection Observer is al geconfigureerd.",
+      "no_protocols": "Geen ondersteunde protocollen gevonden. Configureer eerst Zigbee, Z-Wave, Bluetooth of een andere ondersteunde integratie."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Connection Observer – Instellingen",
+        "data": {
+          "protocols": "Te bewaken protocollen",
+          "notify_service": "Meldingsdienst(en)",
+          "notify_immediate": "Directe melding bij verbindingsverlies",
+          "notify_summary": "Geplande samenvatting",
+          "summary_time": "Tijd van samenvatting",
+          "summary_days": "Dagen van samenvatting",
+          "notify_reconnect": "Melding bij herverbinding",
+          "alert_delay": "Vertraging (minuten, 0 = direct)",
+          "cooldown": "Minimale tijd tussen meldingen per apparaat (minuten, 0 = geen limiet)",
+          "min_offline_duration": "Minimale offline-duur voor samenvatting (minuten, 0 = alle gebeurtenissen)",
+          "include_area": "Ruimte / zone opnemen in meldingen",
+          "include_device_info": "Fabrikant en model opnemen in meldingen",
+          "language": "Taal van meldingen",
+          "excluded_entities": "Uitgesloten entiteiten",
+          "repairs_threshold": "HA Repairs-melding na N uur offline (0 = uitgeschakeld)",
+          "tmpl_imm_title": "Sjabloon: titel directe melding (leeg = standaard)",
+          "tmpl_imm_msg": "Sjabloon: bericht directe melding (leeg = standaard)",
+          "tmpl_rec_title": "Sjabloon: titel herverbindingsmelding (leeg = standaard)",
+          "tmpl_rec_msg": "Sjabloon: bericht herverbindingsmelding (leeg = standaard)",
+          "tmpl_sum_title": "Sjabloon: titel samenvatting (leeg = standaard)",
+          "tmpl_sum_resolved": "Sjabloon: samenvattingsregel – opgelost (leeg = standaard)",
+          "tmpl_sum_ongoing": "Sjabloon: samenvattingsregel – nog offline (leeg = standaard)"
+        },
+        "data_description": {
+          "tmpl_imm_title": "Variabelen: {device_name} {protocol} {time} {area} {model}",
+          "tmpl_imm_msg": "Variabelen: {device_name} {protocol} {time} {area} {model}",
+          "tmpl_rec_title": "Variabelen: {device_name}",
+          "tmpl_rec_msg": "Variabelen: {device_name}",
+          "tmpl_sum_title": "Variabelen: {count}",
+          "tmpl_sum_resolved": "Variabelen: {device_name} {area} {protocol} {time_offline} {time_online}",
+          "tmpl_sum_ongoing": "Variabelen: {device_name} {area} {protocol} {time_offline}"
+        }
+      }
+    }
+  },
+  "issues": {
+    "device_offline": {
+      "title": "Apparaat offline: {device_name}",
+      "description": "**{device_name}** ({protocol}) is offline sinds **{since}**.\n\nControleer het apparaat en de verbinding. Zodra het opnieuw verbinding maakt, sluit Connection Observer dit probleem automatisch."
+    }
+  }
+}

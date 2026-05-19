@@ -1,0 +1,98 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connection Observer – Protocolos",
+        "description": "Selecciona los protocolos de conexión que deseas monitorizar. Solo se muestran los protocolos ya configurados en tu instancia de Home Assistant.",
+        "data": {
+          "protocols": "Protocolos a monitorizar",
+          "language": "Idioma de las notificaciones"
+        }
+      },
+      "notifications": {
+        "title": "Connection Observer – Notificaciones",
+        "description": "Elige cómo y cuándo recibir alertas. Los modos inmediato y resumen pueden estar activos simultáneamente.",
+        "data": {
+          "notify_service": "Servicio(s) de notificación",
+          "notify_immediate": "Notificación inmediata al desconectarse",
+          "notify_summary": "Resumen programado",
+          "summary_time": "Hora del resumen",
+          "summary_days": "Días del resumen",
+          "notify_reconnect": "Notificar al reconectarse (opt-in)"
+        }
+      },
+      "test": {
+        "title": "Connection Observer – Prueba",
+        "description": "Haz clic en **Enviar** para enviar una notificación de prueba a tu servicio seleccionado. Desmarca la casilla para omitir este paso.",
+        "data": {
+          "send_test": "Enviar notificación de prueba ahora"
+        }
+      },
+      "advanced": {
+        "title": "Connection Observer – Avanzado",
+        "description": "Todos los campos son opcionales. El valor 0 desactiva la función correspondiente.",
+        "data": {
+          "alert_delay": "Retraso de alerta – minutos sin conexión antes de crear un evento (0 = inmediato)",
+          "cooldown": "Tiempo mínimo entre notificaciones inmediatas por dispositivo (0 = sin límite)",
+          "min_offline_duration": "Duración mínima sin conexión para aparecer en el resumen (0 = todos los eventos)",
+          "include_area": "Incluir habitación / área en las notificaciones",
+          "include_device_info": "Incluir fabricante y modelo en las notificaciones",
+          "excluded_entities": "Entidades excluidas (opcional)"
+        }
+      }
+    },
+    "error": {
+      "test_failed": "Error al enviar la notificación de prueba. Comprueba que el servicio de notificación esté correctamente configurado e inténtalo de nuevo. Desmarca la casilla para omitir la prueba y continuar de todas formas."
+    },
+    "abort": {
+      "already_configured": "Connection Observer ya está configurado.",
+      "no_protocols": "No se encontraron protocolos compatibles. Configura primero Zigbee, Z-Wave, Bluetooth u otra integración compatible."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Connection Observer – Opciones",
+        "data": {
+          "protocols": "Protocolos a monitorizar",
+          "notify_service": "Servicio(s) de notificación",
+          "notify_immediate": "Notificación inmediata al desconectarse",
+          "notify_summary": "Resumen programado",
+          "summary_time": "Hora del resumen",
+          "summary_days": "Días del resumen",
+          "notify_reconnect": "Notificar al reconectarse",
+          "alert_delay": "Retraso de alerta (minutos, 0 = inmediato)",
+          "cooldown": "Tiempo mínimo entre notificaciones por dispositivo (minutos, 0 = sin límite)",
+          "min_offline_duration": "Duración mínima sin conexión para el resumen (minutos, 0 = todos los eventos)",
+          "include_area": "Incluir habitación / área en las notificaciones",
+          "include_device_info": "Incluir fabricante y modelo en las notificaciones",
+          "language": "Idioma de las notificaciones",
+          "excluded_entities": "Entidades excluidas",
+          "repairs_threshold": "Incidencia en HA Repairs tras N horas sin conexión (0 = desactivado)",
+          "tmpl_imm_title": "Plantilla: título de notificación inmediata (vacío = predeterminado)",
+          "tmpl_imm_msg": "Plantilla: mensaje de notificación inmediata (vacío = predeterminado)",
+          "tmpl_rec_title": "Plantilla: título de notificación de reconexión (vacío = predeterminado)",
+          "tmpl_rec_msg": "Plantilla: mensaje de notificación de reconexión (vacío = predeterminado)",
+          "tmpl_sum_title": "Plantilla: título del resumen (vacío = predeterminado)",
+          "tmpl_sum_resolved": "Plantilla: línea del resumen – evento resuelto (vacío = predeterminado)",
+          "tmpl_sum_ongoing": "Plantilla: línea del resumen – todavía sin conexión (vacío = predeterminado)"
+        },
+        "data_description": {
+          "tmpl_imm_title": "Variables: {device_name} {protocol} {time} {area} {model}",
+          "tmpl_imm_msg": "Variables: {device_name} {protocol} {time} {area} {model}",
+          "tmpl_rec_title": "Variables: {device_name}",
+          "tmpl_rec_msg": "Variables: {device_name}",
+          "tmpl_sum_title": "Variables: {count}",
+          "tmpl_sum_resolved": "Variables: {device_name} {area} {protocol} {time_offline} {time_online}",
+          "tmpl_sum_ongoing": "Variables: {device_name} {area} {protocol} {time_offline}"
+        }
+      }
+    }
+  },
+  "issues": {
+    "device_offline": {
+      "title": "Dispositivo sin conexión: {device_name}",
+      "description": "**{device_name}** ({protocol}) está sin conexión desde **{since}**.\n\nComprueba el dispositivo y su conexión. Una vez que se reconecte, Connection Observer resolverá automáticamente esta incidencia."
+    }
+  }
+}

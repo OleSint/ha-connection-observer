@@ -1,0 +1,11 @@
+send_summary_now:
+  name: Send Summary Now
+  description: >
+    Immediately sends a summary notification of all pending disconnect events,
+    without waiting for the next scheduled time.
+
+clear_history:
+  name: Clear History
+  description: >
+    Clears all stored disconnect events from memory and persistent storage.
+    The pending-events sensor will reset to 0.
