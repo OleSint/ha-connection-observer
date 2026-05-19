@@ -4,6 +4,8 @@
 [![GitHub Release](https://img.shields.io/github/v/release/OleSint/ha-connection-observer)](https://github.com/OleSint/ha-connection-observer/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+📖 **[English](docs/DOCUMENTATION.md)** · **[Deutsch](docs/DOKUMENTATION.md)** · **[Français](docs/DOCUMENTATION_FR.md)** · **[Nederlands](docs/DOCUMENTATION_NL.md)** · **[Español](docs/DOCUMENTATION_ES.md)**
+
 > **Deutsch weiter unten** ↓
 
 ---
@@ -14,18 +16,44 @@
 
 ### Features
 
-- **Protocol-based monitoring** – select entire integration families (Zigbee, Z-Wave, Hue, ESPHome, Shelly, Sonos, …) instead of configuring individual entities. 80+ integrations supported out of the box.
+- **Protocol-based monitoring** – select entire integration families (Zigbee, Z-Wave, Hue, ESPHome, Shelly, Sonos, …) instead of configuring individual entities. 100+ integrations supported out of the box.
 - **Immediate notifications** – get alerted the moment a device goes offline
 - **Scheduled summaries** – receive a digest on configurable days and times listing everything that disconnected since the last summary, including whether the device came back online and when
 - **Both modes simultaneously** – immediate + summary can both be active at once; summary is pre-selected by default
 - **Reconnect notifications** – opt-in alert when a device comes back online
+- **Alert delay** – opt-in: only create an event after a device has been offline for N minutes, filtering out brief dropouts entirely
+- **Cooldown** – opt-in: limit immediate notifications per device to once every N minutes
+- **Minimum offline duration** – opt-in: suppress short blips from the summary without losing them
+- **Room / area** – opt-in: include the HA area name in notifications
+- **Manufacturer & model** – opt-in: include device info in immediate notifications
 - **Per-entity exclusions** – exclude specific noisy entities from monitoring
-- **Bilingual** – notification messages in English or German (configurable)
+- **5 languages** – notification messages in English, German, French, Dutch, or Spanish (configurable)
+- **Notification templates** – customise the text of any notification with your own format string; variables like `{device_name}`, `{protocol}`, and `{time}` are available
+- **HA Repairs integration** – after a configurable number of hours offline, an issue appears in Home Assistant's built-in Repairs panel; resolved automatically when the device comes back
+- **Test notification** – built-in test step during setup to verify your notification service works
 - **Persistent state** – events survive Home Assistant restarts; an HA restart itself never triggers a false disconnect alarm
+- **Watchdog** – runs silently every 5 minutes to catch reconnects that did not produce a state-change event
+
+### Entities
+
+| Entity | Type | Description |
+|---|---|---|
+| `sensor.connection_observer_offline_devices` | Sensor | Number of devices currently offline. Attribute `devices` lists their names. |
+| `sensor.connection_observer_pending_summary_events` | Sensor | Number of events not yet included in a summary. |
+| `binary_sensor.connection_observer_connection_problem` | Binary Sensor | `ON` = at least one device is offline. Use in automations or dashboards. |
+
+### Services
+
+| Service | Description |
+|---|---|
+| `connection_observer.send_summary_now` | Immediately send a summary of all pending events, without waiting for the next scheduled time. |
+| `connection_observer.clear_history` | Clear all stored disconnect events. Resets the pending-events sensor to 0. |
 
 ### How it works
 
-Connection Observer listens for entities transitioning to the `unavailable` state — this is the standard Home Assistant mechanism used by virtually all integrations when a device can no longer be reached. When a device with multiple entities goes offline, only **one** notification is sent per device (not one per entity).
+Connection Observer listens for entities transitioning to the `unavailable` state — the standard Home Assistant mechanism used by virtually all integrations when a device can no longer be reached. When a device with multiple entities goes offline, only **one** notification is sent per device (not one per entity).
+
+The built-in watchdog runs every 5 minutes and catches any reconnects that did not produce a `state_changed` event, keeping the offline count accurate at all times.
 
 Only integrations that are actually configured in your HA instance appear as options during setup.
 
@@ -49,19 +77,25 @@ Only integrations that are actually configured in your HA instance appear as opt
 1. Go to **Settings → Devices & Services → Add Integration**
 2. Search for **Connection Observer**
 3. **Step 1 – Protocols**: Select the integration families to monitor and choose your notification language
-4. **Step 2 – Notifications**: Select one or more notification services, configure immediate and/or summary notifications, and optionally exclude specific entities
+4. **Step 2 – Notifications**: Select one or more notification services; configure immediate and/or summary notifications
+5. **Step 3 – Test**: Optionally send a test notification to verify your setup
+6. **Step 4 – Advanced** *(all optional, 0 = disabled)*:
+   - Alert delay, cooldown, minimum offline duration
+   - Room/area and device info in notifications
+   - Excluded entities
 
-All settings can be changed later via the **Configure** button on the integration card.
+All settings — plus notification templates and the HA Repairs threshold — can be changed later via the **Configure** button on the integration card.
 
 ### Notification examples
 
-**Immediate (English):**
+**Immediate (English) — with area and device info enabled:**
 > ⚠️ Living Room Plug (shelly) lost connection at 14:32.
+> 📍 Living Room  ·  Shelly Plus 1PM
 
 **Summary (English):**
 > 📋 3 device(s) affected since last summary:
-> • Kitchen Sensor (zha): offline since 05/12 07:15, back online at 07:42
-> • Bedroom Bulb (hue): offline since 05/12 09:05 ⚠️ still offline
+> • Kitchen Sensor [Kitchen] (zha): offline since 05/12 07:15, back online at 07:42
+> • Bedroom Bulb [Bedroom] (hue): offline since 05/12 09:05 ⚠️ still offline
 > • Hallway Motion (esphome): offline since 05/12 11:20, back online at 11:28
 
 ### Requirements
@@ -77,18 +111,44 @@ All settings can be changed later via the **Configure** button on the integratio
 
 ### Funktionen
 
-- **Protokollbasierte Überwachung** – ganze Integrationsfamilien auswählen (Zigbee, Z-Wave, Hue, ESPHome, Shelly, Sonos, …) statt einzelner Entitäten. Über 80 Integrationen werden unterstützt.
+- **Protokollbasierte Überwachung** – ganze Integrationsfamilien auswählen (Zigbee, Z-Wave, Hue, ESPHome, Shelly, Sonos, …) statt einzelner Entitäten. Über 100 Integrationen werden unterstützt.
 - **Sofortbenachrichtigung** – wird direkt gesendet, sobald ein Gerät offline geht
-- **Geplante Zusammenfassung** – Sammelnachricht zu konfigurierbaren Tagen und Uhrzeiten mit allen Verbindungsabbrüchen seit der letzten Zusammenfassung (inkl. ob das Gerät zwischendurch wieder online war)
+- **Geplante Zusammenfassung** – Sammelnachricht zu konfigurierbaren Tagen und Uhrzeiten mit allen Verbindungsabbrüchen seit der letzten Zusammenfassung
 - **Beide Modi gleichzeitig** – Sofort + Zusammenfassung können parallel aktiv sein; Zusammenfassung ist standardmäßig vorausgewählt
 - **Wiederverbindungsbenachrichtigung** – optionale Meldung, wenn ein Gerät wieder online geht
+- **Verzögerung** – opt-in: Ereignis wird erst erstellt, wenn das Gerät N Minuten offline war — kurze Aussetzer werden komplett ignoriert
+- **Cooldown** – opt-in: Sofortbenachrichtigung pro Gerät höchstens alle N Minuten
+- **Mindestausfallzeit** – opt-in: kurze Aussetzer werden aus der Zusammenfassung herausgefiltert
+- **Raum / Bereich** – opt-in: HA-Bereichsname in Benachrichtigungen einblenden
+- **Hersteller & Modell** – opt-in: Geräteinformationen in Sofortmeldungen einblenden
 - **Entitäten ausschließen** – einzelne, störungsanfällige Entitäten von der Überwachung ausnehmen
-- **Zweisprachig** – Benachrichtigungen auf Deutsch oder Englisch (konfigurierbar)
-- **Persistenter Zustand** – Ereignisse überleben HA-Neustarts; ein HA-Neustart selbst löst keinen falschen Alarm aus
+- **5 Sprachen** – Benachrichtigungen auf Englisch, Deutsch, Französisch, Niederländisch oder Spanisch (konfigurierbar)
+- **Benachrichtigungsvorlagen** – Texte beliebig anpassen mit Variablen wie `{device_name}`, `{protocol}` und `{time}`
+- **HA-Reparaturen** – nach einer konfigurierbaren Offline-Dauer erscheint ein Eintrag im HA Repairs-Panel; wird automatisch gelöst, wenn das Gerät zurückkommt
+- **Testbenachrichtigung** – integrierter Testschritt im Setup-Assistenten
+- **Persistenter Zustand** – Ereignisse überleben HA-Neustarts; ein Neustart löst keinen falschen Alarm aus
+- **Watchdog** – läuft alle 5 Minuten still im Hintergrund und fängt Reconnects ab, die kein State-Change-Event ausgelöst haben
+
+### Entitäten
+
+| Entität | Typ | Beschreibung |
+|---|---|---|
+| `sensor.connection_observer_offline_devices` | Sensor | Anzahl aktuell offline befindlicher Geräte. Attribut `devices` listet die Namen. |
+| `sensor.connection_observer_pending_summary_events` | Sensor | Anzahl der Ereignisse, die noch nicht in einer Zusammenfassung waren. |
+| `binary_sensor.connection_observer_connection_problem` | Binary Sensor | `EIN` = mindestens ein Gerät ist offline. Ideal für Automationen und Dashboards. |
+
+### Services
+
+| Service | Beschreibung |
+|---|---|
+| `connection_observer.send_summary_now` | Zusammenfassung sofort senden, ohne auf den nächsten geplanten Zeitpunkt zu warten. |
+| `connection_observer.clear_history` | Alle gespeicherten Ereignisse löschen. Setzt den Pending-Sensor auf 0 zurück. |
 
 ### Funktionsprinzip
 
-Connection Observer überwacht, wann Entitäten den Status `unavailable` annehmen — das ist der Standard-Mechanismus in HA, den nahezu alle Integrationen verwenden, wenn ein Gerät nicht mehr erreichbar ist. Hat ein Gerät mehrere Entitäten, wird nur **eine** Benachrichtigung pro Gerät ausgelöst, nicht eine pro Entität.
+Connection Observer überwacht, wann Entitäten den Status `unavailable` annehmen — der Standard-Mechanismus in HA, den nahezu alle Integrationen verwenden, wenn ein Gerät nicht mehr erreichbar ist. Hat ein Gerät mehrere Entitäten, wird nur **eine** Benachrichtigung pro Gerät ausgelöst.
+
+Der integrierte Watchdog läuft alle 5 Minuten und fängt Reconnects ab, die kein `state_changed`-Event ausgelöst haben, damit der Offline-Zähler immer korrekt bleibt.
 
 Im Setup-Assistenten erscheinen nur Integrationen, die in der jeweiligen HA-Instanz auch wirklich konfiguriert sind.
 
@@ -112,19 +172,25 @@ Im Setup-Assistenten erscheinen nur Integrationen, die in der jeweiligen HA-Inst
 1. **Einstellungen → Geräte & Dienste → Integration hinzufügen**
 2. Nach **Connection Observer** suchen
 3. **Schritt 1 – Protokolle**: Zu überwachende Integrationsfamilien und Benachrichtigungssprache auswählen
-4. **Schritt 2 – Benachrichtigungen**: Einen oder mehrere Benachrichtigungsdienste auswählen, Sofortalarm und/oder Zusammenfassung konfigurieren, optional Entitäten ausschließen
+4. **Schritt 2 – Benachrichtigungen**: Einen oder mehrere Dienste auswählen; Sofort- und/oder Zusammenfassungsmodus konfigurieren
+5. **Schritt 3 – Test**: Optional eine Testbenachrichtigung senden
+6. **Schritt 4 – Erweitert** *(alle Felder optional, 0 = deaktiviert)*:
+   - Verzögerung, Cooldown, Mindestausfallzeit
+   - Raum/Bereich und Geräteinformationen in Benachrichtigungen
+   - Ausgeschlossene Entitäten
 
-Alle Einstellungen können nachträglich über den **Konfigurieren**-Button der Integrationskarte geändert werden.
+Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Schwellwert — können nachträglich über den **Konfigurieren**-Button der Integrationskarte geändert werden.
 
 ### Beispiel-Benachrichtigungen
 
-**Sofort (Deutsch):**
+**Sofort (Deutsch) — mit Raum und Geräteinformationen:**
 > ⚠️ Wohnzimmer Steckdose (shelly) hat um 14:32 die Verbindung verloren.
+> 📍 Wohnzimmer  ·  Shelly Plus 1PM
 
 **Zusammenfassung (Deutsch):**
 > 📋 3 Gerät(e) seit der letzten Zusammenfassung betroffen:
-> • Küchen-Sensor (zha): offline seit 12.05. 07:15, wieder online um 07:42
-> • Schlafzimmer Birne (hue): offline seit 12.05. 09:05 ⚠️ noch offline
+> • Küchen-Sensor [Küche] (zha): offline seit 12.05. 07:15, wieder online um 07:42
+> • Schlafzimmer Birne [Schlafzimmer] (hue): offline seit 12.05. 09:05 ⚠️ noch offline
 > • Flur Bewegungsmelder (esphome): offline seit 12.05. 11:20, wieder online um 11:28
 
 ### Voraussetzungen
@@ -147,7 +213,7 @@ Pull requests are welcome. Missing an integration? Open an issue or add the doma
 ## Appendix – Supported integrations
 
 <details>
-<summary>Show all 80+ supported integrations</summary>
+<summary>Show all 100+ supported integrations</summary>
 
 | Category | Integration | Domain |
 |---|---|---|
@@ -204,6 +270,16 @@ Pull requests are welcome. Missing an integration? Open an issue or add the doma
 | | SolarEdge | `solaredge` |
 | | Fronius | `fronius` |
 | | Tesla Powerwall | `powerwall` |
+| **Heating / HVAC** | Viessmann ViCare | `vicare` |
+| | Vaillant (myVaillant) | `vaillant` |
+| | Bosch Smart Home | `bosch_shc` |
+| | Mitsubishi MelCloud | `melcloud` |
+| | NIBE heat pump | `nibe_heatpump` |
+| **Solar / energy (extended)** | Huawei Solar | `huawei_solar` |
+| | Enphase Envoy | `enphase_envoy` |
+| | GoodWe | `goodwe` |
+| | Growatt | `growatt_server` |
+| | EcoFlow | `ecoflow` |
 | **Security & access** | Nuki Smart Lock | `nuki` |
 | | August Smart Lock | `august` |
 | | Yale Smart Alarm | `yale_smart_alarm` |
@@ -221,7 +297,18 @@ Pull requests are welcome. Missing an integration? Open an issue or add the doma
 | | MikroTik | `mikrotik` |
 | | ASUS Router | `asusrouter` |
 | | Synology NAS | `synology_dsm` |
+| **Vacuum robots** | Roborock | `roborock` |
+| | ECOVACS | `ecovacs` |
+| | Neato Robotics | `neato` |
+| **Household appliances** | LG ThinQ | `lg_thinq` |
+| | Meross | `meross` |
+| | Belkin WeMo | `wemo` |
+| **Gates & garage doors** | myQ (Chamberlain / LiftMaster) | `myq` |
+| | Nice G.O. | `nice_go` |
+| **Local weather stations** | Ecowitt | `ecowitt` |
+| | Ambient Weather Station | `ambient_station` |
 | **Garden & household** | Husqvarna Automower | `husqvarna_automower` |
+| | GARDENA Bluetooth | `gardena_bluetooth` |
 | | iRobot Roomba | `roomba` |
 | **Other / generic** | MQTT | `mqtt` |
 | | HomeKit Controller | `homekit_controller` |
