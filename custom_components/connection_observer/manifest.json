@@ -1,7 +1,7 @@
 {
   "domain": "connection_observer",
   "name": "Connection Observer",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "documentation": "https://github.com/OleSint/ha-connection-observer",
   "issue_tracker": "https://github.com/OleSint/ha-connection-observer/issues",
   "codeowners": ["@OleSint"],

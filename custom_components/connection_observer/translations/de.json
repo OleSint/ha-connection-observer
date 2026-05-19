@@ -78,13 +78,13 @@
           "tmpl_sum_ongoing": "Vorlage: Zusammenfassungszeile – Gerät noch offline (leer = Standard)"
         },
         "data_description": {
-          "tmpl_imm_title": "Variablen: {device_name} {protocol} {time} {area} {model}",
-          "tmpl_imm_msg": "Variablen: {device_name} {protocol} {time} {area} {model}",
-          "tmpl_rec_title": "Variablen: {device_name}",
-          "tmpl_rec_msg": "Variablen: {device_name}",
-          "tmpl_sum_title": "Variablen: {count}",
-          "tmpl_sum_resolved": "Variablen: {device_name} {area} {protocol} {time_offline} {time_online}",
-          "tmpl_sum_ongoing": "Variablen: {device_name} {area} {protocol} {time_offline}"
+          "tmpl_imm_title": "Variablen: '{device_name}' '{protocol}' '{time}' '{area}' '{model}'",
+          "tmpl_imm_msg": "Variablen: '{device_name}' '{protocol}' '{time}' '{area}' '{model}'",
+          "tmpl_rec_title": "Variablen: '{device_name}'",
+          "tmpl_rec_msg": "Variablen: '{device_name}'",
+          "tmpl_sum_title": "Variablen: '{count}'",
+          "tmpl_sum_resolved": "Variablen: '{device_name}' '{area}' '{protocol}' '{time_offline}' '{time_online}'",
+          "tmpl_sum_ongoing": "Variablen: '{device_name}' '{area}' '{protocol}' '{time_offline}'"
         }
       }
     }
