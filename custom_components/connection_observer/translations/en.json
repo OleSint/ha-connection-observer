@@ -37,6 +37,7 @@
           "min_offline_duration": "Minimum offline duration to appear in summary (0 = all events)",
           "include_area": "Include room / area in notifications",
           "include_device_info": "Include manufacturer & model in notifications",
+          "excluded_domains": "Excluded entity domains (e.g. sensor, button)",
           "excluded_entities": "Excluded entities (optional)"
         }
       }
@@ -67,6 +68,7 @@
           "include_area": "Include room / area in notifications",
           "include_device_info": "Include manufacturer & model in notifications",
           "language": "Notification language",
+          "excluded_domains": "Excluded entity domains (e.g. sensor, button)",
           "excluded_entities": "Excluded entities",
           "repairs_threshold": "HA Repairs issue after N hours offline (0 = disabled)",
           "tmpl_imm_title": "Template: immediate notification title (empty = default)",
@@ -86,7 +88,17 @@
           "tmpl_sum_resolved": "Variables: '{device_name}' '{area}' '{protocol}' '{time_offline}' '{time_online}'",
           "tmpl_sum_ongoing": "Variables: '{device_name}' '{area}' '{protocol}' '{time_offline}'"
         }
+      },
+      "test": {
+        "title": "Connection Observer – Test",
+        "description": "Optionally send a test notification to verify your updated settings.",
+        "data": {
+          "send_test": "Send test notification now"
+        }
       }
+    },
+    "error": {
+      "test_failed": "Test notification failed. Check that the notification service is set up correctly, then try again. Uncheck the box to skip the test and proceed anyway."
     }
   },
   "issues": {

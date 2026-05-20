@@ -24,6 +24,7 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_ALERT_DELAY,
     CONF_COOLDOWN,
+    CONF_EXCLUDED_DOMAINS,
     CONF_EXCLUDED_ENTITIES,
     CONF_INCLUDE_AREA,
     CONF_INCLUDE_DEVICE_INFO,
@@ -241,6 +242,16 @@ class ConnectionObserverCoordinator:
     async def async_send_summary_now(self) -> None:
         await self._send_summary()
 
+    async def async_clear_device(self, entity_id: str) -> None:
+        device_key, _ = self._resolve_device(entity_id)
+        async_delete_issue(self.hass, DOMAIN, _repair_issue_id(device_key))
+        before = len(self._events)
+        self._events = [ev for ev in self._events if ev.device_key != device_key]
+        if len(self._events) != before:
+            await self._save_store()
+            self._async_notify_listeners()
+            _LOGGER.info("Connection Observer: cleared history for device %s", device_key)
+
     async def async_clear_history(self) -> None:
         for ev in self._events:
             if ev.reconnected_at is None:
@@ -357,6 +368,11 @@ class ConnectionObserverCoordinator:
         new_state = event.data.get("new_state")
         old_state = event.data.get("old_state")
         if not entity_id or not new_state or not old_state:
+            return
+        entity_domain = entity_id.split(".", 1)[0]
+        if entity_domain == "device_tracker":
+            return
+        if entity_domain in self._cfg.get(CONF_EXCLUDED_DOMAINS, []):
             return
         if entity_id in self._cfg.get(CONF_EXCLUDED_ENTITIES, []):
             return

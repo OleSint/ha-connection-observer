@@ -3,8 +3,10 @@ from __future__ import annotations
 
 import logging
 
+import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.helpers import config_validation as cv
 
 from .const import DOMAIN
 from .coordinator import ConnectionObserverCoordinator
@@ -34,8 +36,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             for coord in hass.data[DOMAIN].values():
                 await coord.async_clear_history()
 
+        async def _clear_device(call: ServiceCall) -> None:
+            entity_id: str = call.data["entity_id"]
+            for coord in hass.data[DOMAIN].values():
+                await coord.async_clear_device(entity_id)
+
         hass.services.async_register(DOMAIN, "send_summary_now", _send_summary_now)
         hass.services.async_register(DOMAIN, "clear_history", _clear_history)
+        hass.services.async_register(
+            DOMAIN,
+            "clear_device",
+            _clear_device,
+            schema=vol.Schema({vol.Required("entity_id"): cv.entity_id}),
+        )
 
     return True
 
@@ -50,5 +63,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if not hass.data[DOMAIN]:
         hass.services.async_remove(DOMAIN, "send_summary_now")
         hass.services.async_remove(DOMAIN, "clear_history")
+        hass.services.async_remove(DOMAIN, "clear_device")
 
     return unload_ok

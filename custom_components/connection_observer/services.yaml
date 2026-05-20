@@ -9,3 +9,16 @@ clear_history:
   description: >
     Clears all stored disconnect events from memory and persistent storage.
     The pending-events sensor will reset to 0.
+
+clear_device:
+  name: Clear Device History
+  description: >
+    Removes all stored disconnect events for a specific device and resolves
+    any open HA Repairs issue for it. Other devices are not affected.
+  fields:
+    entity_id:
+      name: Entity
+      description: Any entity belonging to the device whose history should be cleared.
+      required: true
+      selector:
+        entity: {}

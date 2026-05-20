@@ -37,6 +37,7 @@
           "min_offline_duration": "Minimale offline-duur om in de samenvatting te verschijnen (0 = alle gebeurtenissen)",
           "include_area": "Ruimte / zone opnemen in meldingen",
           "include_device_info": "Fabrikant en model opnemen in meldingen",
+          "excluded_domains": "Uitgesloten entiteitsdomeinen (bijv. sensor, button)",
           "excluded_entities": "Uitgesloten entiteiten (optioneel)"
         }
       }
@@ -67,6 +68,7 @@
           "include_area": "Ruimte / zone opnemen in meldingen",
           "include_device_info": "Fabrikant en model opnemen in meldingen",
           "language": "Taal van meldingen",
+          "excluded_domains": "Uitgesloten entiteitsdomeinen (bijv. sensor, button)",
           "excluded_entities": "Uitgesloten entiteiten",
           "repairs_threshold": "HA Repairs-melding na N uur offline (0 = uitgeschakeld)",
           "tmpl_imm_title": "Sjabloon: titel directe melding (leeg = standaard)",
@@ -86,7 +88,17 @@
           "tmpl_sum_resolved": "Variabelen: '{device_name}' '{area}' '{protocol}' '{time_offline}' '{time_online}'",
           "tmpl_sum_ongoing": "Variabelen: '{device_name}' '{area}' '{protocol}' '{time_offline}'"
         }
+      },
+      "test": {
+        "title": "Connection Observer – Test",
+        "description": "Verstuur optioneel een testmelding om je bijgewerkte instellingen te verifiëren.",
+        "data": {
+          "send_test": "Testmelding nu verzenden"
+        }
       }
+    },
+    "error": {
+      "test_failed": "Testmelding mislukt. Controleer of de meldingsdienst correct is geconfigureerd en probeer het opnieuw. Vink het vakje uit om de test over te slaan en toch verder te gaan."
     }
   },
   "issues": {

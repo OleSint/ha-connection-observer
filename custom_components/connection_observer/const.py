@@ -130,6 +130,7 @@ CONF_LANGUAGE = "language"
 
 # Config keys – advanced
 CONF_EXCLUDED_ENTITIES = "excluded_entities"
+CONF_EXCLUDED_DOMAINS = "excluded_domains"
 CONF_ALERT_DELAY = "alert_delay"
 CONF_COOLDOWN = "cooldown"
 CONF_MIN_OFFLINE_DURATION = "min_offline_duration"

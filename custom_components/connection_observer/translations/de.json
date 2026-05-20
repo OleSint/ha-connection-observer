@@ -37,6 +37,7 @@
           "min_offline_duration": "Mindestausfallzeit für die Zusammenfassung (0 = alle Ereignisse)",
           "include_area": "Raum / Bereich in Benachrichtigungen anzeigen",
           "include_device_info": "Hersteller & Modell in Benachrichtigungen anzeigen",
+          "excluded_domains": "Ausgeschlossene Entitätsdomänen (z. B. sensor, button)",
           "excluded_entities": "Ausgeschlossene Entitäten (optional)"
         }
       }
@@ -67,6 +68,7 @@
           "include_area": "Raum / Bereich in Benachrichtigungen anzeigen",
           "include_device_info": "Hersteller & Modell in Benachrichtigungen anzeigen",
           "language": "Sprache der Benachrichtigungen",
+          "excluded_domains": "Ausgeschlossene Entitätsdomänen (z. B. sensor, button)",
           "excluded_entities": "Ausgeschlossene Entitäten",
           "repairs_threshold": "HA-Reparaturen-Eintrag nach N Stunden offline (0 = deaktiviert)",
           "tmpl_imm_title": "Vorlage: Titel der Sofortbenachrichtigung (leer = Standard)",
@@ -86,7 +88,17 @@
           "tmpl_sum_resolved": "Variablen: '{device_name}' '{area}' '{protocol}' '{time_offline}' '{time_online}'",
           "tmpl_sum_ongoing": "Variablen: '{device_name}' '{area}' '{protocol}' '{time_offline}'"
         }
+      },
+      "test": {
+        "title": "Connection Observer – Test",
+        "description": "Optional eine Testbenachrichtigung senden, um die aktualisierten Einstellungen zu prüfen.",
+        "data": {
+          "send_test": "Testbenachrichtigung jetzt senden"
+        }
       }
+    },
+    "error": {
+      "test_failed": "Testbenachrichtigung fehlgeschlagen. Prüfe, ob der Benachrichtigungsdienst korrekt eingerichtet ist, und versuche es erneut. Deaktiviere das Kontrollkästchen, um den Test zu überspringen und fortzufahren."
     }
   },
   "issues": {

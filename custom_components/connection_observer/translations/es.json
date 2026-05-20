@@ -37,6 +37,7 @@
           "min_offline_duration": "Duración mínima sin conexión para aparecer en el resumen (0 = todos los eventos)",
           "include_area": "Incluir habitación / área en las notificaciones",
           "include_device_info": "Incluir fabricante y modelo en las notificaciones",
+          "excluded_domains": "Dominios de entidades excluidos (p. ej. sensor, button)",
           "excluded_entities": "Entidades excluidas (opcional)"
         }
       }
@@ -67,6 +68,7 @@
           "include_area": "Incluir habitación / área en las notificaciones",
           "include_device_info": "Incluir fabricante y modelo en las notificaciones",
           "language": "Idioma de las notificaciones",
+          "excluded_domains": "Dominios de entidades excluidos (p. ej. sensor, button)",
           "excluded_entities": "Entidades excluidas",
           "repairs_threshold": "Incidencia en HA Repairs tras N horas sin conexión (0 = desactivado)",
           "tmpl_imm_title": "Plantilla: título de notificación inmediata (vacío = predeterminado)",
@@ -86,7 +88,17 @@
           "tmpl_sum_resolved": "Variables: '{device_name}' '{area}' '{protocol}' '{time_offline}' '{time_online}'",
           "tmpl_sum_ongoing": "Variables: '{device_name}' '{area}' '{protocol}' '{time_offline}'"
         }
+      },
+      "test": {
+        "title": "Connection Observer – Prueba",
+        "description": "Envía opcionalmente una notificación de prueba para verificar tus ajustes actualizados.",
+        "data": {
+          "send_test": "Enviar notificación de prueba ahora"
+        }
       }
+    },
+    "error": {
+      "test_failed": "Error al enviar la notificación de prueba. Comprueba que el servicio de notificación esté correctamente configurado e inténtalo de nuevo. Desmarca la casilla para omitir la prueba y continuar de todas formas."
     }
   },
   "issues": {

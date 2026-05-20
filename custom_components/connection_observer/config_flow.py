@@ -12,6 +12,7 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_ALERT_DELAY,
     CONF_COOLDOWN,
+    CONF_EXCLUDED_DOMAINS,
     CONF_EXCLUDED_ENTITIES,
     CONF_INCLUDE_AREA,
     CONF_INCLUDE_DEVICE_INFO,
@@ -85,6 +86,23 @@ _HOURS_SELECTOR = selector.NumberSelector(
 
 _TEXT_SELECTOR = selector.TextSelector(
     selector.TextSelectorConfig(type=selector.TextSelectorType.TEXT)
+)
+
+_DOMAIN_SELECTOR = selector.SelectSelector(
+    selector.SelectSelectorConfig(
+        options=[
+            selector.SelectOptionDict(value="sensor", label="sensor"),
+            selector.SelectOptionDict(value="binary_sensor", label="binary_sensor"),
+            selector.SelectOptionDict(value="button", label="button"),
+            selector.SelectOptionDict(value="event", label="event"),
+            selector.SelectOptionDict(value="number", label="number"),
+            selector.SelectOptionDict(value="select", label="select"),
+            selector.SelectOptionDict(value="text", label="text"),
+            selector.SelectOptionDict(value="update", label="update"),
+        ],
+        multiple=True,
+        custom_value=True,
+    )
 )
 
 
@@ -260,6 +278,7 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(CONF_MIN_OFFLINE_DURATION, default=0): _MINUTES_SELECTOR,
                     vol.Optional(CONF_INCLUDE_AREA, default=False): selector.BooleanSelector(),
                     vol.Optional(CONF_INCLUDE_DEVICE_INFO, default=False): selector.BooleanSelector(),
+                    vol.Optional(CONF_EXCLUDED_DOMAINS, default=[]): _DOMAIN_SELECTOR,
                     vol.Optional(CONF_EXCLUDED_ENTITIES, default=[]): selector.EntitySelector(
                         selector.EntitySelectorConfig(multiple=True)
                     ),
@@ -283,12 +302,14 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         self._entry = config_entry
+        self._data: dict[str, Any] = {}
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.FlowResult:
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            self._data = user_input
+            return await self.async_step_test()
 
         cur = {**self._entry.data, **self._entry.options}
         protocols = _available_protocols(self.hass)
@@ -358,6 +379,10 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                         selector.SelectSelectorConfig(options=_LANGUAGE_OPTIONS)
                     ),
                     vol.Optional(
+                        CONF_EXCLUDED_DOMAINS,
+                        default=cur.get(CONF_EXCLUDED_DOMAINS, []),
+                    ): _DOMAIN_SELECTOR,
+                    vol.Optional(
                         CONF_EXCLUDED_ENTITIES,
                         default=cur.get(CONF_EXCLUDED_ENTITIES, []),
                     ): selector.EntitySelector(
@@ -397,5 +422,54 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                         default=cur.get(CONF_TMPL_SUM_LINE_ONGOING, ""),
                     ): _TEXT_SELECTOR,
                 }
+            ),
+        )
+
+    async def async_step_test(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.FlowResult:
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            if user_input.get("send_test", False):
+                services = self._data.get(CONF_NOTIFY_SERVICE, [])
+                if isinstance(services, str):
+                    services = [services] if services else []
+                failed: list[str] = []
+                for svc in services:
+                    try:
+                        domain, service_name = svc.split(".", 1)
+                        await self.hass.services.async_call(
+                            domain,
+                            service_name,
+                            {
+                                "title": "Connection Observer – Test",
+                                "message": (
+                                    "✅ Test notification from Connection Observer. "
+                                    "Your notification service is working correctly!"
+                                ),
+                            },
+                            blocking=True,
+                        )
+                    except Exception as exc:  # noqa: BLE001
+                        _LOGGER.warning(
+                            "Connection Observer: test notification failed via %s: %s", svc, exc
+                        )
+                        failed.append(svc)
+                if failed:
+                    errors["base"] = "test_failed"
+                    return self.async_show_form(
+                        step_id="test",
+                        data_schema=vol.Schema(
+                            {vol.Optional("send_test", default=False): selector.BooleanSelector()}
+                        ),
+                        errors=errors,
+                    )
+            return self.async_create_entry(title="", data=self._data)
+
+        return self.async_show_form(
+            step_id="test",
+            data_schema=vol.Schema(
+                {vol.Optional("send_test", default=False): selector.BooleanSelector()}
             ),
         )
