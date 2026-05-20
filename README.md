@@ -27,6 +27,8 @@
 - **Room / area** – opt-in: include the HA area name in notifications
 - **Manufacturer & model** – opt-in: include device info in immediate notifications
 - **Per-entity exclusions** – exclude specific noisy entities from monitoring
+- **Domain exclusions** – exclude entire entity domains (e.g. `sensor`, `button`) from monitoring; `device_tracker` is always excluded automatically
+- **Test notification in options** – re-send a test notification any time you change your notification services
 - **5 languages** – notification messages in English, German, French, Dutch, or Spanish (configurable)
 - **Notification templates** – customise the text of any notification with your own format string; variables like `{device_name}`, `{protocol}`, and `{time}` are available
 - **HA Repairs integration** – after a configurable number of hours offline, an issue appears in Home Assistant's built-in Repairs panel; resolved automatically when the device comes back
@@ -48,6 +50,7 @@
 |---|---|
 | `connection_observer.send_summary_now` | Immediately send a summary of all pending events, without waiting for the next scheduled time. |
 | `connection_observer.clear_history` | Clear all stored disconnect events. Resets the pending-events sensor to 0. |
+| `connection_observer.clear_device` | Remove all stored events for a specific device (pass any entity of that device). Also resolves any open HA Repairs issue for it. |
 
 ### How it works
 
@@ -112,6 +115,8 @@ All settings — plus notification templates and the HA Repairs threshold — ca
 ### Funktionen
 
 - **Protokollbasierte Überwachung** – ganze Integrationsfamilien auswählen (Zigbee, Z-Wave, Hue, ESPHome, Shelly, Sonos, …) statt einzelner Entitäten. Über 100 Integrationen werden unterstützt.
+- **Domänen ausschließen** – ganze Entitätsdomänen von der Überwachung ausnehmen (z. B. `sensor`, `button`); `device_tracker` wird immer automatisch ignoriert
+- **Test im Options-Flow** – Testbenachrichtigung jederzeit neu senden, auch nach der Ersteinrichtung
 - **Sofortbenachrichtigung** – wird direkt gesendet, sobald ein Gerät offline geht
 - **Geplante Zusammenfassung** – Sammelnachricht zu konfigurierbaren Tagen und Uhrzeiten mit allen Verbindungsabbrüchen seit der letzten Zusammenfassung
 - **Beide Modi gleichzeitig** – Sofort + Zusammenfassung können parallel aktiv sein; Zusammenfassung ist standardmäßig vorausgewählt
@@ -143,6 +148,7 @@ All settings — plus notification templates and the HA Repairs threshold — ca
 |---|---|
 | `connection_observer.send_summary_now` | Zusammenfassung sofort senden, ohne auf den nächsten geplanten Zeitpunkt zu warten. |
 | `connection_observer.clear_history` | Alle gespeicherten Ereignisse löschen. Setzt den Pending-Sensor auf 0 zurück. |
+| `connection_observer.clear_device` | Alle gespeicherten Ereignisse für ein bestimmtes Gerät löschen (beliebige Entität des Geräts angeben). Löst auch einen offenen HA-Reparatureintrag auf. |
 
 ### Funktionsprinzip
 
