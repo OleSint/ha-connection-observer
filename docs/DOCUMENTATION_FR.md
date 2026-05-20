@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (Français)
 
-**Version:** 0.9.0  
+**Version:** 1.0.0  
 **Dépôt :** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -134,6 +134,7 @@ Une étape de test optionnelle envoie une notification à tous vos services sél
 | **Durée minimale hors ligne** | Événements plus courts exclus du résumé. Par défaut : **0** (tous les événements). |
 | **Inclure la pièce / zone** | Afficher le nom de la zone HA dans les notifications. Par défaut : **désactivé**. |
 | **Inclure fabricant & modèle** | Afficher les informations de l'appareil. Par défaut : **désactivé**. |
+| **Domaines d'entités exclus** | Exclure des domaines d'entités entiers de la surveillance (ex. `sensor`, `button`). Les entités `device_tracker` sont toujours exclues automatiquement. |
 | **Entités exclues** | Liste d'entités spécifiques à exclure de la surveillance. |
 
 ---
@@ -143,6 +144,14 @@ Une étape de test optionnelle envoie une notification à tous vos services sél
 Tous les paramètres de l'assistant peuvent être modifiés à tout moment via **Paramètres → Appareils et services → Connection Observer → Configurer**.
 
 En plus des paramètres de l'assistant, la page d'options propose également :
+
+### Notification de test
+
+Après avoir enregistré vos paramètres, une étape de test apparaît. Cochez **Envoyer une notification de test maintenant** et cliquez sur Soumettre pour envoyer un test en direct. Utile après chaque changement de service de notification.
+
+### Exclusions de domaines
+
+Des domaines d'entités entiers peuvent être exclus sur la page d'options. Les entités `device_tracker` sont toujours exclues automatiquement.
 
 ### Seuil HA Repairs
 
@@ -296,6 +305,20 @@ Efface tous les événements enregistrés de la mémoire et du stockage persista
 
 ```yaml
 service: connection_observer.clear_history
+```
+
+---
+
+### `connection_observer.clear_device`
+
+Supprime tous les événements de déconnexion d'un **appareil spécifique** et résout toute entrée HA Repairs ouverte pour cet appareil. Les autres appareils ne sont pas affectés.
+
+Passez n'importe quelle entité appartenant à l'appareil à effacer.
+
+```yaml
+service: connection_observer.clear_device
+data:
+  entity_id: light.salon_ampoule
 ```
 
 ---

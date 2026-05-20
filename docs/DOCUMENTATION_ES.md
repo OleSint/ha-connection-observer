@@ -1,6 +1,6 @@
 # Connection Observer – Documentación (Español)
 
-**Versión:** 0.9.0  
+**Versión:** 1.0.0  
 **Repositorio:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -134,6 +134,7 @@ Un paso de prueba opcional envía una notificación a todos tus servicios selecc
 | **Duración mínima sin conexión** | Eventos más cortos que este valor se excluyen del resumen. Por defecto: **0** (todos los eventos). |
 | **Incluir habitación / área** | Mostrar el nombre del área de HA en las notificaciones. Por defecto: **desactivado**. |
 | **Incluir fabricante y modelo** | Mostrar información del dispositivo. Por defecto: **desactivado**. |
+| **Dominios de entidades excluidos** | Excluye dominios de entidades completos (p. ej. `sensor`, `button`). Las entidades `device_tracker` siempre se excluyen automáticamente. |
 | **Entidades excluidas** | Lista de entidades específicas a excluir de la monitorización. |
 
 ---
@@ -143,6 +144,14 @@ Un paso de prueba opcional envía una notificación a todos tus servicios selecc
 Todos los ajustes del asistente pueden modificarse en cualquier momento mediante **Ajustes → Dispositivos y servicios → Connection Observer → Configurar**.
 
 Además de los ajustes del asistente, la página de opciones también ofrece:
+
+### Notificación de prueba
+
+Desde la página de opciones puedes enviar una notificación de prueba en cualquier momento sin necesidad de reconfigurar la integración. Marca **Enviar notificación de prueba ahora** para enviar un mensaje de prueba a todos tus servicios configurados antes de guardar los nuevos ajustes.
+
+### Dominios de entidades excluidos
+
+Puedes excluir dominios de entidades completos de la monitorización — p. ej. `sensor`, `button`, `number`. Esto resulta útil cuando ciertos dominios pasan por `unavailable` con frecuencia en tu configuración. Las entidades `device_tracker` siempre se excluyen automáticamente, independientemente de este ajuste.
 
 ### Umbral de HA Repairs
 
@@ -296,6 +305,22 @@ Borra todos los eventos almacenados de la memoria y del almacenamiento persisten
 
 ```yaml
 service: connection_observer.clear_history
+```
+
+---
+
+### `connection_observer.clear_device`
+
+Borra todos los eventos de desconexión almacenados para un dispositivo específico y elimina su incidencia de HA Repairs correspondiente. Útil cuando un dispositivo ha sido reemplazado o cuando quieres restablecer el historial de un solo dispositivo sin borrar todo el historial.
+
+| Parámetro | Descripción |
+|---|---|
+| `entity_id` | Obligatorio. Un ID de entidad perteneciente al dispositivo que se desea restablecer (p. ej. `sensor.enchufe_salon_energy`). |
+
+```yaml
+service: connection_observer.clear_device
+data:
+  entity_id: sensor.enchufe_salon_energy
 ```
 
 ---

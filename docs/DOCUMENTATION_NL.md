@@ -1,6 +1,6 @@
 # Connection Observer – Documentatie (Nederlands)
 
-**Versie:** 0.9.0  
+**Versie:** 1.0.0  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -134,6 +134,7 @@ Een optionele teststap stuurt een melding naar al je geselecteerde diensten om t
 | **Minimale offline-duur** | Gebeurtenissen korter dan dit worden niet in de samenvatting opgenomen. Standaard: **0** (alle gebeurtenissen). |
 | **Ruimte / zone opnemen** | HA-zonenaam weergeven in meldingen. Standaard: **uit**. |
 | **Fabrikant & model opnemen** | Apparaatinformatie weergeven. Standaard: **uit**. |
+| **Uitgesloten entiteitsdomeinen** | Sluit volledige entiteitsdomeinen uit (bijv. `sensor`, `button`). `device_tracker`-entiteiten worden altijd automatisch uitgesloten. |
 | **Uitgesloten entiteiten** | Lijst van specifieke entiteiten die worden uitgesloten van bewaking. |
 
 ---
@@ -143,6 +144,14 @@ Een optionele teststap stuurt een melding naar al je geselecteerde diensten om t
 Alle instellingen van de wizard kunnen op elk moment worden gewijzigd via **Instellingen → Apparaten en diensten → Connection Observer → Configureren**.
 
 Naast de wizard-instellingen biedt de optiepagina ook:
+
+### Testmelding
+
+Via de optiepagina kun je op elk moment een testmelding versturen zonder de integratie opnieuw te configureren. Vink **Testmelding nu verzenden** aan om een testbericht naar al je geconfigureerde diensten te sturen voordat de nieuwe instellingen worden opgeslagen.
+
+### Uitgesloten entiteitsdomeinen
+
+Je kunt volledige entiteitsdomeinen uitsluiten van bewaking — bijv. `sensor`, `button`, `number`. Dit is handig wanneer bepaalde domeinen in jouw opzet altijd tijdelijk `unavailable` worden. `device_tracker`-entiteiten worden altijd automatisch uitgesloten, ongeacht deze instelling.
 
 ### HA Repairs drempelwaarde
 
@@ -296,6 +305,22 @@ Wist alle opgeslagen gebeurtenissen uit geheugen en permanente opslag. Verwijder
 
 ```yaml
 service: connection_observer.clear_history
+```
+
+---
+
+### `connection_observer.clear_device`
+
+Wist alle opgeslagen verbrekingsgebeurtenissen voor één specifiek apparaat en verwijdert het bijbehorende HA Repairs-item. Nuttig als een apparaat is vervangen of als je de geschiedenis van één enkel apparaat wilt resetten zonder de volledige geschiedenis te wissen.
+
+| Parameter | Beschrijving |
+|---|---|
+| `entity_id` | Verplicht. Een entiteit-ID van het te resetten apparaat (bijv. `sensor.woonkamer_stekker_energy`). |
+
+```yaml
+service: connection_observer.clear_device
+data:
+  entity_id: sensor.woonkamer_stekker_energy
 ```
 
 ---

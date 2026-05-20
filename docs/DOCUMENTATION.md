@@ -1,6 +1,6 @@
 # Connection Observer – Documentation
 
-**Version:** 0.9.0  
+**Version:** 1.0.0  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -140,6 +140,7 @@ An optional test step sends a notification to all your selected services so you 
 | **Minimum offline duration for summary** | Events shorter than this duration (in minutes) are excluded from the summary. Unlike alert delay, short events *are* still recorded internally. Default: **0** (all events). |
 | **Include room / area** | If enabled, the HA area assigned to the device is included in notifications. Default: **off**. |
 | **Include manufacturer & model** | If enabled, device info from the device registry is appended to immediate notifications. Default: **off**. |
+| **Excluded entity domains** | Exclude entire entity domains from monitoring (e.g. `sensor`, `button`). Select from the list or type a custom domain. `device_tracker` entities are always excluded automatically and do not need to be added here. |
 | **Excluded entities** | A list of specific entities to exclude from monitoring. |
 
 ---
@@ -149,6 +150,14 @@ An optional test step sends a notification to all your selected services so you 
 All settings from the setup wizard can be changed at any time via **Settings → Devices & Services → Connection Observer → Configure**.
 
 In addition to the wizard settings, the options page also exposes:
+
+### Test notification
+
+After saving your settings you are taken to a brief test step. Tick **Send test notification now** and click Submit to send a live test to all configured services. Untick to skip. This is useful whenever you change your notification services.
+
+### Domain exclusions
+
+Entire entity domains can be excluded in the options page (same as in the Advanced wizard step). `device_tracker` is always excluded automatically regardless of this setting.
 
 ### HA Repairs threshold
 
@@ -315,6 +324,24 @@ Clears all stored disconnect events from memory and persistent storage. Also rem
 
 ```yaml
 service: connection_observer.clear_history
+```
+
+---
+
+### `connection_observer.clear_device`
+
+Removes all stored disconnect events for a **single device** and resolves any open HA Repairs issue for it. All other devices are unaffected.
+
+Pass any entity that belongs to the device you want to clear.
+
+**When to use this:**
+- After a planned maintenance on one specific device
+- To manually close a stale offline event for a single device without wiping everything
+
+```yaml
+service: connection_observer.clear_device
+data:
+  entity_id: light.living_room_bulb
 ```
 
 ---

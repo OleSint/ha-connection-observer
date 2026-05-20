@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation
 
-**Version:** 0.9.0  
+**Version:** 1.0.0  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -134,6 +134,7 @@ Ein optionaler Testschritt sendet eine Benachrichtigung an alle ausgewählten Di
 | **Mindestausfallzeit für Zusammenfassung** | Ereignisse kürzer als dieser Wert erscheinen nicht in der Zusammenfassung. Standard: **0** (alle Ereignisse). |
 | **Raum / Bereich anzeigen** | HA-Bereichsname in Benachrichtigungen einblenden. Standard: **aus**. |
 | **Hersteller & Modell anzeigen** | Geräteinformationen in Sofortmeldungen einblenden. Standard: **aus**. |
+| **Ausgeschlossene Entitätsdomänen** | Ganze Entitätsdomänen von der Überwachung ausschließen (z. B. `sensor`, `button`). Aus der Liste auswählen oder eigene Domäne eingeben. `device_tracker`-Entitäten werden immer automatisch ignoriert und müssen hier nicht eingetragen werden. |
 | **Ausgeschlossene Entitäten** | Liste von Entitäten, die von der Überwachung ausgenommen werden. |
 
 ---
@@ -143,6 +144,14 @@ Ein optionaler Testschritt sendet eine Benachrichtigung an alle ausgewählten Di
 Alle Einstellungen aus dem Setup-Assistenten können jederzeit über **Einstellungen → Geräte & Dienste → Connection Observer → Konfigurieren** geändert werden.
 
 Zusätzlich zu den Wizard-Einstellungen bietet die Optionsseite:
+
+### Testbenachrichtigung
+
+Nach dem Speichern der Einstellungen folgt ein kurzer Testschritt. Aktiviere **Testbenachrichtigung jetzt senden** und klicke auf Weiter, um einen Live-Test an alle konfigurierten Dienste zu senden. Deaktiviere das Kontrollkästchen, um den Schritt zu überspringen. Besonders nützlich, wenn du den Benachrichtigungsdienst gewechselt hast.
+
+### Domänenausschlüsse
+
+Ganze Entitätsdomänen können auf der Optionsseite ausgeschlossen werden (identisch mit dem Feld im Erweitert-Schritt des Wizards). `device_tracker` wird unabhängig von dieser Einstellung immer automatisch ignoriert.
 
 ### HA-Reparaturen-Schwellwert
 
@@ -296,6 +305,24 @@ Löscht alle gespeicherten Ereignisse aus Speicher und persistentem Storage. Ent
 
 ```yaml
 service: connection_observer.clear_history
+```
+
+---
+
+### `connection_observer.clear_device`
+
+Entfernt alle gespeicherten Verbindungsabbruch-Ereignisse für ein **einzelnes Gerät** und löst einen offenen HA-Reparatureintrag dafür auf. Alle anderen Geräte bleiben unberührt.
+
+Als Ziel wird eine beliebige Entität des Geräts angegeben.
+
+**Wann sinnvoll:**
+- Nach einer geplanten Wartung an einem bestimmten Gerät
+- Um ein veraltetes Offline-Ereignis für ein einzelnes Gerät manuell zu schließen, ohne die gesamte History zu löschen
+
+```yaml
+service: connection_observer.clear_device
+data:
+  entity_id: light.wohnzimmer_lampe
 ```
 
 ---
