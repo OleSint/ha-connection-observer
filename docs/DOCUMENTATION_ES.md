@@ -1,6 +1,6 @@
 # Connection Observer – Documentación (Español)
 
-**Versión:** 1.0.0  
+**Versión:** 1.0.1  
 **Repositorio:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
