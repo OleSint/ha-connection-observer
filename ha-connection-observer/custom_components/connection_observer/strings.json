@@ -1,0 +1,130 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connection Observer – Protocols",
+        "description": "Select which connection protocols to monitor. Only protocols already configured in your Home Assistant instance are shown.",
+        "data": {
+          "protocols": "Protocols to monitor",
+          "language": "Notification language"
+        }
+      },
+      "notifications": {
+        "title": "Connection Observer – Notifications",
+        "description": "Choose how and when to receive alerts. Immediate and summary modes can both be active simultaneously.",
+        "data": {
+          "notify_service": "Notification service(s)",
+          "notify_immediate": "Immediate notification on disconnect",
+          "notify_summary": "Scheduled summary notification",
+          "summary_time": "Summary time",
+          "summary_days": "Summary days",
+          "notify_reconnect": "Notify on reconnect (opt-in)"
+        }
+      },
+      "test": {
+        "title": "Connection Observer – Test",
+        "description": "Click **Submit** to send a test notification to your selected service(s). Uncheck the box below to skip this step.",
+        "data": {
+          "send_test": "Send test notification now"
+        }
+      },
+      "advanced": {
+        "title": "Connection Observer – Advanced",
+        "description": "All fields are optional. Set to 0 to disable a feature.",
+        "data": {
+          "alert_delay": "Alert delay – minutes offline before an event is created (0 = instant)",
+          "cooldown": "Cooldown between immediate notifications per device (0 = no limit)",
+          "min_offline_duration": "Minimum offline duration to appear in summary (0 = all events)",
+          "include_area": "Include room / area in notifications",
+          "include_device_info": "Include manufacturer & model in notifications",
+          "excluded_domains": "Excluded entity domains (e.g. sensor, button)",
+          "excluded_entities": "Excluded entities (optional)"
+        }
+      }
+    },
+    "error": {
+      "test_failed": "Test notification failed. Check that the notification service is set up correctly, then try again. Uncheck the box to skip the test and proceed anyway."
+    },
+    "abort": {
+      "already_configured": "Connection Observer is already configured.",
+      "no_protocols": "No supported protocols found. Please configure Zigbee, Z-Wave, Bluetooth, or another supported integration first."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Connection Observer – Options",
+        "data": {
+          "protocols": "Protocols to monitor",
+          "notify_service": "Notification service(s)",
+          "notify_immediate": "Immediate notification on disconnect",
+          "notify_summary": "Scheduled summary notification",
+          "summary_time": "Summary time",
+          "summary_days": "Summary days",
+          "notify_reconnect": "Notify on reconnect",
+          "alert_delay": "Alert delay (minutes, 0 = instant)",
+          "cooldown": "Cooldown between notifications per device (minutes, 0 = no limit)",
+          "min_offline_duration": "Minimum offline duration for summary (minutes, 0 = all events)",
+          "include_area": "Include room / area in notifications",
+          "include_device_info": "Include manufacturer & model in notifications",
+          "language": "Notification language",
+          "excluded_domains": "Excluded entity domains (e.g. sensor, button)",
+          "excluded_entities": "Excluded entities",
+          "repairs_threshold": "HA Repairs issue after N hours offline (0 = disabled)",
+          "tmpl_imm_title": "Template: immediate notification title (empty = default)",
+          "tmpl_imm_msg": "Template: immediate notification message (empty = default)",
+          "tmpl_rec_title": "Template: reconnect notification title (empty = default)",
+          "tmpl_rec_msg": "Template: reconnect notification message (empty = default)",
+          "tmpl_sum_title": "Template: summary notification title (empty = default)",
+          "tmpl_sum_resolved": "Template: summary line – resolved event (empty = default)",
+          "tmpl_sum_ongoing": "Template: summary line – ongoing offline (empty = default)"
+        },
+        "data_description": {
+          "tmpl_imm_title": "Variables: '{device_name}' '{protocol}' '{time}' '{area}' '{model}'",
+          "tmpl_imm_msg": "Variables: '{device_name}' '{protocol}' '{time}' '{area}' '{model}'",
+          "tmpl_rec_title": "Variables: '{device_name}'",
+          "tmpl_rec_msg": "Variables: '{device_name}'",
+          "tmpl_sum_title": "Variables: '{count}'",
+          "tmpl_sum_resolved": "Variables: '{device_name}' '{area}' '{protocol}' '{time_offline}' '{time_online}'",
+          "tmpl_sum_ongoing": "Variables: '{device_name}' '{area}' '{protocol}' '{time_offline}'"
+        }
+      },
+      "test": {
+        "title": "Connection Observer – Test",
+        "description": "Optionally send a test notification to verify your updated settings.",
+        "data": {
+          "send_test": "Send test notification now"
+        }
+      }
+    },
+    "error": {
+      "test_failed": "Test notification failed. Check that the notification service is set up correctly, then try again. Uncheck the box to skip the test and proceed anyway."
+    }
+  },
+  "issues": {
+    "device_offline": {
+      "title": "Device offline: {device_name}",
+      "description": "**{device_name}** ({protocol}) has been offline since **{since}**.\n\nCheck the device and its connection. Once it reconnects, Connection Observer will automatically resolve this issue."
+    }
+  },
+  "services": {
+    "send_summary_now": {
+      "name": "Send Summary Now",
+      "description": "Immediately sends a summary of all pending disconnect events."
+    },
+    "clear_history": {
+      "name": "Clear History",
+      "description": "Clears all stored disconnect events."
+    },
+    "clear_device": {
+      "name": "Clear Device History",
+      "description": "Removes all stored disconnect events for a specific device and resolves any open HA Repairs issue for it.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity",
+          "description": "Any entity belonging to the device whose history should be cleared."
+        }
+      }
+    }
+  }
+}
