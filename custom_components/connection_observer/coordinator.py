@@ -348,10 +348,14 @@ class ConnectionObserverCoordinator:
             self._schedule_next_summary()
 
     def _setup_watchdog(self) -> None:
+        @callback
+        def _watchdog_callback(_now: datetime) -> None:
+            self.hass.async_create_task(self._run_watchdog())
+
         self._unsub.append(
             async_track_time_interval(
                 self.hass,
-                lambda _now: self.hass.async_create_task(self._run_watchdog()),
+                _watchdog_callback,
                 timedelta(seconds=WATCHDOG_INTERVAL_SECONDS),
             )
         )
