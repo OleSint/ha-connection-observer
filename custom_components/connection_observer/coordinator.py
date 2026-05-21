@@ -483,7 +483,14 @@ class ConnectionObserverCoordinator:
             # Check if device actually came back (missed state_changed)
             if ev.trigger_entity_id:
                 state = self.hass.states.get(ev.trigger_entity_id)
-                if state is not None and state.state != "unavailable":
+                if state is None:
+                    # Entity no longer exists (renamed or removed) – close silently
+                    _LOGGER.debug("Watchdog: %s – trigger entity gone, closing event", ev.device_name)
+                    ev.reconnected_at = dt_util.now()
+                    changed = True
+                    async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
+                    continue
+                if state.state != "unavailable":
                     _LOGGER.debug("Watchdog: %s recovered (missed event)", ev.device_name)
                     ev.reconnected_at = dt_util.now()
                     changed = True
