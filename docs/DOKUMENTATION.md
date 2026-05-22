@@ -102,6 +102,8 @@ Der Assistent zeigt nur Integrationsfamilien an, die in deiner HA-Instanz tatsä
 
 > **Tipp:** Du kannst Protokolle jederzeit hinzufügen oder entfernen. Neu hinzugefügte Geräte eines ausgewählten Protokolls werden automatisch erfasst.
 
+> **Zigbee2MQTT-Nutzer:** Zigbee2MQTT-Geräte erscheinen in HA unter dem `mqtt`-Integrations-Domain — es gibt keinen separaten Zigbee2MQTT-Eintrag. Wähle **MQTT**, um sie zu überwachen. Beachte dabei, dass dadurch auch alle anderen MQTT-basierten Geräte erfasst werden (z.B. Tasmota, eigene Sensoren). Für eine feinere Steuerung ist eine Label-basierte Filterung in einer zukünftigen Version geplant.
+
 ### Schritt 2 – Benachrichtigungen
 
 **Lege fest, wie und wann du Benachrichtigungen erhältst.**

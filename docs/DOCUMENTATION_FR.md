@@ -102,6 +102,8 @@ L'assistant n'affiche que les familles d'intégration réellement configurées d
 
 > **Conseil :** Vous pouvez toujours ajouter ou supprimer des protocoles ultérieurement. Les nouveaux appareils d'un protocole sélectionné sont automatiquement pris en charge.
 
+> **Utilisateurs de Zigbee2MQTT :** Les appareils Zigbee2MQTT apparaissent dans HA sous le domaine d'intégration `mqtt` — il n'existe pas d'entrée Zigbee2MQTT séparée. Sélectionnez **MQTT** pour les surveiller. Notez que cela inclura également tous les autres appareils MQTT de votre installation (p. ex. Tasmota, capteurs personnalisés). Un filtrage par étiquettes (labels) est prévu pour une version future afin de permettre un contrôle plus précis.
+
 ### Étape 2 – Notifications
 
 **Configurez comment et quand recevoir des alertes.**

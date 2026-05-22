@@ -102,6 +102,8 @@ De wizard toont alleen integratifamilies die daadwerkelijk zijn geconfigureerd i
 
 > **Tip:** Je kunt protocollen altijd later toevoegen of verwijderen. Nieuwe apparaten van een geselecteerd protocol worden automatisch meegenomen.
 
+> **Zigbee2MQTT-gebruikers:** Zigbee2MQTT-apparaten verschijnen in HA onder het `mqtt`-integratiedomein — er is geen apart Zigbee2MQTT-item. Selecteer **MQTT** om ze te bewaken. Let op: dit omvat ook alle andere MQTT-gebaseerde apparaten in je installatie (bijv. Tasmota, eigen sensoren). Voor fijnere controle is labelgebaseerde filtering gepland voor een toekomstige versie.
+
 ### Stap 2 – Meldingen
 
 **Stel in hoe en wanneer je waarschuwingen ontvangt.**

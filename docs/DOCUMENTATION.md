@@ -108,6 +108,8 @@ The wizard only shows integration families that are actually configured in your 
 
 > **Tip:** You can always come back and add or remove protocols later. Newly added devices in a selected protocol are automatically picked up — no reconfiguration needed.
 
+> **Zigbee2MQTT users:** Zigbee2MQTT devices appear in HA under the `mqtt` integration domain — there is no separate Zigbee2MQTT entry. Select **MQTT** to monitor them. Note that this will also include any other MQTT-based devices in your setup (e.g. Tasmota, custom sensors). For finer control, label-based filtering is planned for a future release.
+
 ### Step 2 – Notifications
 
 **Configure how and when you receive alerts.**
