@@ -59,11 +59,14 @@ EVENT_RETENTION_DAYS = 30
 # ---------------------------------------------------------------------------
 # Built-in message strings per language
 # Variables available per key:
-#   imm_title/msg : {device_name} {protocol} {time} {area} {model}
-#   rec_title/msg : {device_name} {time}
-#   sum_title     : {count}
-#   sum_resolved  : {device_name} {area} {protocol} {time_offline} {time_online}
-#   sum_ongoing   : {device_name} {area} {protocol} {time_offline}
+#   imm_title/msg      : {device_name} {protocol} {time} {area} {model}
+#   rec_title/msg      : {device_name} {time}
+#   sum_title          : {count}  (count = number of affected devices)
+#   sum_resolved       : {device_name} {area} {protocol} {time_offline} {time_online}
+#   sum_ongoing        : {device_name} {area} {protocol} {time_offline}
+#   sum_multi_header   : {device_name} {area} {protocol} {count}  (header for devices with >1 event)
+#   sum_sub_resolved   : {time_offline} {time_online}  (indented sub-line, resolved)
+#   sum_sub_ongoing    : {time_offline}                (indented sub-line, still offline)
 # {area} is pre-formatted as " [Room]" or "" — include it directly after {device_name}
 # ---------------------------------------------------------------------------
 _MESSAGES: dict[str, dict[str, str]] = {
@@ -76,6 +79,9 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "sum_header": "📋 {count} device(s) affected since last summary:",
         "sum_resolved": "• {device_name}{area} ({protocol}): offline since {time_offline}, back online at {time_online}",
         "sum_ongoing": "• {device_name}{area} ({protocol}): offline since {time_offline} ⚠️ still offline",
+        "sum_multi_header": "• {device_name}{area} ({protocol}) – {count} event(s):",
+        "sum_sub_resolved": "  ↓ {time_offline} → ✅ {time_online}",
+        "sum_sub_ongoing": "  ↓ {time_offline} ⚠️ still offline",
     },
     "de": {
         "imm_title": "Verbindungsabbruch",
@@ -86,6 +92,9 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "sum_header": "📋 {count} Gerät(e) seit der letzten Zusammenfassung betroffen:",
         "sum_resolved": "• {device_name}{area} ({protocol}): offline seit {time_offline}, wieder online um {time_online}",
         "sum_ongoing": "• {device_name}{area} ({protocol}): offline seit {time_offline} ⚠️ noch offline",
+        "sum_multi_header": "• {device_name}{area} ({protocol}) – {count} Ereignis(se):",
+        "sum_sub_resolved": "  ↓ {time_offline} → ✅ {time_online}",
+        "sum_sub_ongoing": "  ↓ {time_offline} ⚠️ noch offline",
     },
     "fr": {
         "imm_title": "Connexion perdue",
@@ -96,6 +105,9 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "sum_header": "📋 {count} appareil(s) affecté(s) depuis le dernier résumé :",
         "sum_resolved": "• {device_name}{area} ({protocol}) : hors ligne depuis {time_offline}, de nouveau en ligne à {time_online}",
         "sum_ongoing": "• {device_name}{area} ({protocol}) : hors ligne depuis {time_offline} ⚠️ toujours hors ligne",
+        "sum_multi_header": "• {device_name}{area} ({protocol}) – {count} événement(s) :",
+        "sum_sub_resolved": "  ↓ {time_offline} → ✅ {time_online}",
+        "sum_sub_ongoing": "  ↓ {time_offline} ⚠️ toujours hors ligne",
     },
     "nl": {
         "imm_title": "Verbinding verbroken",
@@ -106,6 +118,9 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "sum_header": "📋 {count} apparaat/apparaten getroffen sinds het laatste overzicht:",
         "sum_resolved": "• {device_name}{area} ({protocol}): offline sinds {time_offline}, weer online om {time_online}",
         "sum_ongoing": "• {device_name}{area} ({protocol}): offline sinds {time_offline} ⚠️ nog steeds offline",
+        "sum_multi_header": "• {device_name}{area} ({protocol}) – {count} gebeurtenis(sen):",
+        "sum_sub_resolved": "  ↓ {time_offline} → ✅ {time_online}",
+        "sum_sub_ongoing": "  ↓ {time_offline} ⚠️ nog steeds offline",
     },
     "es": {
         "imm_title": "Conexión perdida",
@@ -116,6 +131,9 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "sum_header": "📋 {count} dispositivo(s) afectado(s) desde el último resumen:",
         "sum_resolved": "• {device_name}{area} ({protocol}): sin conexión desde {time_offline}, de nuevo en línea a las {time_online}",
         "sum_ongoing": "• {device_name}{area} ({protocol}): sin conexión desde {time_offline} ⚠️ todavía sin conexión",
+        "sum_multi_header": "• {device_name}{area} ({protocol}) – {count} evento(s):",
+        "sum_sub_resolved": "  ↓ {time_offline} → ✅ {time_online}",
+        "sum_sub_ongoing": "  ↓ {time_offline} ⚠️ todavía sin conexión",
     },
 }
 
@@ -612,26 +630,52 @@ class ConnectionObserverCoordinator:
         # Date format varies by language
         dt_fmt = "%d.%m. %H:%M" if lang == "de" else "%m/%d %H:%M"
 
-        title = self._msg("sum_title", count=len(pending_report))
-        header = self._msg("sum_header", count=len(pending_report))
+        # Group events by device, preserving first-seen order
+        groups: dict[str, list] = {}
+        for ev in pending_report:
+            groups.setdefault(ev.device_key, []).append(ev)
+
+        device_count = len(groups)
+        title = self._msg("sum_title", count=device_count)
+        header = self._msg("sum_header", count=device_count)
         lines = [header]
 
-        for ev in pending_report:
-            area = f" [{ev.area_name}]" if ev.area_name else ""
-            t_off = ev.disconnected_at.strftime(dt_fmt)
-            if ev.reconnected_at:
-                t_on = ev.reconnected_at.strftime("%H:%M")
-                lines.append(self._msg(
-                    "sum_resolved",
-                    device_name=ev.device_name, area=area, protocol=ev.protocol,
-                    time_offline=t_off, time_online=t_on,
-                ))
+        for evts in groups.values():
+            evts_sorted = sorted(evts, key=lambda e: e.disconnected_at)
+            first = evts_sorted[0]
+            area = f" [{first.area_name}]" if first.area_name else ""
+
+            if len(evts_sorted) == 1:
+                # Single event — use existing template format (custom templates respected)
+                ev = evts_sorted[0]
+                t_off = ev.disconnected_at.strftime(dt_fmt)
+                if ev.reconnected_at:
+                    t_on = ev.reconnected_at.strftime("%H:%M")
+                    lines.append(self._msg(
+                        "sum_resolved",
+                        device_name=ev.device_name, area=area, protocol=ev.protocol,
+                        time_offline=t_off, time_online=t_on,
+                    ))
+                else:
+                    lines.append(self._msg(
+                        "sum_ongoing",
+                        device_name=ev.device_name, area=area, protocol=ev.protocol,
+                        time_offline=t_off,
+                    ))
             else:
+                # Multiple events — device header + indented sub-lines
                 lines.append(self._msg(
-                    "sum_ongoing",
-                    device_name=ev.device_name, area=area, protocol=ev.protocol,
-                    time_offline=t_off,
+                    "sum_multi_header",
+                    device_name=first.device_name, area=area, protocol=first.protocol,
+                    count=len(evts_sorted),
                 ))
+                for ev in evts_sorted:
+                    t_off = ev.disconnected_at.strftime(dt_fmt)
+                    if ev.reconnected_at:
+                        t_on = ev.reconnected_at.strftime("%H:%M")
+                        lines.append(self._msg("sum_sub_resolved", time_offline=t_off, time_online=t_on))
+                    else:
+                        lines.append(self._msg("sum_sub_ongoing", time_offline=t_off))
 
         await self._notify_all(services, title, "\n".join(lines))
         await self._save_store()
