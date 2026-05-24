@@ -1,6 +1,6 @@
 # Connection Observer – Documentation
 
-**Version:** 1.0.3  
+**Version:** 1.0.4  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -263,7 +263,36 @@ Shows the number of devices that are currently offline.
 
 | Attribute | Description |
 |---|---|
-| `devices` | List of device names that are currently offline. |
+| `devices` | Flat list of device names that are currently offline. |
+| `by_protocol` | Per-protocol breakdown: offline count and detailed device list per integration family. |
+
+The `by_protocol` attribute has the following structure:
+
+```yaml
+by_protocol:
+  shelly:
+    offline: 1
+    devices:
+      - name: "Kitchen Plug"
+        offline_since: "22.05. 14:30"
+        offline_duration: "2h 15m"
+  bthome:
+    offline: 0
+    devices: []
+```
+
+Only protocols with at least one currently offline device appear in this attribute.
+
+**Example — Markdown card showing per-protocol status:**
+```yaml
+type: markdown
+content: >
+  {% set proto = state_attr('sensor.connection_observer_offline_devices', 'by_protocol') %}
+  {% for p, data in proto.items() %}
+  **{{ p }}**: {{ data.devices | map(attribute='name') | join(', ') }}
+  (offline seit {{ data.devices[0].offline_since }})
+  {% endfor %}
+```
 
 **Example use in an automation:**
 ```yaml

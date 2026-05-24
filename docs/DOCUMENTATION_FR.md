@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (Français)
 
-**Version:** 1.0.3  
+**Version:** 1.0.4  
 **Dépôt :** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -244,7 +244,36 @@ Indique le nombre d'appareils actuellement hors ligne.
 
 | Attribut | Description |
 |---|---|
-| `devices` | Liste des noms d'appareils actuellement hors ligne. |
+| `devices` | Liste plate des noms d'appareils actuellement hors ligne. |
+| `by_protocol` | Détail par protocole : nombre hors ligne et liste des appareils par famille d'intégration. |
+
+L'attribut `by_protocol` a la structure suivante :
+
+```yaml
+by_protocol:
+  shelly:
+    offline: 1
+    devices:
+      - name: "Prise cuisine"
+        offline_since: "22.05. 14:30"
+        offline_duration: "2h 15m"
+  bthome:
+    offline: 0
+    devices: []
+```
+
+Seuls les protocoles avec au moins un appareil hors ligne apparaissent dans cet attribut.
+
+**Exemple — carte Markdown avec statut par protocole :**
+```yaml
+type: markdown
+content: >
+  {% set proto = state_attr('sensor.connection_observer_offline_devices', 'by_protocol') %}
+  {% for p, data in proto.items() %}
+  **{{ p }}**: {{ data.devices | map(attribute='name') | join(', ') }}
+  (hors ligne depuis {{ data.devices[0].offline_since }})
+  {% endfor %}
+```
 
 **Exemple dans une automatisation :**
 ```yaml

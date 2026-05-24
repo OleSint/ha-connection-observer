@@ -244,7 +244,36 @@ Toont het aantal apparaten dat momenteel offline is.
 
 | Attribuut | Beschrijving |
 |---|---|
-| `devices` | Lijst van apparaatnamen die momenteel offline zijn. |
+| `devices` | Vlakke lijst van apparaatnamen die momenteel offline zijn. |
+| `by_protocol` | Uitsplitsing per protocol: aantal offline en gedetailleerde apparaatlijst per integratiefamilie. |
+
+Het attribuut `by_protocol` heeft de volgende structuur:
+
+```yaml
+by_protocol:
+  shelly:
+    offline: 1
+    devices:
+      - name: "Stekker Keuken"
+        offline_since: "22.05. 14:30"
+        offline_duration: "2h 15m"
+  bthome:
+    offline: 0
+    devices: []
+```
+
+Alleen protocollen met ten minste één momenteel offline apparaat verschijnen in dit attribuut.
+
+**Voorbeeld — Markdown-kaart met protocollenstatus:**
+```yaml
+type: markdown
+content: >
+  {% set proto = state_attr('sensor.connection_observer_offline_devices', 'by_protocol') %}
+  {% for p, data in proto.items() %}
+  **{{ p }}**: {{ data.devices | map(attribute='name') | join(', ') }}
+  (offline sinds {{ data.devices[0].offline_since }})
+  {% endfor %}
+```
 
 **Voorbeeld in een automatisering:**
 ```yaml

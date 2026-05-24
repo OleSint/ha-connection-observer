@@ -244,7 +244,36 @@ Muestra el número de dispositivos que están actualmente sin conexión.
 
 | Atributo | Descripción |
 |---|---|
-| `devices` | Lista de nombres de dispositivos actualmente sin conexión. |
+| `devices` | Lista plana de nombres de dispositivos actualmente sin conexión. |
+| `by_protocol` | Desglose por protocolo: número sin conexión y lista detallada de dispositivos por familia de integración. |
+
+El atributo `by_protocol` tiene la siguiente estructura:
+
+```yaml
+by_protocol:
+  shelly:
+    offline: 1
+    devices:
+      - name: "Enchufe Cocina"
+        offline_since: "22.05. 14:30"
+        offline_duration: "2h 15m"
+  bthome:
+    offline: 0
+    devices: []
+```
+
+Solo aparecen en este atributo los protocolos con al menos un dispositivo actualmente sin conexión.
+
+**Ejemplo — tarjeta Markdown con estado por protocolo:**
+```yaml
+type: markdown
+content: >
+  {% set proto = state_attr('sensor.connection_observer_offline_devices', 'by_protocol') %}
+  {% for p, data in proto.items() %}
+  **{{ p }}**: {{ data.devices | map(attribute='name') | join(', ') }}
+  (sin conexión desde {{ data.devices[0].offline_since }})
+  {% endfor %}
+```
 
 **Ejemplo en una automatización:**
 ```yaml
