@@ -13,6 +13,7 @@ KNOWN_PROTOCOLS: dict[str, str] = {
     "matter": "Matter",
     "otbr": "Thread (OTBR)",
     "bluetooth": "Bluetooth",
+    "bthome": "BTHome",
     "rfxtrx": "RFXtrx (433 MHz)",
     "mysensors": "MySensors",
     "insteon": "Insteon",

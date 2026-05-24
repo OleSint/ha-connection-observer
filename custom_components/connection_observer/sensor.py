@@ -5,6 +5,7 @@ from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 from .coordinator import ConnectionObserverCoordinator
@@ -63,12 +64,36 @@ class OfflineCountSensor(_CoordinatorEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
+        now = dt_util.now()
+        offline_events = [ev for ev in self._coordinator.events if ev.reconnected_at is None]
+
+        # Flat device list (backward-compatible)
+        devices = [ev.device_name for ev in offline_events]
+
+        # Per-protocol breakdown
+        by_protocol: dict[str, dict] = {}
+        for ev in offline_events:
+            proto = ev.protocol
+            if proto not in by_protocol:
+                by_protocol[proto] = {"offline": 0, "devices": []}
+            elapsed = now - ev.disconnected_at
+            total_minutes = int(elapsed.total_seconds() // 60)
+            if total_minutes >= 60:
+                hours = total_minutes // 60
+                minutes = total_minutes % 60
+                since_str = f"{hours}h {minutes}m" if minutes else f"{hours}h"
+            else:
+                since_str = f"{total_minutes}m"
+            by_protocol[proto]["offline"] += 1
+            by_protocol[proto]["devices"].append({
+                "name": ev.device_name,
+                "offline_since": ev.disconnected_at.strftime("%d.%m. %H:%M"),
+                "offline_duration": since_str,
+            })
+
         return {
-            "devices": [
-                ev.device_name
-                for ev in self._coordinator.events
-                if ev.reconnected_at is None
-            ]
+            "devices": devices,
+            "by_protocol": by_protocol,
         }
 
 
