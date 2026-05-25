@@ -458,6 +458,6 @@ Le watchdog s'exécute toutes les 5 minutes et fermera automatiquement l'événe
 
 - **Intégrations cloud uniquement :** Les appareils connectés exclusivement via un service cloud peuvent ne pas être détectés si l'intégration ne passe pas les entités à `unavailable`.
 - **Intégrations par sondage :** Une déconnexion peut n'être détectée qu'après le prochain cycle de sondage.
-- **Couverture Bluetooth :** Les appareils visibles uniquement au niveau de l'adaptateur Bluetooth brut peuvent ne pas être couverts.
+- **Appareils BLE passifs (BTHome etc.) :** Les capteurs Bluetooth Low Energy comme les capteurs de porte/fenêtre BTHome ne maintiennent pas de connexion persistante — ils diffusent des annonces périodiques. Si un tel appareil passe hors ligne (p. ex. batterie retirée), Home Assistant ne met ses entités à `unavailable` qu'après son propre délai interne, qui peut atteindre plusieurs heures. Connection Observer ne peut réagir qu'une fois que HA signale `unavailable`. La surveillance en temps réel n'est donc structurellement pas possible pour les appareils BLE passifs, contrairement aux appareils WiFi.
 - **Une seule instance :** Connection Observer supporte une seule instance par installation HA.
 - **Conservation des événements 30 jours :** Les événements de plus de 30 jours sont automatiquement supprimés.

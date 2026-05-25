@@ -460,6 +460,6 @@ De watchdog draait elke 5 minuten en sluit de gebeurtenis automatisch. Je kunt o
 
 - **Alleen-cloud integraties:** Apparaten die uitsluitend via een clouddienst verbinden, worden mogelijk niet gedetecteerd als de integratie geen `unavailable`-status instelt bij cloudproblemen.
 - **Poll-integraties:** Een verbreking wordt pas gedetecteerd na de volgende pollcyclus.
-- **Bluetooth-dekking:** Apparaten die alleen zichtbaar zijn op het niveau van de ruwe Bluetooth-adapter worden mogelijk niet gedekt.
+- **Passieve BLE-apparaten (BTHome etc.):** Bluetooth Low Energy-sensoren zoals BTHome deur-/raamsensoren onderhouden geen persistente verbinding — ze zenden periodieke berichten uit. Als zo'n apparaat offline gaat (bijv. batterij verwijderd), stelt Home Assistant de entiteiten pas op `unavailable` na een eigen interne time-out, die enkele uren kan bedragen. Connection Observer kan pas reageren zodra HA `unavailable` meldt. Realtime bewaking is voor passieve BLE-apparaten structureel niet mogelijk, in tegenstelling tot WiFi-apparaten.
 - **Slechts één instantie:** Connection Observer ondersteunt één integratie-instantie per HA-installatie.
 - **30 dagen bewaring:** Gebeurtenissen ouder dan 30 dagen worden automatisch verwijderd.
