@@ -34,6 +34,7 @@ from .const import (
     CONF_NOTIFY_RECONNECT,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_SUMMARY,
+    CONF_PROTOCOL_DELAYS,
     CONF_PROTOCOLS,
     CONF_REPAIRS_THRESHOLD,
     CONF_SUMMARY_DAYS,
@@ -45,6 +46,7 @@ from .const import (
     CONF_TMPL_SUM_LINE_ONGOING,
     CONF_TMPL_SUM_LINE_RESOLVED,
     CONF_TMPL_SUM_TITLE,
+    CONF_WATCH_LABEL,
     DOMAIN,
     STARTUP_GRACE_SECONDS,
     STORAGE_KEY,
@@ -233,6 +235,7 @@ class ConnectionObserverCoordinator:
         self._pending_disconnects: dict[str, Callable] = {}
         self._last_notified: dict[str, datetime] = {}
         self._listeners: list[Callable[[], None]] = []
+        self._watch_label_entities: set[str] = set()
 
     # ------------------------------------------------------------------
     # Public API
@@ -289,6 +292,7 @@ class ConnectionObserverCoordinator:
         self._setup_state_listener()
         self._setup_summary_scheduler()
         self._setup_watchdog()
+        self._setup_watch_label_listener()
 
     async def async_unload(self) -> None:
         for cancel_fn in self._pending_disconnects.values():
@@ -307,9 +311,11 @@ class ConnectionObserverCoordinator:
             unsub()
         self._unsub.clear()
         self._startup_complete = True
+        self._watch_label_entities.clear()
         self._setup_state_listener()
         self._setup_summary_scheduler()
         self._setup_watchdog()
+        self._setup_watch_label_listener()
 
     # ------------------------------------------------------------------
     # Setup
@@ -378,6 +384,27 @@ class ConnectionObserverCoordinator:
             )
         )
 
+    def _setup_watch_label_listener(self) -> None:
+        """Scan entity registry for entities carrying the watch label and cache them.
+
+        Called at startup and after every options-update so that the set stays
+        in sync when the user changes the label name or adds/removes the label
+        from entities in the HA UI.
+        """
+        label: str = self._cfg.get(CONF_WATCH_LABEL, "").strip()
+        self._watch_label_entities.clear()
+        if not label:
+            return
+        er = async_get_entity_registry(self.hass)
+        for entry in er.entities.values():
+            if label in (entry.labels or set()):
+                self._watch_label_entities.add(entry.entity_id)
+        if self._watch_label_entities:
+            _LOGGER.debug(
+                "Connection Observer: watch-label '%s' matched %d entity/entities: %s",
+                label, len(self._watch_label_entities), self._watch_label_entities,
+            )
+
     # ------------------------------------------------------------------
     # State change
     # ------------------------------------------------------------------
@@ -391,6 +418,25 @@ class ConnectionObserverCoordinator:
         old_state = event.data.get("old_state")
         if not entity_id or not new_state or not old_state:
             return
+
+        # ── Watch-label path ────────────────────────────────────────────────
+        # Binary sensors (or any entity) labelled with CONF_WATCH_LABEL signal
+        # offline/online via state: "on" = offline indicator active, "off" = back.
+        if entity_id in self._watch_label_entities:
+            going_offline = (
+                new_state.state == "on" and old_state.state != "on"
+            )
+            coming_back = (
+                new_state.state == "off" and old_state.state != "off"
+            )
+            if going_offline:
+                self._on_disconnect(entity_id, "custom")
+            elif coming_back:
+                self._on_reconnect(entity_id)
+            # Watch-label entities are handled exclusively here; skip normal flow.
+            return
+
+        # ── Normal unavailable-state path ───────────────────────────────────
         entity_domain = entity_id.split(".", 1)[0]
         if entity_domain == "device_tracker":
             return
@@ -420,7 +466,9 @@ class ConnectionObserverCoordinator:
                 return
         if device_key in self._pending_disconnects:
             return
-        alert_delay = int(self._cfg.get(CONF_ALERT_DELAY, 0))
+        protocol_delays: dict[str, int] = self._cfg.get(CONF_PROTOCOL_DELAYS, {})
+        _proto_delay = protocol_delays.get(protocol)
+        alert_delay = int(_proto_delay if _proto_delay is not None else self._cfg.get(CONF_ALERT_DELAY, 0))
         if alert_delay > 0:
             @callback
             def _confirm(_now: Any, _eid: str = entity_id, _dk: str = device_key,
@@ -508,7 +556,14 @@ class ConnectionObserverCoordinator:
                     changed = True
                     async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
                     continue
-                if state.state != "unavailable":
+                # Watch-label entities signal "back online" via state "off" (not "unavailable")
+                is_watch = ev.trigger_entity_id in self._watch_label_entities
+                recovered = (
+                    state.state != "on"
+                    if is_watch
+                    else state.state != "unavailable"
+                )
+                if recovered:
                     _LOGGER.debug("Watchdog: %s recovered (missed event)", ev.device_name)
                     ev.reconnected_at = dt_util.now()
                     changed = True

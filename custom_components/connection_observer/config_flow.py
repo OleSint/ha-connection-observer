@@ -22,6 +22,7 @@ from .const import (
     CONF_NOTIFY_RECONNECT,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_SUMMARY,
+    CONF_PROTOCOL_DELAYS,
     CONF_PROTOCOLS,
     CONF_REPAIRS_THRESHOLD,
     CONF_SUMMARY_DAYS,
@@ -33,6 +34,7 @@ from .const import (
     CONF_TMPL_SUM_LINE_ONGOING,
     CONF_TMPL_SUM_LINE_RESOLVED,
     CONF_TMPL_SUM_TITLE,
+    CONF_WATCH_LABEL,
     DOMAIN,
     KNOWN_PROTOCOLS,
     LANG_DE,
@@ -40,6 +42,7 @@ from .const import (
     LANG_ES,
     LANG_FR,
     LANG_NL,
+    PROTOCOL_DELAY_HINTS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -106,6 +109,10 @@ _DOMAIN_SELECTOR = selector.SelectSelector(
 )
 
 
+# ---------------------------------------------------------------------------
+# Helper functions
+# ---------------------------------------------------------------------------
+
 def _available_protocols(hass) -> dict[str, str]:
     found: dict[str, str] = {}
     for entry in hass.config_entries.async_entries():
@@ -143,8 +150,48 @@ def _notify_selector(services: list[str]) -> selector.SelectSelector:
     )
 
 
+def _build_expert_schema(
+    selected_protocols: list[str],
+    current_delays: dict[str, int],
+    watch_label: str,
+) -> vol.Schema:
+    """Build the dynamic expert-step schema.
+
+    Per-protocol delay fields are named ``delay_<protocol>``.
+    A value of 0 means "use the global alert delay".  Positive values
+    override the global delay for that specific protocol.
+    """
+    schema_dict: dict[Any, Any] = {
+        vol.Optional("apply_recommendations", default=False): selector.BooleanSelector(),
+    }
+    for proto in selected_protocols:
+        key = f"delay_{proto}"
+        default_val = current_delays.get(proto, 0)
+        schema_dict[vol.Optional(key, default=default_val)] = _MINUTES_SELECTOR
+    schema_dict[vol.Optional(CONF_WATCH_LABEL, default=watch_label)] = _TEXT_SELECTOR
+    return vol.Schema(schema_dict)
+
+
+def _parse_protocol_delays(
+    user_input: dict[str, Any],
+    selected_protocols: list[str],
+) -> dict[str, int]:
+    """Extract per-protocol delays from form data.
+
+    Only protocols with a value > 0 are stored; 0 means "use global delay"
+    and is therefore omitted from the returned dict.
+    """
+    delays: dict[str, int] = {}
+    for proto in selected_protocols:
+        raw = user_input.get(f"delay_{proto}", 0)
+        val = int(raw or 0)
+        if val > 0:
+            delays[proto] = val
+    return delays
+
+
 # ---------------------------------------------------------------------------
-# Config flow  (4 steps: protocols → notifications → test → advanced)
+# Config flow  (5 steps: protocols → notifications → test → advanced → expert)
 # ---------------------------------------------------------------------------
 
 class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -265,9 +312,7 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.FlowResult:
         if user_input is not None:
             self._data.update(user_input)
-            await self.async_set_unique_id(DOMAIN)
-            self._abort_if_unique_id_configured()
-            return self.async_create_entry(title="Connection Observer", data=self._data)
+            return await self.async_step_expert()
 
         return self.async_show_form(
             step_id="advanced",
@@ -286,6 +331,40 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
         )
 
+    # Step 5 – expert: per-protocol delays + watch label
+    async def async_step_expert(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.FlowResult:
+        selected_protocols: list[str] = self._data.get(CONF_PROTOCOLS, [])
+        current_delays: dict[str, int] = {}
+        watch_label: str = ""
+
+        if user_input is not None:
+            # If the user clicked "Apply recommended delays", pre-fill and re-render
+            if user_input.get("apply_recommendations"):
+                pre_delays = {p: PROTOCOL_DELAY_HINTS[p] for p in selected_protocols if p in PROTOCOL_DELAY_HINTS}
+                return self.async_show_form(
+                    step_id="expert",
+                    data_schema=_build_expert_schema(
+                        selected_protocols,
+                        pre_delays,
+                        user_input.get(CONF_WATCH_LABEL, ""),
+                    ),
+                )
+
+            # Normal submission – parse delays and finish
+            protocol_delays = _parse_protocol_delays(user_input, selected_protocols)
+            self._data[CONF_PROTOCOL_DELAYS] = protocol_delays
+            self._data[CONF_WATCH_LABEL] = user_input.get(CONF_WATCH_LABEL, "").strip()
+            await self.async_set_unique_id(DOMAIN)
+            self._abort_if_unique_id_configured()
+            return self.async_create_entry(title="Connection Observer", data=self._data)
+
+        return self.async_show_form(
+            step_id="expert",
+            data_schema=_build_expert_schema(selected_protocols, current_delays, watch_label),
+        )
+
     @staticmethod
     @callback
     def async_get_options_flow(
@@ -295,7 +374,7 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 # ---------------------------------------------------------------------------
-# Options flow  (single page with all settings + templates + repairs)
+# Options flow  (6 steps: protocols → notifications → advanced → expert → templates → test)
 # ---------------------------------------------------------------------------
 
 class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
@@ -304,26 +383,50 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
         self._entry = config_entry
         self._data: dict[str, Any] = {}
 
+    def _cur(self) -> dict[str, Any]:
+        """Merged current config (data + options) as single dict."""
+        return {**self._entry.data, **self._entry.options}
+
+    # Step 1 – protocols + language
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.FlowResult:
         if user_input is not None:
-            self._data = user_input
-            return await self.async_step_test()
+            self._data.update(user_input)
+            return await self.async_step_notifications()
 
-        cur = {**self._entry.data, **self._entry.options}
+        cur = self._cur()
         protocols = _available_protocols(self.hass)
-        notify_services = _available_notify_services(self.hass)
-
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    # ── Protocols ────────────────────────────────────────
                     vol.Required(
                         CONF_PROTOCOLS, default=cur.get(CONF_PROTOCOLS, [])
                     ): _protocol_selector(protocols),
-                    # ── Notifications ────────────────────────────────────
+                    vol.Required(
+                        CONF_LANGUAGE, default=cur.get(CONF_LANGUAGE, LANG_EN)
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(options=_LANGUAGE_OPTIONS)
+                    ),
+                }
+            ),
+        )
+
+    # Step 2 – notifications
+    async def async_step_notifications(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.FlowResult:
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_advanced()
+
+        cur = self._cur()
+        notify_services = _available_notify_services(self.hass)
+        return self.async_show_form(
+            step_id="notifications",
+            data_schema=vol.Schema(
+                {
                     vol.Required(
                         CONF_NOTIFY_SERVICE, default=cur.get(CONF_NOTIFY_SERVICE, [])
                     ): _notify_selector(notify_services),
@@ -352,7 +455,23 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                         CONF_NOTIFY_RECONNECT,
                         default=cur.get(CONF_NOTIFY_RECONNECT, False),
                     ): selector.BooleanSelector(),
-                    # ── Advanced ─────────────────────────────────────────
+                }
+            ),
+        )
+
+    # Step 3 – advanced timing + filters
+    async def async_step_advanced(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.FlowResult:
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_expert()
+
+        cur = self._cur()
+        return self.async_show_form(
+            step_id="advanced",
+            data_schema=vol.Schema(
+                {
                     vol.Optional(
                         CONF_ALERT_DELAY,
                         default=cur.get(CONF_ALERT_DELAY, 0),
@@ -373,11 +492,6 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                         CONF_INCLUDE_DEVICE_INFO,
                         default=cur.get(CONF_INCLUDE_DEVICE_INFO, False),
                     ): selector.BooleanSelector(),
-                    vol.Required(
-                        CONF_LANGUAGE, default=cur.get(CONF_LANGUAGE, LANG_EN)
-                    ): selector.SelectSelector(
-                        selector.SelectSelectorConfig(options=_LANGUAGE_OPTIONS)
-                    ),
                     vol.Optional(
                         CONF_EXCLUDED_DOMAINS,
                         default=cur.get(CONF_EXCLUDED_DOMAINS, []),
@@ -392,7 +506,56 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                         CONF_REPAIRS_THRESHOLD,
                         default=cur.get(CONF_REPAIRS_THRESHOLD, 24),
                     ): _HOURS_SELECTOR,
-                    # ── Notification templates (empty = use language default) ──
+                }
+            ),
+        )
+
+    # Step 4 – expert: per-protocol delays + watch label
+    async def async_step_expert(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.FlowResult:
+        cur = self._cur()
+        selected_protocols: list[str] = self._data.get(CONF_PROTOCOLS, cur.get(CONF_PROTOCOLS, []))
+        current_delays: dict[str, int] = cur.get(CONF_PROTOCOL_DELAYS, {})
+        watch_label: str = cur.get(CONF_WATCH_LABEL, "")
+
+        if user_input is not None:
+            # If the user clicked "Apply recommended delays", pre-fill and re-render
+            if user_input.get("apply_recommendations"):
+                pre_delays = {p: PROTOCOL_DELAY_HINTS[p] for p in selected_protocols if p in PROTOCOL_DELAY_HINTS}
+                return self.async_show_form(
+                    step_id="expert",
+                    data_schema=_build_expert_schema(
+                        selected_protocols,
+                        pre_delays,
+                        user_input.get(CONF_WATCH_LABEL, watch_label),
+                    ),
+                )
+
+            # Normal submission – parse delays and advance
+            protocol_delays = _parse_protocol_delays(user_input, selected_protocols)
+            self._data[CONF_PROTOCOL_DELAYS] = protocol_delays
+            self._data[CONF_WATCH_LABEL] = user_input.get(CONF_WATCH_LABEL, "").strip()
+            return await self.async_step_templates()
+
+        return self.async_show_form(
+            step_id="expert",
+            data_schema=_build_expert_schema(selected_protocols, current_delays, watch_label),
+        )
+
+    # Step 5 – notification templates (empty = use language default)
+    async def async_step_templates(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.FlowResult:
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_test()
+
+        cur = self._cur()
+        return self.async_show_form(
+            step_id="templates",
+            data_schema=vol.Schema(
+                {
                     vol.Optional(
                         CONF_TMPL_IMM_TITLE,
                         default=cur.get(CONF_TMPL_IMM_TITLE, ""),
@@ -425,6 +588,7 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
             ),
         )
 
+    # Step 6 – optional test notification
     async def async_step_test(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.FlowResult:
