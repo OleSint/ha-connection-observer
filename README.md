@@ -28,6 +28,8 @@
 - **Manufacturer & model** – opt-in: include device info in immediate notifications
 - **Per-entity exclusions** – exclude specific noisy entities from monitoring
 - **Domain exclusions** – exclude entire entity domains (e.g. `sensor`, `button`) from monitoring; `device_tracker` is always excluded automatically
+- **Per-protocol alert delays** *(v1.1.0)* – set individual alert delays per integration family; use "Apply recommended delays" for a one-click starting point
+- **Watch label – custom offline indicators** *(v1.1.0)* – label any HA entity (e.g. a template binary sensor) to monitor devices that never go `unavailable`, such as passive BLE sensors (BTHome, GARDENA Bluetooth)
 - **Test notification in options** – re-send a test notification any time you change your notification services
 - **5 languages** – notification messages in English, German, French, Dutch, or Spanish (configurable)
 - **Notification templates** – customise the text of any notification with your own format string; variables like `{device_name}`, `{protocol}`, and `{time}` are available
@@ -130,6 +132,8 @@ All settings — plus notification templates and the HA Repairs threshold — ca
 - **5 Sprachen** – Benachrichtigungen auf Englisch, Deutsch, Französisch, Niederländisch oder Spanisch (konfigurierbar)
 - **Benachrichtigungsvorlagen** – Texte beliebig anpassen mit Variablen wie `{device_name}`, `{protocol}` und `{time}`
 - **HA-Reparaturen** – nach einer konfigurierbaren Offline-Dauer erscheint ein Eintrag im HA Repairs-Panel; wird automatisch gelöst, wenn das Gerät zurückkommt
+- **Protokollspezifische Verzögerungen** *(v1.1.0)* – individuelle Verzögerung pro Integrationsfamilie; mit „Empfohlene Verzögerungen anwenden" im Experten-Schritt per Klick vorkonfigurieren
+- **Watch-Label – eigene Offline-Indikatoren** *(v1.1.0)* – beliebige HA-Entität (z. B. ein Template-Binärsensor) mit einem Label versehen, um Geräte zu überwachen, die nie `unavailable` werden — ideal für passive BLE-Sensoren (BTHome, GARDENA Bluetooth)
 - **Testbenachrichtigung** – integrierter Testschritt im Setup-Assistenten
 - **Persistenter Zustand** – Ereignisse überleben HA-Neustarts; ein Neustart löst keinen falschen Alarm aus
 - **Watchdog** – läuft alle 5 Minuten still im Hintergrund und fängt Reconnects ab, die kein State-Change-Event ausgelöst haben
@@ -184,6 +188,9 @@ Im Setup-Assistenten erscheinen nur Integrationen, die in der jeweiligen HA-Inst
    - Verzögerung, Cooldown, Mindestausfallzeit
    - Raum/Bereich und Geräteinformationen in Benachrichtigungen
    - Ausgeschlossene Entitäten
+7. **Schritt 5 – Experte** *(optional)*:
+   - Protokollspezifische Verzögerungen (oder „Empfohlene Verzögerungen anwenden")
+   - Watch-Label für benutzerdefinierte Offline-Indikatoren
 
 Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Schwellwert — können nachträglich über den **Konfigurieren**-Button der Integrationskarte geändert werden.
 
@@ -203,6 +210,24 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 - Home Assistant 2023.6 oder neuer
 - Mindestens eine unterstützte Integration eingerichtet
+
+---
+
+## Changelog
+
+### v1.1.0 *(released)*
+
+**Per-protocol alert delays**  
+Each integration family can now have its own alert delay overriding the global setting. A built-in "Apply recommended delays" checkbox pre-fills all fields with sensible values for each protocol (2 min for ESPHome/Shelly/Tasmota, 5 min for Zigbee/Z-Wave, 20 min for passive BLE, 10 min for cloud integrations, and more).
+
+**Watch label – custom offline indicators**  
+Label any HA entity with a custom HA label name. Connection Observer monitors those entities and creates an offline event when their state turns `on`, and closes it when the state returns to `off`. This enables real-time monitoring of passive BLE devices (BTHome, GARDENA Bluetooth), cloud devices, or any custom scenario where `unavailable` is not used — pair it with a template binary sensor watching `last_updated` for a complete BTHome freshness monitor.
+
+## Roadmap
+
+### v1.2.0 — Label-based scope filtering *(planned)*
+
+Use HA's label system to define monitoring scope without maintaining entity lists — monitor everything tagged `critical`, exclude anything tagged `ignore`.
 
 ---
 

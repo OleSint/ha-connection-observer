@@ -1,6 +1,6 @@
 # Connection Observer – Documentación (Español)
 
-**Versión:** 1.0.1  
+**Versión:** 1.1.0  
 **Repositorio:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -12,6 +12,8 @@
 3. [Instalación](#3-instalación)
 4. [Asistente de configuración](#4-asistente-de-configuración)
 5. [Opciones de configuración](#5-opciones-de-configuración)
+   - [Retrasos de alerta por protocolo](#retrasos-de-alerta-por-protocolo)
+   - [Watch label – indicadores de desconexión personalizados](#watch-label--indicadores-de-desconexión-personalizados)
 6. [Plantillas de notificación](#6-plantillas-de-notificación)
 7. [Integración HA Repairs](#7-integración-ha-repairs)
 8. [Entidades](#8-entidades)
@@ -87,7 +89,7 @@ Cada 5 minutos, Connection Observer verifica activamente si los dispositivos con
 
 ## 4. Asistente de configuración
 
-El asistente de configuración te guía a través de cuatro pasos. Todos los ajustes pueden modificarse posteriormente mediante el botón **Configurar** de la tarjeta de integración.
+El asistente de configuración te guía a través de cinco pasos. Todos los ajustes pueden modificarse posteriormente mediante el botón **Configurar** de la tarjeta de integración.
 
 ### Paso 1 – Protocolos
 
@@ -127,7 +129,8 @@ Un paso de prueba opcional envía una notificación a todos tus servicios selecc
 
 ### Paso 4 – Avanzado
 
-**Todos los campos son opcionales. El valor 0 desactiva la función correspondiente.**
+**Todos los campos son opcionales. El valor 0 desactiva la función correspondiente.**  
+El **retraso de alerta global** configurado aquí se aplica a todos los protocolos, salvo que se defina un retraso específico en el Paso 5.
 
 | Campo | Descripción |
 |---|---|
@@ -138,6 +141,36 @@ Un paso de prueba opcional envía una notificación a todos tus servicios selecc
 | **Incluir fabricante y modelo** | Mostrar información del dispositivo. Por defecto: **desactivado**. |
 | **Dominios de entidades excluidos** | Excluye dominios de entidades completos (p. ej. `sensor`, `button`). Las entidades `device_tracker` siempre se excluyen automáticamente. |
 | **Entidades excluidas** | Lista de entidades específicas a excluir de la monitorización. |
+
+### Paso 5 – Experto
+
+**Ambas funciones son opcionales. Omite este paso si solo necesitas el retraso global.**
+
+#### Retrasos de alerta por protocolo
+
+Cada protocolo que seleccionaste en el Paso 1 aparece aquí con su propio campo de retraso. Un valor de **0** significa "usar el retraso de alerta global del Paso 4". Introduce un valor positivo para anular el retraso global para ese protocolo específico.
+
+**Consejo: Aplicar retrasos recomendados**  
+Marca la casilla **Aplicar retrasos recomendados para todos los protocolos** y haz clic en Enviar. Todos los campos de retraso se rellenan automáticamente con los valores recomendados. Puedes ajustar los valores individuales o aceptarlos tal como están.
+
+Los valores recomendados se basan en las características de conexión típicas de cada familia de protocolos:
+- Protocolos TCP directos (ESPHome, Shelly, Tasmota) → **2 min** (conexión persistente, detección rápida)
+- Protocolos mesh locales (ZHA, Z-Wave JS) → **5 min** (el enrutamiento mesh necesita un momento)
+- BLE pasivo (BTHome, GARDENA Bluetooth) → **20 min** (ciclos de anuncio infrecuentes)
+- Protocolos cloud (Tuya, Nest, Ring…) → **10 min** (latencia de sondeo)
+
+Consulta la [tabla de referencia completa](#retrasos-de-alerta-por-protocolo) en la Sección 5 para ver todos los valores.
+
+#### Watch label – indicadores de desconexión personalizados
+
+Introduce aquí el nombre de una etiqueta de HA (p. ej. `indicador_desconexion`). Cualquier entidad a la que asignes esta etiqueta en el editor de etiquetas de Home Assistant será tratada como un indicador de desconexión personalizado por Connection Observer:
+
+- Cuando el estado de la entidad cambia a **`on`** → Connection Observer crea un evento de desconexión (protocolo mostrado como `custom`)
+- Cuando el estado de la entidad cambia a **`off`** → Connection Observer marca el dispositivo como de nuevo en línea
+
+Esta función es intencionadamente genérica: etiqueta cualquier entidad que desees — un sensor binario de plantilla, un helper o cualquier entidad binaria — y Connection Observer reaccionará a sus cambios de estado.
+
+**Caso de uso típico:** los dispositivos BLE pasivos (sensores BTHome, GARDENA Bluetooth) no pueden monitorizarse en tiempo real mediante el estado `unavailable`. Consulta las [Limitaciones conocidas](#13-limitaciones-conocidas) y el [Watch label](#watch-label--indicadores-de-desconexión-personalizados) en la Sección 5 para un ejemplo completo paso a paso.
 
 ---
 
@@ -167,14 +200,168 @@ Siete campos de texto opcionales permiten personalizar el formato de cualquier n
 
 Consulta la [Sección 6](#6-plantillas-de-notificación) para más detalles.
 
+### Retrasos de alerta por protocolo
+
+Cada protocolo seleccionado puede tener su propio retraso de alerta que anula el valor global. Establece el retraso de un protocolo en **0** (o déjalo sin configurar) para usar el retraso global.
+
+**Configuración con un clic:** En el paso Experto (asistente) o la página Experto (opciones), marca **Aplicar retrasos recomendados** y haz clic en Enviar. Todos los campos se rellenan automáticamente.
+
+| Protocolo | Dominio | Retraso recomendado | Razón |
+|---|---|---:|---|
+| Zigbee (ZHA) | `zha` | 5 min | El enrutamiento mesh necesita un momento |
+| Zigbee (deCONZ) | `deconz` | 5 min | El enrutamiento mesh necesita un momento |
+| Z-Wave (Z-Wave JS) | `zwave_js` | 5 min | El enrutamiento mesh necesita un momento |
+| Matter | `matter` | 5 min | Comportamiento similar a mesh |
+| Thread (OTBR) | `otbr` | 5 min | Mesh Thread |
+| Bluetooth | `bluetooth` | 10 min | La conexión BLE es más lenta |
+| BTHome | `bthome` | 20 min | BLE pasivo – anuncios poco frecuentes |
+| RFXtrx (433 MHz) | `rfxtrx` | 10 min | RF unidireccional, sin confirmación |
+| MySensors | `mysensors` | 10 min | Sondeo lento |
+| Insteon | `insteon` | 5 min | Bus propietario, basado en sondeo |
+| KNX | `knx` | 5 min | Bus cableado, fiable pero sondeado |
+| Velbus | `velbus` | 5 min | Bus cableado |
+| ESPHome | `esphome` | 2 min | TCP persistente, detección muy rápida |
+| Shelly | `shelly` | 2 min | TCP persistente, detección muy rápida |
+| Tasmota | `tasmota` | 2 min | TCP persistente, detección muy rápida |
+| Tuya | `tuya` | 5 min | Sondeo cloud |
+| WLED | `wled` | 2 min | TCP local |
+| TP-Link (Kasa/Tapo) | `tplink` | 3 min | TCP local |
+| TP-Link Omada | `tplink_omada` | 3 min | TCP local |
+| Broadlink | `broadlink` | 3 min | TCP local |
+| Philips Hue | `hue` | 3 min | Puente Hue local |
+| IKEA TRÅDFRI | `tradfri` | 5 min | El hub IKEA puede ser lento |
+| LIFX | `lifx` | 3 min | UDP/TCP local |
+| Nanoleaf | `nanoleaf` | 3 min | TCP local |
+| Yeelight | `yeelight` | 2 min | TCP local |
+| Xiaomi Mi Home | `xiaomi_miio` | 5 min | Mezcla local + cloud |
+| Sonos | `sonos` | 3 min | Red local |
+| Google Cast | `cast` | 3 min | Red local |
+| Logitech Media Server | `squeezebox` | 5 min | Depende del servidor |
+| Kodi | `kodi` | 3 min | Red local |
+| Plex | `plex` | 5 min | Depende del servidor |
+| Sony Bravia TV | `braviatv` | 3 min | Red local |
+| Samsung TV | `samsungtv` | 3 min | Red local |
+| LG webOS TV | `webostv` | 3 min | Red local |
+| Android TV / Google TV | `androidtv` | 3 min | Red local |
+| Apple TV | `apple_tv` | 3 min | Red local |
+| Roku | `roku` | 3 min | Red local |
+| Yamaha MusicCast | `yamaha_musiccast` | 3 min | Red local |
+| Denon / Marantz AVR | `denon` | 3 min | Red local |
+| Onkyo / Pioneer AVR | `onkyo` | 3 min | Red local |
+| Logitech Harmony | `harmony` | 5 min | Requiere hub |
+| Netatmo | `netatmo` | 10 min | Sondeo cloud, alta latencia |
+| Tado | `tado` | 10 min | Sondeo cloud |
+| Daikin | `daikin` | 5 min | Mezcla local + cloud |
+| ecobee | `ecobee` | 10 min | Sondeo cloud |
+| Google Nest | `nest` | 10 min | Sondeo cloud |
+| HomeWizard Energy | `homewizard` | 3 min | LAN local |
+| Tibber | `tibber` | 10 min | API cloud |
+| SMA Solar | `sma` | 10 min | Cloud / Modbus local |
+| SolarEdge | `solaredge` | 10 min | Sondeo cloud |
+| Fronius | `fronius` | 10 min | Sondeo cloud |
+| Tesla Powerwall | `powerwall` | 5 min | Generalmente local |
+| Nuki Smart Lock | `nuki` | 5 min | Puente BLE / cloud |
+| August Smart Lock | `august` | 5 min | Cloud |
+| Yale Smart Alarm | `yale_smart_alarm` | 5 min | Cloud |
+| Ring | `ring` | 10 min | Cámara cloud |
+| Blink | `blink` | 10 min | Cámara cloud |
+| Arlo | `arlo` | 10 min | Cámara cloud |
+| DoorBird | `doorbird` | 3 min | LAN local |
+| Reolink | `reolink` | 3 min | LAN local |
+| Amcrest | `amcrest` | 3 min | LAN local |
+| Eufy Security | `eufy_security` | 5 min | Cloud |
+| SimpliSafe | `simplisafe` | 10 min | Cloud |
+| Abode | `abode` | 10 min | Cloud |
+| UniFi (Ubiquiti) | `unifi` | 3 min | LAN local |
+| AVM FRITZ!Box | `fritz` | 5 min | LAN local |
+| MikroTik | `mikrotik` | 3 min | LAN local |
+| ASUS Router | `asusrouter` | 3 min | LAN local |
+| Synology NAS | `synology_dsm` | 3 min | LAN local |
+| Viessmann ViCare | `vicare` | 10 min | Cloud |
+| Vaillant (myVaillant) | `vaillant` | 10 min | Cloud |
+| Bosch Smart Home | `bosch_shc` | 5 min | Controlador local |
+| Mitsubishi MelCloud | `melcloud` | 10 min | Cloud |
+| NIBE heat pump | `nibe_heatpump` | 10 min | Cloud / local |
+| Huawei Solar | `huawei_solar` | 5 min | Modbus local |
+| Enphase Envoy | `enphase_envoy` | 5 min | LAN local |
+| GoodWe | `goodwe` | 10 min | Cloud |
+| Growatt | `growatt_server` | 10 min | Cloud |
+| EcoFlow | `ecoflow` | 10 min | Cloud |
+| Roborock | `roborock` | 3 min | Local + cloud |
+| ECOVACS | `ecovacs` | 5 min | Cloud |
+| Neato Robotics | `neato` | 5 min | Cloud |
+| LG ThinQ | `lg_thinq` | 5 min | Cloud |
+| Meross | `meross` | 3 min | Local + cloud |
+| Belkin WeMo | `wemo` | 3 min | LAN local |
+| myQ (Chamberlain / LiftMaster) | `myq` | 5 min | Cloud |
+| Nice G.O. | `nice_go` | 5 min | Cloud |
+| Ecowitt | `ecowitt` | 10 min | Local, raramente crítico |
+| Ambient Weather Station | `ambient_station` | 10 min | Cloud / local |
+| Husqvarna Automower | `husqvarna_automower` | 10 min | Cloud |
+| GARDENA Bluetooth | `gardena_bluetooth` | 20 min | BLE pasivo |
+| MQTT | `mqtt` | 5 min | Ajustar por dispositivo – muy variable |
+| HomeKit Controller | `homekit_controller` | 5 min | HomeKit local |
+| Lutron Caséta | `lutron_caseta` | 3 min | Puente local |
+| SwitchBot | `switchbot` | 10 min | BLE / cloud |
+| iRobot Roomba | `roomba` | 5 min | Cloud |
+
+> ⚠️ **Para desarrolladores:** Cada vez que se añada un nuevo protocolo a `KNOWN_PROTOCOLS` en `const.py`, **se debe** añadir un retraso recomendado correspondiente a `PROTOCOL_DELAY_HINTS` en el mismo archivo, y añadir una nueva fila a esta tabla en los cinco archivos de documentación.
+
+---
+
+### Watch label – indicadores de desconexión personalizados
+
+La función **watch label** permite monitorizar *cualquier* dispositivo que Connection Observer no pueda monitorizar mediante la ruta estándar `unavailable` — por ejemplo:
+
+- **Sensores BLE pasivos** (BTHome, GARDENA Bluetooth): sin conexión persistente, HA solo establece `unavailable` al cabo de horas
+- **Dispositivos cloud** que permanecen "disponibles" aunque el dispositivo físico esté averiado o sea inaccesible
+- **Cualquier escenario personalizado** en el que puedas construir un sensor binario que refleje el estado real de la conexión
+
+#### Cómo funciona
+
+1. Crea un **sensor binario de plantilla** (o cualquier entidad binaria) que se active con `on` cuando tu dispositivo está sin conexión y `off` cuando está en línea.
+2. En el editor de etiquetas de HA (**Ajustes → Etiquetas**), crea una etiqueta con el nombre exacto que configuraste en el paso Experto (p. ej. `indicador_desconexion`).
+3. Asigna esa etiqueta a tu sensor binario de plantilla.
+4. Connection Observer recoge automáticamente todas las entidades que llevan la etiqueta y monitoriza su estado:
+   - `on` → crea un evento de desconexión (protocolo mostrado como `custom`)
+   - `off` → marca el dispositivo como de nuevo en línea
+
+#### Ejemplo: monitor de actualización para sensor de puerta BTHome
+
+Crea un sensor binario de plantilla que compruebe si la última actualización fue hace más de 2 horas:
+
+```yaml
+# configuration.yaml
+template:
+  - binary_sensor:
+      - name: "BTHome Puerta Indicador Sin Conexión"
+        unique_id: bthome_puerta_indicador_sin_conexion
+        state: >
+          {{ (now() - states.sensor.bthome_puerta_contacto.last_updated).total_seconds() > 7200 }}
+        device_class: problem
+```
+
+A continuación:
+1. Ve a **Ajustes → Etiquetas** → crea una etiqueta llamada `indicador_desconexion`
+2. Ve a **Ajustes → Dispositivos y servicios → Entidades** → busca `binary_sensor.bthome_puerta_indicador_sin_conexion` → asigna la etiqueta `indicador_desconexion`
+3. En el paso Experto de Connection Observer, establece **Watch label** como `indicador_desconexion`
+
+Connection Observer creará ahora un evento de desconexión cada vez que el sensor BTHome no haya enviado un informe en más de 2 horas, y lo cerrará automáticamente cuando llegue un nuevo informe.
+
+> **Consejo:** Puedes etiquetar varias entidades con el mismo watch label. Cada una se monitoriza de forma independiente. El nombre del dispositivo en las notificaciones es el nombre descriptivo de la entidad etiquetada.
+
+---
+
 ### Configuración inicial recomendada
 
 - **Notificación inmediata:** desactivada
 - **Resumen:** activado, diario a las 08:00
-- **Retraso de alerta:** 5 minutos (evita falsas alarmas por caídas breves de WiFi)
+- **Retraso de alerta:** 5 minutos global (evita falsas alarmas por caídas breves de WiFi)
+- **Retrasos por protocolo:** usa "Aplicar retrasos recomendados" para una configuración rápida
 - **Duración mínima sin conexión:** 5 minutos (mantiene el resumen limpio)
 - **Incluir área:** activado (hace las notificaciones mucho más legibles)
 - **Umbral HA Repairs:** 24 horas
+- **Watch label:** configúralo para dispositivos BLE pasivos o personalizados que quieras monitorizar
 
 ---
 
@@ -460,6 +647,6 @@ El watchdog se ejecuta cada 5 minutos y cerrará el evento automáticamente. Tam
 
 - **Integraciones solo en la nube:** Es posible que los dispositivos conectados exclusivamente a través de un servicio en la nube no se detecten si la integración no establece `unavailable` cuando la nube no está disponible.
 - **Integraciones por sondeo:** Una desconexión puede detectarse solo después del siguiente ciclo de sondeo.
-- **Dispositivos BLE pasivos (BTHome etc.):** Los sensores Bluetooth Low Energy como los sensores de puerta/ventana BTHome no mantienen una conexión persistente — emiten anuncios periódicos. Si un dispositivo de este tipo se desconecta (p. ej. se retira la batería), Home Assistant solo establece sus entidades como `unavailable` tras su propio tiempo de espera interno, que puede ser de varias horas. Connection Observer solo puede reaccionar cuando HA informa `unavailable`. Por tanto, la monitorización en tiempo real no es estructuralmente posible para dispositivos BLE pasivos, a diferencia de los dispositivos WiFi.
+- **Dispositivos BLE pasivos (BTHome etc.):** Los sensores Bluetooth Low Energy como los sensores de puerta/ventana BTHome no mantienen una conexión persistente — emiten anuncios periódicos. Si un dispositivo de este tipo se desconecta (p. ej. se retira la batería), Home Assistant solo establece sus entidades como `unavailable` tras su propio tiempo de espera interno, que puede ser de varias horas. Connection Observer solo puede reaccionar cuando HA informa `unavailable`. Por tanto, la monitorización en tiempo real no es estructuralmente posible para dispositivos BLE pasivos, a diferencia de los dispositivos WiFi. **Solución desde v1.1.0:** Usa la función [Watch label](#watch-label--indicadores-de-desconexión-personalizados) con un sensor binario de plantilla que monitorice `last_updated` — esto permite la detección en cuestión de minutos.
 - **Una sola instancia:** Connection Observer admite una única instancia de integración por instalación de HA.
 - **Retención de eventos 30 días:** Los eventos con más de 30 días se eliminan automáticamente del almacenamiento.

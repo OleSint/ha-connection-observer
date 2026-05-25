@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation
 
-**Version:** 1.0.4  
+**Version:** 1.1.0  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -12,6 +12,8 @@
 3. [Installation](#3-installation)
 4. [Setup-Assistent](#4-setup-assistent)
 5. [Konfigurationsoptionen](#5-konfigurationsoptionen)
+   - [Protokollspezifische Verzögerungen](#protokollspezifische-verzögerungen)
+   - [Watch-Label – eigene Offline-Indikatoren](#watch-label--eigene-offline-indikatoren)
 6. [Benachrichtigungsvorlagen](#6-benachrichtigungsvorlagen)
 7. [HA-Reparaturen-Integration](#7-ha-reparaturen-integration)
 8. [Entitäten](#8-entitäten)
@@ -87,7 +89,7 @@ Alle 5 Minuten prüft Connection Observer aktiv, ob Geräte mit offenen Ereignis
 
 ## 4. Setup-Assistent
 
-Der Setup-Assistent führt dich durch vier Schritte. Alle Einstellungen können anschließend über den **Konfigurieren**-Button der Integrationskarte geändert werden.
+Der Setup-Assistent führt dich durch fünf Schritte. Alle Einstellungen können anschließend über den **Konfigurieren**-Button der Integrationskarte geändert werden.
 
 ### Schritt 1 – Protokolle
 
@@ -127,7 +129,8 @@ Ein optionaler Testschritt sendet eine Benachrichtigung an alle ausgewählten Di
 
 ### Schritt 4 – Erweitert
 
-**Alle Felder in diesem Schritt sind optional. Der Wert 0 deaktiviert die jeweilige Funktion.**
+**Alle Felder in diesem Schritt sind optional. Der Wert 0 deaktiviert die jeweilige Funktion.**  
+Die hier eingestellte **globale Verzögerung** gilt für alle Protokolle, sofern in Schritt 5 kein eigener Wert gesetzt wird.
 
 | Feld | Beschreibung |
 |---|---|
@@ -138,6 +141,36 @@ Ein optionaler Testschritt sendet eine Benachrichtigung an alle ausgewählten Di
 | **Hersteller & Modell anzeigen** | Geräteinformationen in Sofortmeldungen einblenden. Standard: **aus**. |
 | **Ausgeschlossene Entitätsdomänen** | Ganze Entitätsdomänen von der Überwachung ausschließen (z. B. `sensor`, `button`). Aus der Liste auswählen oder eigene Domäne eingeben. `device_tracker`-Entitäten werden immer automatisch ignoriert und müssen hier nicht eingetragen werden. |
 | **Ausgeschlossene Entitäten** | Liste von Entitäten, die von der Überwachung ausgenommen werden. |
+
+### Schritt 5 – Experte
+
+**Beide Felder sind optional. Überspringe diesen Schritt, wenn du nur die globale Verzögerung benötigst.**
+
+#### Protokollspezifische Verzögerungen
+
+Jedes in Schritt 1 gewählte Protokoll erscheint hier mit einem eigenen Verzögerungsfeld. Der Wert **0** bedeutet „globale Verzögerung aus Schritt 4 verwenden". Ein positiver Wert überschreibt die globale Verzögerung für dieses Protokoll.
+
+**Tipp: Ein-Klick-Empfehlungen**  
+Setze das Häkchen bei **Empfohlene Verzögerungen für alle Protokolle anwenden** und klicke auf Weiter. Alle Felder werden automatisch mit den empfohlenen Werten gefüllt. Du kannst einzelne Werte danach noch anpassen.
+
+Die Empfehlungen basieren auf den typischen Verbindungseigenschaften der jeweiligen Protokollfamilie:
+- Direkte TCP-Protokolle (ESPHome, Shelly, Tasmota) → **2 min** (persistente Verbindung, schnelle Erkennung)
+- Lokale Mesh-Protokolle (ZHA, Z-Wave JS) → **5 min** (Mesh-Routing braucht einen Moment)
+- Passives BLE (BTHome, GARDENA Bluetooth) → **20 min** (seltene Advertisement-Zyklen)
+- Cloud-Protokolle (Tuya, Nest, Ring, Tibber …) → **10 min** (Polling-Latenz)
+
+Die vollständige Referenztabelle findest du in [Abschnitt 5](#protokollspezifische-verzögerungen).
+
+#### Watch-Label – eigene Offline-Indikatoren
+
+Gib hier den Namen eines HA-Labels ein (z. B. `offline_anzeige`). Jede Entität, der du dieses Label in der HA-Label-Verwaltung zuweist, wird von Connection Observer als eigener Offline-Indikator behandelt:
+
+- Zustand der Entität wechselt auf **`on`** → Connection Observer erstellt ein Offline-Ereignis (Protokoll wird als `custom` angezeigt)
+- Zustand der Entität wechselt auf **`off`** → Connection Observer markiert das Gerät als wieder online
+
+Das Feature ist bewusst generisch: Du kannst jede beliebige Entität labeln — einen Template-Binärsensor, einen Helper oder eine andere binäre Entität.
+
+**Typischer Anwendungsfall:** Passive BLE-Geräte (BTHome-Sensoren, GARDENA Bluetooth) können nicht in Echtzeit über den `unavailable`-Status überwacht werden. Siehe [Bekannte Einschränkungen](#13-bekannte-einschränkungen) und [Watch-Label](#watch-label--eigene-offline-indikatoren) in Abschnitt 5 für ein vollständiges Schritt-für-Schritt-Beispiel.
 
 ---
 
@@ -167,14 +200,168 @@ Sieben optionale Textfelder ermöglichen es, das Standard-Benachrichtigungsforma
 
 Siehe [Abschnitt 6](#6-benachrichtigungsvorlagen) für Details.
 
+### Protokollspezifische Verzögerungen
+
+Jedes gewählte Protokoll kann eine eigene Verzögerung erhalten, die den globalen Wert überschreibt. Der Wert **0** (oder kein Eintrag) bedeutet Fallback auf die globale Verzögerung.
+
+**Ein-Klick-Setup:** Im Experte-Schritt (Wizard) bzw. auf der Experte-Seite (Optionen) das Häkchen bei **Empfohlene Verzögerungen anwenden** setzen und auf Weiter klicken.
+
+| Protokoll | Domain | Empf. Verzögerung | Begründung |
+|---|---|---:|---|
+| Zigbee (ZHA) | `zha` | 5 min | Mesh-Routing braucht einen Moment |
+| Zigbee (deCONZ) | `deconz` | 5 min | Mesh-Routing braucht einen Moment |
+| Z-Wave (Z-Wave JS) | `zwave_js` | 5 min | Mesh-Routing braucht einen Moment |
+| Matter | `matter` | 5 min | Mesh-ähnliches Verhalten |
+| Thread (OTBR) | `otbr` | 5 min | Thread-Mesh |
+| Bluetooth | `bluetooth` | 10 min | BLE-Verbindungsaufbau ist langsamer |
+| BTHome | `bthome` | 20 min | Passives BLE – seltene Advertisements |
+| RFXtrx (433 MHz) | `rfxtrx` | 10 min | Einweg-RF, kein ACK |
+| MySensors | `mysensors` | 10 min | Langsames Polling |
+| Insteon | `insteon` | 5 min | Proprietärer Bus, polling-basiert |
+| KNX | `knx` | 5 min | Drahtbus, zuverlässig aber polling-basiert |
+| Velbus | `velbus` | 5 min | Drahtbus |
+| ESPHome | `esphome` | 2 min | Persistentes TCP, sehr schnelle Erkennung |
+| Shelly | `shelly` | 2 min | Persistentes TCP, sehr schnelle Erkennung |
+| Tasmota | `tasmota` | 2 min | Persistentes TCP, sehr schnelle Erkennung |
+| Tuya | `tuya` | 5 min | Cloud-Polling |
+| WLED | `wled` | 2 min | Lokales TCP |
+| TP-Link (Kasa/Tapo) | `tplink` | 3 min | Lokales TCP |
+| TP-Link Omada | `tplink_omada` | 3 min | Lokales TCP |
+| Broadlink | `broadlink` | 3 min | Lokales TCP |
+| Philips Hue | `hue` | 3 min | Lokale Hue-Bridge |
+| IKEA TRÅDFRI | `tradfri` | 5 min | IKEA-Hub kann langsam reagieren |
+| LIFX | `lifx` | 3 min | Lokales UDP/TCP |
+| Nanoleaf | `nanoleaf` | 3 min | Lokales TCP |
+| Yeelight | `yeelight` | 2 min | Lokales TCP |
+| Xiaomi Mi Home | `xiaomi_miio` | 5 min | Lokal + Cloud-Mix |
+| Sonos | `sonos` | 3 min | Lokales Netzwerk |
+| Google Cast | `cast` | 3 min | Lokales Netzwerk |
+| Logitech Media Server | `squeezebox` | 5 min | Server-abhängig |
+| Kodi | `kodi` | 3 min | Lokales Netzwerk |
+| Plex | `plex` | 5 min | Server-abhängig |
+| Sony Bravia TV | `braviatv` | 3 min | Lokales Netzwerk |
+| Samsung TV | `samsungtv` | 3 min | Lokales Netzwerk |
+| LG webOS TV | `webostv` | 3 min | Lokales Netzwerk |
+| Android TV / Google TV | `androidtv` | 3 min | Lokales Netzwerk |
+| Apple TV | `apple_tv` | 3 min | Lokales Netzwerk |
+| Roku | `roku` | 3 min | Lokales Netzwerk |
+| Yamaha MusicCast | `yamaha_musiccast` | 3 min | Lokales Netzwerk |
+| Denon / Marantz AVR | `denon` | 3 min | Lokales Netzwerk |
+| Onkyo / Pioneer AVR | `onkyo` | 3 min | Lokales Netzwerk |
+| Logitech Harmony | `harmony` | 5 min | Hub-basiert |
+| Netatmo | `netatmo` | 10 min | Cloud-Polling, höhere Latenz |
+| Tado | `tado` | 10 min | Cloud-Polling |
+| Daikin | `daikin` | 5 min | Lokal + Cloud-Mix |
+| ecobee | `ecobee` | 10 min | Cloud-Polling |
+| Google Nest | `nest` | 10 min | Cloud-Polling |
+| HomeWizard Energy | `homewizard` | 3 min | Lokales LAN |
+| Tibber | `tibber` | 10 min | Cloud-API |
+| SMA Solar | `sma` | 10 min | Cloud / lokales Modbus |
+| SolarEdge | `solaredge` | 10 min | Cloud-Polling |
+| Fronius | `fronius` | 10 min | Cloud-Polling |
+| Tesla Powerwall | `powerwall` | 5 min | Meist lokal |
+| Nuki Smart Lock | `nuki` | 5 min | BLE-Bridge / Cloud |
+| August Smart Lock | `august` | 5 min | Cloud |
+| Yale Smart Alarm | `yale_smart_alarm` | 5 min | Cloud |
+| Ring | `ring` | 10 min | Cloud-Kamera |
+| Blink | `blink` | 10 min | Cloud-Kamera |
+| Arlo | `arlo` | 10 min | Cloud-Kamera |
+| DoorBird | `doorbird` | 3 min | Lokales LAN |
+| Reolink | `reolink` | 3 min | Lokales LAN |
+| Amcrest | `amcrest` | 3 min | Lokales LAN |
+| Eufy Security | `eufy_security` | 5 min | Cloud |
+| SimpliSafe | `simplisafe` | 10 min | Cloud |
+| Abode | `abode` | 10 min | Cloud |
+| UniFi (Ubiquiti) | `unifi` | 3 min | Lokales LAN |
+| AVM FRITZ!Box | `fritz` | 5 min | Lokales LAN |
+| MikroTik | `mikrotik` | 3 min | Lokales LAN |
+| ASUS Router | `asusrouter` | 3 min | Lokales LAN |
+| Synology NAS | `synology_dsm` | 3 min | Lokales LAN |
+| Viessmann ViCare | `vicare` | 10 min | Cloud |
+| Vaillant (myVaillant) | `vaillant` | 10 min | Cloud |
+| Bosch Smart Home | `bosch_shc` | 5 min | Lokaler Controller |
+| Mitsubishi MelCloud | `melcloud` | 10 min | Cloud |
+| NIBE Wärmepumpe | `nibe_heatpump` | 10 min | Cloud / lokal |
+| Huawei Solar | `huawei_solar` | 5 min | Lokales Modbus |
+| Enphase Envoy | `enphase_envoy` | 5 min | Lokales LAN |
+| GoodWe | `goodwe` | 10 min | Cloud |
+| Growatt | `growatt_server` | 10 min | Cloud |
+| EcoFlow | `ecoflow` | 10 min | Cloud |
+| Roborock | `roborock` | 3 min | Lokal + Cloud |
+| ECOVACS | `ecovacs` | 5 min | Cloud |
+| Neato Robotics | `neato` | 5 min | Cloud |
+| LG ThinQ | `lg_thinq` | 5 min | Cloud |
+| Meross | `meross` | 3 min | Lokal + Cloud |
+| Belkin WeMo | `wemo` | 3 min | Lokales LAN |
+| myQ (Chamberlain / LiftMaster) | `myq` | 5 min | Cloud |
+| Nice G.O. | `nice_go` | 5 min | Cloud |
+| Ecowitt | `ecowitt` | 10 min | Lokal, aber selten kritisch |
+| Ambient Weather Station | `ambient_station` | 10 min | Cloud / lokal |
+| Husqvarna Automower | `husqvarna_automower` | 10 min | Cloud |
+| GARDENA Bluetooth | `gardena_bluetooth` | 20 min | Passives BLE |
+| MQTT | `mqtt` | 5 min | Je nach Gerät anpassen – sehr unterschiedlich |
+| HomeKit Controller | `homekit_controller` | 5 min | Lokales HomeKit |
+| Lutron Caséta | `lutron_caseta` | 3 min | Lokale Bridge |
+| SwitchBot | `switchbot` | 10 min | BLE / Cloud |
+| iRobot Roomba | `roomba` | 5 min | Cloud |
+
+> ⚠️ **Für Entwickler:** Wird ein neues Protokoll in `KNOWN_PROTOCOLS` (`const.py`) hinzugefügt, muss zwingend ein passender Eintrag in `PROTOCOL_DELAY_HINTS` ergänzt werden — und eine neue Zeile in dieser Tabelle in allen fünf Sprachdokumentationen.
+
+---
+
+### Watch-Label – eigene Offline-Indikatoren
+
+Das **Watch-Label**-Feature ermöglicht die Überwachung von *beliebigen* Geräten, die Connection Observer nicht über den normalen `unavailable`-Pfad überwachen kann — zum Beispiel:
+
+- **Passive BLE-Sensoren** (BTHome, GARDENA Bluetooth): keine persistente Verbindung, HA setzt `unavailable` erst nach Stunden
+- **Cloud-Geräte**, die im HA-Status "available" bleiben, obwohl das physische Gerät defekt oder nicht erreichbar ist
+- **Jedes eigene Szenario**, bei dem du einen Binärsensor bauen kannst, der den echten Verbindungsstatus abbildet
+
+#### Funktionsprinzip
+
+1. Erstelle einen **Template-Binärsensor** (oder eine andere binäre Entität), der `on` ist wenn das Gerät offline ist, und `off` wenn es online ist.
+2. Lege in der HA-Label-Verwaltung (**Einstellungen → Labels**) ein Label mit dem exakten Namen an, den du im Experte-Schritt konfiguriert hast (z. B. `offline_anzeige`).
+3. Weise dem Template-Binärsensor dieses Label zu.
+4. Connection Observer erkennt automatisch alle Entitäten mit diesem Label und überwacht ihren Zustand:
+   - `on` → erstellt ein Offline-Ereignis (Protokoll wird als `custom` angezeigt)
+   - `off` → markiert das Gerät als wieder online
+
+#### Beispiel: BTHome-Türsensor – Frischheitsprüfung
+
+Erstelle einen Template-Binärsensor, der prüft, ob das letzte Update mehr als 2 Stunden zurückliegt:
+
+```yaml
+# configuration.yaml
+template:
+  - binary_sensor:
+      - name: "BTHome Tür Offline-Anzeige"
+        unique_id: bthome_tuer_offline_anzeige
+        state: >
+          {{ (now() - states.sensor.bthome_tuer_kontakt.last_updated).total_seconds() > 7200 }}
+        device_class: problem
+```
+
+Dann:
+1. Unter **Einstellungen → Labels** ein Label `offline_anzeige` anlegen
+2. Unter **Einstellungen → Geräte & Dienste → Entitäten** → `binary_sensor.bthome_tuer_offline_anzeige` suchen → Label `offline_anzeige` zuweisen
+3. Im Experte-Schritt von Connection Observer bei **Watch-Label** `offline_anzeige` eintragen
+
+Connection Observer erstellt jetzt ein Offline-Ereignis, sobald der BTHome-Sensor seit über 2 Stunden keinen Wert gemeldet hat — und schließt es automatisch, wenn ein neuer Wert eintrifft.
+
+> **Tipp:** Du kannst mehrere Entitäten mit demselben Watch-Label versehen. Jede wird unabhängig überwacht. Der in Benachrichtigungen angezeigte Gerätename ist der Anzeigename der gelabelten Entität.
+
+---
+
 ### Empfohlene Startkonfiguration
 
 - **Sofortbenachrichtigung:** aus
 - **Zusammenfassung:** ein, täglich um 08:00 Uhr
-- **Verzögerung:** 5 Minuten (vermeidet Fehlalarme durch kurze WLAN-Aussetzer)
+- **Globale Verzögerung:** 5 Minuten (vermeidet Fehlalarme durch kurze WLAN-Aussetzer)
+- **Protokollspezifische Verzögerungen:** „Empfehlungen anwenden" für einen schnellen Start nutzen
 - **Mindestausfallzeit:** 5 Minuten (hält die Zusammenfassung übersichtlich)
 - **Bereich anzeigen:** ein (macht Benachrichtigungen deutlich lesbarer)
 - **HA-Reparaturen-Schwellwert:** 24 Stunden
+- **Watch-Label:** für passive BLE- oder eigene Geräte einrichten, wenn gewünscht
 
 ---
 
