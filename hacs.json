@@ -1,6 +1,5 @@
 {
   "name": "Connection Observer",
   "render_readme": true,
-  "homeassistant": "2023.6.0",
-  "icon": "https://raw.githubusercontent.com/OleSint/ha-connection-observer/main/icon.png"
+  "homeassistant": "2023.6.0"
 }

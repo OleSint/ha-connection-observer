@@ -512,13 +512,13 @@
           "tmpl_sum_ongoing": "Summary line – ongoing offline (empty = default)"
         },
         "data_description": {
-          "tmpl_imm_title": "Variables: '{device_name}' '{protocol}' '{time}' '{area}' '{model}'",
-          "tmpl_imm_msg": "Variables: '{device_name}' '{protocol}' '{time}' '{area}' '{model}'",
-          "tmpl_rec_title": "Variables: '{device_name}'",
-          "tmpl_rec_msg": "Variables: '{device_name}'",
-          "tmpl_sum_title": "Variables: '{count}'",
-          "tmpl_sum_resolved": "Variables: '{device_name}' '{area}' '{protocol}' '{time_offline}' '{time_online}'",
-          "tmpl_sum_ongoing": "Variables: '{device_name}' '{area}' '{protocol}' '{time_offline}'"
+          "tmpl_imm_title": "Variables: device_name, protocol, time, area, model",
+          "tmpl_imm_msg": "Variables: device_name, protocol, time, area, model",
+          "tmpl_rec_title": "Variables: device_name",
+          "tmpl_rec_msg": "Variables: device_name",
+          "tmpl_sum_title": "Variables: count",
+          "tmpl_sum_resolved": "Variables: device_name, area, protocol, time_offline, time_online",
+          "tmpl_sum_ongoing": "Variables: device_name, area, protocol, time_offline"
         }
       },
       "test": {
