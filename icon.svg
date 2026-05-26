@@ -1,35 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <defs>
-    <radialGradient id="bg" cx="38%" cy="33%" r="65%">
-      <stop offset="0%" stop-color="#42A5F5"/>
-      <stop offset="100%" stop-color="#0D47A1"/>
-    </radialGradient>
     <clipPath id="eyeClip">
-      <path d="M 28,128 Q 128,60 228,128 Q 128,196 28,128 Z"/>
+      <path d="M 20,128 Q 128,52 236,128 Q 128,204 20,128 Z"/>
     </clipPath>
   </defs>
 
-  <!-- Background circle -->
-  <circle cx="128" cy="128" r="120" fill="url(#bg)"/>
-
   <!-- Eye whites (subtle fill) -->
-  <path d="M 28,128 Q 128,60 228,128 Q 128,196 28,128 Z"
-        fill="rgba(255,255,255,0.12)"/>
+  <path d="M 20,128 Q 128,52 236,128 Q 128,204 20,128 Z"
+        fill="#E3F2FD"/>
 
   <!-- Iris: concentric rings clipped to eye shape -->
   <g clip-path="url(#eyeClip)">
-    <circle cx="128" cy="128" r="54" fill="none" stroke="white" stroke-width="5" stroke-opacity="0.4"/>
-    <circle cx="128" cy="128" r="38" fill="none" stroke="white" stroke-width="5" stroke-opacity="0.7"/>
-    <circle cx="128" cy="128" r="22" fill="none" stroke="white" stroke-width="5"/>
-    <circle cx="128" cy="128" r="8"  fill="white"/>
+    <circle cx="128" cy="132" r="56" fill="none" stroke="#1565C0" stroke-width="6" stroke-opacity="0.25"/>
+    <circle cx="128" cy="132" r="40" fill="none" stroke="#1565C0" stroke-width="6" stroke-opacity="0.55"/>
+    <circle cx="128" cy="132" r="24" fill="none" stroke="#1565C0" stroke-width="6" stroke-opacity="0.85"/>
+    <circle cx="128" cy="132" r="9"  fill="#0D47A1"/>
   </g>
 
-  <!-- Eye outline (drawn on top) -->
-  <path d="M 28,128 Q 128,60 228,128 Q 128,196 28,128 Z"
-        fill="none" stroke="white" stroke-width="5.5" stroke-linejoin="round"/>
+  <!-- Eye outline -->
+  <path d="M 20,128 Q 128,52 236,128 Q 128,204 20,128 Z"
+        fill="none" stroke="#0D47A1" stroke-width="6" stroke-linejoin="round"/>
 
-  <!-- Glanzpunkt (Highlight) -->
-  <ellipse cx="112" cy="108" rx="10" ry="6"
-           fill="white" fill-opacity="0.55" transform="rotate(-30 112 108)"/>
+  <!-- Glanzpunkt -->
+  <ellipse cx="108" cy="112" rx="9" ry="5.5"
+           fill="white" fill-opacity="0.7" transform="rotate(-30 108 112)"/>
 
 </svg>
