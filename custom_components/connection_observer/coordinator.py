@@ -606,8 +606,13 @@ class ConnectionObserverCoordinator:
                     )
 
         if changed:
-            self._async_notify_listeners()
             await self._save_store()
+
+        # Always notify listeners when there are open events so that
+        # the offline_duration attribute stays up to date in the sensor.
+        has_open = any(ev.reconnected_at is None for ev in self._events)
+        if changed or has_open:
+            self._async_notify_listeners()
 
     # ------------------------------------------------------------------
     # Notifications
