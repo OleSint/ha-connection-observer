@@ -58,6 +58,12 @@ _LOGGER = logging.getLogger(__name__)
 
 EVENT_RETENTION_DAYS = 30
 
+# Watch-label state sets: accept binary_sensor ("on"/"off") as well as template
+# sensor variants ("True"/"False", "1"/"0") so users don't need to worry about
+# whether they created a binary_sensor or a regular sensor template.
+_WATCH_OFFLINE: frozenset[str] = frozenset({"on", "true", "1"})
+_WATCH_ONLINE:  frozenset[str] = frozenset({"off", "false", "0"})
+
 # ---------------------------------------------------------------------------
 # Built-in message strings per language
 # Variables available per key:
@@ -328,11 +334,15 @@ class ConnectionObserverCoordinator:
 
         @callback
         def _on_ha_started(_event: Event) -> None:
+            # The one-time listener has fired; HA already removed it internally.
+            # Remove the stale handle from _unsub so our cleanup loop doesn't try
+            # to call it again, which would raise a ValueError in HA's core.
+            if _unsub_handle in self._unsub:
+                self._unsub.remove(_unsub_handle)
             async_call_later(self.hass, STARTUP_GRACE_SECONDS, self._mark_startup_complete)
 
-        self._unsub.append(
-            self.hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _on_ha_started)
-        )
+        _unsub_handle = self.hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _on_ha_started)
+        self._unsub.append(_unsub_handle)
 
     @callback
     def _mark_startup_complete(self, _now: Any) -> None:
@@ -420,14 +430,18 @@ class ConnectionObserverCoordinator:
             return
 
         # ── Watch-label path ────────────────────────────────────────────────
-        # Binary sensors (or any entity) labelled with CONF_WATCH_LABEL signal
-        # offline/online via state: "on" = offline indicator active, "off" = back.
+        # Any entity labelled with CONF_WATCH_LABEL signals offline/online via
+        # its state.  binary_sensor produces "on"/"off"; a template sensor may
+        # produce "True"/"False" or "1"/"0" — all variants are accepted so that
+        # users don't have to worry about the exact entity type.
         if entity_id in self._watch_label_entities:
             going_offline = (
-                new_state.state == "on" and old_state.state != "on"
+                new_state.state.lower() in _WATCH_OFFLINE
+                and old_state.state.lower() not in _WATCH_OFFLINE
             )
             coming_back = (
-                new_state.state == "off" and old_state.state != "off"
+                new_state.state.lower() in _WATCH_ONLINE
+                and old_state.state.lower() not in _WATCH_ONLINE
             )
             if going_offline:
                 self._on_disconnect(entity_id, "custom")
@@ -556,10 +570,10 @@ class ConnectionObserverCoordinator:
                     changed = True
                     async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
                     continue
-                # Watch-label entities signal "back online" via state "off" (not "unavailable")
+                # Watch-label entities signal "back online" via off/false/0 (not "unavailable")
                 is_watch = ev.trigger_entity_id in self._watch_label_entities
                 recovered = (
-                    state.state != "on"
+                    state.state.lower() not in _WATCH_OFFLINE
                     if is_watch
                     else state.state != "unavailable"
                 )
