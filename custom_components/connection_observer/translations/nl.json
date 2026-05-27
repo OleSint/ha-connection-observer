@@ -512,13 +512,13 @@
           "tmpl_sum_ongoing": "Samenvatting – regel nog offline (leeg = standaard)"
         },
         "data_description": {
-          "tmpl_imm_title": "Variabelen: '{device_name}' '{protocol}' '{time}' '{area}' '{model}'",
-          "tmpl_imm_msg": "Variabelen: '{device_name}' '{protocol}' '{time}' '{area}' '{model}'",
-          "tmpl_rec_title": "Variabelen: '{device_name}'",
-          "tmpl_rec_msg": "Variabelen: '{device_name}'",
-          "tmpl_sum_title": "Variabelen: '{count}'",
-          "tmpl_sum_resolved": "Variabelen: '{device_name}' '{area}' '{protocol}' '{time_offline}' '{time_online}'",
-          "tmpl_sum_ongoing": "Variabelen: '{device_name}' '{area}' '{protocol}' '{time_offline}'"
+          "tmpl_imm_title": "Variabelen: device_name, protocol, time, area, model",
+          "tmpl_imm_msg": "Variabelen: device_name, protocol, time, area, model",
+          "tmpl_rec_title": "Variabelen: device_name",
+          "tmpl_rec_msg": "Variabelen: device_name",
+          "tmpl_sum_title": "Variabelen: count",
+          "tmpl_sum_resolved": "Variabelen: device_name, area, protocol, time_offline, time_online",
+          "tmpl_sum_ongoing": "Variabelen: device_name, area, protocol, time_offline"
         }
       },
       "test": {
