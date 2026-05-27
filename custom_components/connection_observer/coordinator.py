@@ -394,26 +394,43 @@ class ConnectionObserverCoordinator:
             )
         )
 
-    def _setup_watch_label_listener(self) -> None:
+    def _refresh_watch_label_entities(self) -> None:
         """Scan entity registry for entities carrying the watch label and cache them.
 
-        Called at startup and after every options-update so that the set stays
-        in sync when the user changes the label name or adds/removes the label
-        from entities in the HA UI.
+        Comparison is case-insensitive so that label IDs stored in lower-case by
+        HA (e.g. 'observer_watch') match whatever the user typed in the config
+        field (e.g. 'Observer_watch').
         """
         label: str = self._cfg.get(CONF_WATCH_LABEL, "").strip()
         self._watch_label_entities.clear()
         if not label:
             return
+        label_lower = label.lower()
         er = async_get_entity_registry(self.hass)
         for entry in er.entities.values():
-            if label in (entry.labels or set()):
+            if any(lbl.lower() == label_lower for lbl in (entry.labels or set())):
                 self._watch_label_entities.add(entry.entity_id)
         if self._watch_label_entities:
             _LOGGER.debug(
                 "Connection Observer: watch-label '%s' matched %d entity/entities: %s",
                 label, len(self._watch_label_entities), self._watch_label_entities,
             )
+
+    def _setup_watch_label_listener(self) -> None:
+        """Initial scan + subscribe to entity-registry changes to keep cache live.
+
+        This ensures that entities labelled after CO was last configured are
+        picked up automatically without requiring an options-save or HA restart.
+        """
+        self._refresh_watch_label_entities()
+
+        @callback
+        def _on_registry_updated(_event: Event) -> None:
+            self._refresh_watch_label_entities()
+
+        self._unsub.append(
+            self.hass.bus.async_listen("entity_registry_updated", _on_registry_updated)
+        )
 
     # ------------------------------------------------------------------
     # State change
