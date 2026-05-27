@@ -461,7 +461,7 @@ class ConnectionObserverCoordinator:
                 and old_state.state.lower() not in _WATCH_ONLINE
             )
             if going_offline:
-                self._on_disconnect(entity_id, "custom")
+                self._on_disconnect(entity_id, self._get_protocol_for_watch_entity(entity_id))
             elif coming_back:
                 self._on_reconnect(entity_id)
             # Watch-label entities are handled exclusively here; skip normal flow.
@@ -806,6 +806,27 @@ class ConnectionObserverCoordinator:
     @property
     def _cfg(self) -> dict[str, Any]:
         return {**self.entry.data, **self.entry.options}
+
+    def _get_protocol_for_watch_entity(self, entity_id: str) -> str:
+        """Return the monitored protocol for the device that owns the watch-label entity.
+
+        Looks up the device the watch-label entity belongs to, then searches all
+        other entities on that device for one whose platform matches a monitored
+        protocol.  Falls back to "custom" if no match is found.
+        """
+        monitored: list[str] = self._cfg.get(CONF_PROTOCOLS, [])
+        er = async_get_entity_registry(self.hass)
+        dr = async_get_device_registry(self.hass)
+        entry = er.async_get(entity_id)
+        if not entry or not entry.device_id:
+            return "custom"
+        device = dr.async_get(entry.device_id)
+        if not device:
+            return "custom"
+        for e in er.entities.get_entries_for_device_id(entry.device_id):
+            if e.platform in monitored:
+                return e.platform
+        return "custom"
 
     def _get_entity_protocol(self, entity_id: str) -> str | None:
         er = async_get_entity_registry(self.hass)
