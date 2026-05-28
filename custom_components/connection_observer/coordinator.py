@@ -242,6 +242,7 @@ class ConnectionObserverCoordinator:
         self._last_notified: dict[str, datetime] = {}
         self._listeners: list[Callable[[], None]] = []
         self._watch_label_entities: set[str] = set()
+        self._active_repairs: set[str] = set()
 
     # ------------------------------------------------------------------
     # Public API
@@ -272,6 +273,7 @@ class ConnectionObserverCoordinator:
     async def async_clear_device(self, entity_id: str) -> None:
         device_key, _ = self._resolve_device(entity_id)
         async_delete_issue(self.hass, DOMAIN, _repair_issue_id(device_key))
+        self._active_repairs.discard(device_key)
         before = len(self._events)
         self._events = [ev for ev in self._events if ev.device_key != device_key]
         if len(self._events) != before:
@@ -283,6 +285,7 @@ class ConnectionObserverCoordinator:
         for ev in self._events:
             if ev.reconnected_at is None:
                 async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
+                self._active_repairs.discard(ev.device_key)
         self._events.clear()
         self._last_summary = None
         await self._save_store()
@@ -536,6 +539,7 @@ class ConnectionObserverCoordinator:
                 device_name = ev.device_name
                 changed = True
                 async_delete_issue(self.hass, DOMAIN, _repair_issue_id(device_key))
+                self._active_repairs.discard(device_key)
                 _LOGGER.info("Connection Observer: %s is back online", ev.device_name)
                 break
         if changed:
@@ -582,6 +586,7 @@ class ConnectionObserverCoordinator:
             if ev.reconnected_at is not None:
                 # Closed event – make sure repair issue is gone
                 async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
+                self._active_repairs.discard(ev.device_key)
                 continue
 
             # Check if device actually came back (missed state_changed)
@@ -593,6 +598,7 @@ class ConnectionObserverCoordinator:
                     ev.reconnected_at = dt_util.now()
                     changed = True
                     async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
+                    self._active_repairs.discard(ev.device_key)
                     continue
                 # Watch-label entities signal "back online" via off/false/0 (not "unavailable")
                 is_watch = ev.trigger_entity_id in self._watch_label_entities
@@ -606,12 +612,13 @@ class ConnectionObserverCoordinator:
                     ev.reconnected_at = dt_util.now()
                     changed = True
                     async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
+                    self._active_repairs.discard(ev.device_key)
                     if self._cfg.get(CONF_NOTIFY_RECONNECT):
                         self.hass.async_create_task(self._send_reconnect(ev.device_name))
                     continue
 
-            # Create HA Repairs entry if offline long enough
-            if repairs_hours > 0:
+            # Create HA Repairs entry if offline long enough (only once per event)
+            if repairs_hours > 0 and ev.device_key not in self._active_repairs:
                 offline_duration = dt_util.now() - ev.disconnected_at
                 if offline_duration >= timedelta(hours=repairs_hours):
                     since_str = ev.disconnected_at.strftime("%Y-%m-%d %H:%M")
@@ -628,6 +635,7 @@ class ConnectionObserverCoordinator:
                             "since": since_str,
                         },
                     )
+                    self._active_repairs.add(ev.device_key)
 
         if changed:
             await self._save_store()
