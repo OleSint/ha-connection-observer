@@ -4,7 +4,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/OleSint/ha-connection-observer)](https://github.com/OleSint/ha-connection-observer/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-📖 **[English](docs/DOCUMENTATION.md)** · **[Deutsch](docs/DOKUMENTATION.md)** · **[Français](docs/DOCUMENTATION_FR.md)** · **[Nederlands](docs/DOCUMENTATION_NL.md)** · **[Español](docs/DOCUMENTATION_ES.md)**
+📖 **[English](docs/DOCUMENTATION_EN.md)** · **[Deutsch](docs/DOCUMENTATION_DE.md)** · **[Français](docs/DOCUMENTATION_FR.md)** · **[Nederlands](docs/DOCUMENTATION_NL.md)** · **[Español](docs/DOCUMENTATION_ES.md)**
 
 > **Deutsch weiter unten** ↓
 
