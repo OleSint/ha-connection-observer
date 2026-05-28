@@ -506,8 +506,15 @@ class ConnectionObserverCoordinator:
                          _dn: str = device_name, _proto: str = protocol) -> None:
                 self._pending_disconnects.pop(_dk, None)
                 state = self.hass.states.get(_eid)
-                if state and state.state == "unavailable":
-                    self._create_event(_dk, _dn, _eid, _proto)
+                if state:
+                    is_watch = _eid in self._watch_label_entities
+                    still_offline = (
+                        state.state.lower() in _WATCH_OFFLINE
+                        if is_watch
+                        else state.state == "unavailable"
+                    )
+                    if still_offline:
+                        self._create_event(_dk, _dn, _eid, _proto)
             cancel = async_call_later(self.hass, alert_delay * 60, _confirm)
             self._pending_disconnects[device_key] = cancel
         else:
@@ -814,18 +821,18 @@ class ConnectionObserverCoordinator:
         other entities on that device for one whose platform matches a monitored
         protocol.  Falls back to "custom" if no match is found.
         """
-        monitored: list[str] = self._cfg.get(CONF_PROTOCOLS, [])
-        er = async_get_entity_registry(self.hass)
-        dr = async_get_device_registry(self.hass)
-        entry = er.async_get(entity_id)
-        if not entry or not entry.device_id:
-            return "custom"
-        device = dr.async_get(entry.device_id)
-        if not device:
-            return "custom"
-        for e in er.entities.get_entries_for_device_id(entry.device_id):
-            if e.platform in monitored:
-                return e.platform
+        try:
+            monitored: list[str] = self._cfg.get(CONF_PROTOCOLS, [])
+            er = async_get_entity_registry(self.hass)
+            entry = er.async_get(entity_id)
+            if not entry or not entry.device_id:
+                return "custom"
+            device_id = entry.device_id
+            for e in er.entities.values():
+                if e.device_id == device_id and e.platform in monitored:
+                    return e.platform
+        except Exception:  # noqa: BLE001
+            _LOGGER.debug("Connection Observer: could not resolve protocol for %s", entity_id)
         return "custom"
 
     def _get_entity_protocol(self, entity_id: str) -> str | None:
