@@ -105,6 +105,8 @@ Der Assistent zeigt nur Integrationsfamilien an, die in deiner HA-Instanz tatsä
 > **Tipp:** Du kannst Protokolle jederzeit hinzufügen oder entfernen. Neu hinzugefügte Geräte eines ausgewählten Protokolls werden automatisch erfasst.
 
 > **Zigbee2MQTT-Nutzer:** Zigbee2MQTT-Geräte erscheinen in HA unter dem `mqtt`-Integrations-Domain — es gibt keinen separaten Zigbee2MQTT-Eintrag. Wähle **MQTT**, um sie zu überwachen. Beachte dabei, dass dadurch auch alle anderen MQTT-basierten Geräte erfasst werden (z.B. Tasmota, eigene Sensoren). Für eine feinere Steuerung ist eine Label-basierte Filterung in einer zukünftigen Version geplant.
+>
+> ⚠️ **Wichtig:** Connection Observer erkennt Geräte nur, wenn HA sie auf `unavailable` setzt. Zigbee2MQTT tut dies standardmäßig **nicht** — die Verfügbarkeitsprüfung muss erst aktiviert werden: **Zigbee2MQTT → Einstellungen → Verfügbarkeit → aktiviert**. Ohne diese Einstellung bleibt Connection Observer für Z2M-Geräte wirkungslos.
 
 ### Schritt 2 – Benachrichtigungen
 
@@ -650,5 +652,6 @@ Der Watchdog läuft alle 5 Minuten und schließt das Ereignis automatisch ab. Du
 - **Nur-Cloud-Integrationen:** Geräte, die ausschließlich über einen Cloud-Dienst verbunden sind, werden möglicherweise nicht erkannt, wenn die Integration bei fehlender Cloud-Verbindung keinen `unavailable`-Status setzt.
 - **Polling-Integrationen:** Eine Verbindungsunterbrechung wird erst nach dem nächsten Abfragezyklus erkannt, was zu einer kurzen Verzögerung führen kann.
 - **Passive BLE-Geräte (BTHome etc.):** Bluetooth-Low-Energy-Sensoren wie BTHome-Tür-/Fenstersensoren halten keine dauerhafte Verbindung — sie senden periodische Advertisements. Geht ein solches Gerät offline (z. B. Batterie entfernt), setzt Home Assistant die Entitäten erst nach seinem eigenen internen Timeout auf `unavailable` — das kann mehrere Stunden dauern. Connection Observer kann erst reagieren, wenn HA `unavailable` meldet. Echtzeitüberwachung ist bei passiven BLE-Geräten daher strukturell nicht möglich. Sie unterscheiden sich grundlegend von WLAN-Geräten.
+- **Zigbee2MQTT – Verfügbarkeitsprüfung erforderlich:** Connection Observer reagiert auf den `unavailable`-Status von Entitäten. Zigbee2MQTT setzt diesen Status standardmäßig **nicht** — die Verfügbarkeitsprüfung muss in Z2M aktiviert werden: **Einstellungen → Verfügbarkeit → aktiviert**. Ohne diese Einstellung werden Z2M-Geräte nicht erkannt.
 - **Nur eine Instanz:** Connection Observer unterstützt eine einzige Integrationsinstanz pro HA-Installation.
 - **30-Tage-Ereignisaufbewahrung:** Ereignisse, die älter als 30 Tage sind, werden automatisch aus dem Speicher entfernt.

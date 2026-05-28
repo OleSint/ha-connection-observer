@@ -106,6 +106,8 @@ El asistente solo muestra las familias de integración que están realmente conf
 
 > **Usuarios de Zigbee2MQTT:** Los dispositivos Zigbee2MQTT aparecen en HA bajo el dominio de integración `mqtt` — no existe una entrada separada para Zigbee2MQTT. Selecciona **MQTT** para monitorizarlos. Ten en cuenta que esto también incluirá el resto de dispositivos MQTT de tu instalación (p. ej. Tasmota, sensores personalizados). Para un control más preciso, el filtrado por etiquetas (labels) está previsto para una versión futura.
 
+> ⚠️ **Importante:** Connection Observer solo puede detectar dispositivos cuando HA los pone en `unavailable`. Zigbee2MQTT **no** lo hace por defecto — primero debes activar las comprobaciones de disponibilidad: **Zigbee2MQTT → Ajustes → Disponibilidad → activado**. Sin este ajuste, Connection Observer no puede detectar los dispositivos Z2M sin conexión.
+
 ### Paso 2 – Notificaciones
 
 **Configura cómo y cuándo recibir alertas.**
@@ -648,5 +650,6 @@ El watchdog se ejecuta cada 5 minutos y cerrará el evento automáticamente. Tam
 - **Integraciones solo en la nube:** Es posible que los dispositivos conectados exclusivamente a través de un servicio en la nube no se detecten si la integración no establece `unavailable` cuando la nube no está disponible.
 - **Integraciones por sondeo:** Una desconexión puede detectarse solo después del siguiente ciclo de sondeo.
 - **Dispositivos BLE pasivos (BTHome etc.):** Los sensores Bluetooth Low Energy como los sensores de puerta/ventana BTHome no mantienen una conexión persistente — emiten anuncios periódicos. Si un dispositivo de este tipo se desconecta (p. ej. se retira la batería), Home Assistant solo establece sus entidades como `unavailable` tras su propio tiempo de espera interno, que puede ser de varias horas. Connection Observer solo puede reaccionar cuando HA informa `unavailable`. Por tanto, la monitorización en tiempo real no es estructuralmente posible para dispositivos BLE pasivos, a diferencia de los dispositivos WiFi. **Solución desde v1.1.0:** Usa la función [Watch label](#watch-label--indicadores-de-desconexión-personalizados) con un sensor binario de plantilla que monitorice `last_updated` — esto permite la detección en cuestión de minutos.
+- **Zigbee2MQTT – comprobación de disponibilidad obligatoria:** Connection Observer reacciona al estado `unavailable` de las entidades. Zigbee2MQTT **no** establece este estado por defecto — las comprobaciones de disponibilidad deben activarse en Z2M: **Ajustes → Disponibilidad → activado**. Sin este ajuste, los dispositivos Z2M no se detectarán.
 - **Una sola instancia:** Connection Observer admite una única instancia de integración por instalación de HA.
 - **Retención de eventos 30 días:** Los eventos con más de 30 días se eliminan automáticamente del almacenamiento.

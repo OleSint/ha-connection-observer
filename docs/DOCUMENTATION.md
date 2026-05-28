@@ -111,6 +111,8 @@ The wizard only shows integration families that are actually configured in your 
 > **Tip:** You can always come back and add or remove protocols later. Newly added devices in a selected protocol are automatically picked up — no reconfiguration needed.
 
 > **Zigbee2MQTT users:** Zigbee2MQTT devices appear in HA under the `mqtt` integration domain — there is no separate Zigbee2MQTT entry. Select **MQTT** to monitor them. Note that this will also include any other MQTT-based devices in your setup (e.g. Tasmota, custom sensors). For finer control, label-based filtering is planned for a future release.
+>
+> ⚠️ **Important:** Connection Observer only detects devices when HA marks them as `unavailable`. Zigbee2MQTT does **not** do this by default — availability checks must be enabled: **Zigbee2MQTT → Settings → Availability → enabled**. Without this setting, Connection Observer cannot detect Z2M devices going offline.
 
 ### Step 2 – Notifications
 

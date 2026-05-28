@@ -106,6 +106,8 @@ De wizard toont alleen integratifamilies die daadwerkelijk zijn geconfigureerd i
 
 > **Zigbee2MQTT-gebruikers:** Zigbee2MQTT-apparaten verschijnen in HA onder het `mqtt`-integratiedomein — er is geen apart Zigbee2MQTT-item. Selecteer **MQTT** om ze te bewaken. Let op: dit omvat ook alle andere MQTT-gebaseerde apparaten in je installatie (bijv. Tasmota, eigen sensoren). Voor fijnere controle is labelgebaseerde filtering gepland voor een toekomstige versie.
 
+> ⚠️ **Belangrijk:** Connection Observer kan apparaten alleen detecteren wanneer HA ze op `unavailable` zet. Zigbee2MQTT doet dit standaard **niet** — beschikbaarheidscontroles moeten eerst worden ingeschakeld: **Zigbee2MQTT → Instellingen → Beschikbaarheid → ingeschakeld**. Zonder deze instelling kan Connection Observer Z2M-apparaten niet detecteren.
+
 ### Stap 2 – Meldingen
 
 **Stel in hoe en wanneer je waarschuwingen ontvangt.**
@@ -648,5 +650,6 @@ De watchdog draait elke 5 minuten en sluit de gebeurtenis automatisch. Je kunt o
 - **Alleen-cloud integraties:** Apparaten die uitsluitend via een clouddienst verbinden, worden mogelijk niet gedetecteerd als de integratie geen `unavailable`-status instelt bij cloudproblemen.
 - **Poll-integraties:** Een verbreking wordt pas gedetecteerd na de volgende pollcyclus.
 - **Passieve BLE-apparaten (BTHome etc.):** Bluetooth Low Energy-sensoren zoals BTHome deur-/raamsensoren onderhouden geen persistente verbinding — ze zenden periodieke berichten uit. Als zo'n apparaat offline gaat (bijv. batterij verwijderd), stelt Home Assistant de entiteiten pas op `unavailable` na een eigen interne time-out, die enkele uren kan bedragen. Connection Observer kan pas reageren zodra HA `unavailable` meldt. Realtime bewaking is voor passieve BLE-apparaten structureel niet mogelijk, in tegenstelling tot WiFi-apparaten. **Oplossing vanaf v1.1.0:** Gebruik de [Watch label](#watch-label--aangepaste-offline-indicatoren)-functie met een template binaire sensor die `last_updated` bewaakt — dit maakt detectie binnen enkele minuten mogelijk.
+- **Zigbee2MQTT – beschikbaarheidscontrole vereist:** Connection Observer reageert op de `unavailable`-status van entiteiten. Zigbee2MQTT stelt deze status standaard **niet** in — beschikbaarheidscontroles moeten worden ingeschakeld in Z2M: **Instellingen → Beschikbaarheid → ingeschakeld**. Zonder deze instelling worden Z2M-apparaten niet gedetecteerd.
 - **Slechts één instantie:** Connection Observer ondersteunt één integratie-instantie per HA-installatie.
 - **30 dagen bewaring:** Gebeurtenissen ouder dan 30 dagen worden automatisch verwijderd.
