@@ -12,8 +12,8 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_ALERT_DELAY,
     CONF_COOLDOWN,
+    CONF_EXCLUDED_DEVICES,
     CONF_EXCLUDED_DOMAINS,
-    CONF_EXCLUDED_ENTITIES,
     CONF_INCLUDE_AREA,
     CONF_INCLUDE_DEVICE_INFO,
     CONF_LANGUAGE,
@@ -324,8 +324,8 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(CONF_INCLUDE_AREA, default=False): selector.BooleanSelector(),
                     vol.Optional(CONF_INCLUDE_DEVICE_INFO, default=False): selector.BooleanSelector(),
                     vol.Optional(CONF_EXCLUDED_DOMAINS, default=[]): _DOMAIN_SELECTOR,
-                    vol.Optional(CONF_EXCLUDED_ENTITIES, default=[]): selector.EntitySelector(
-                        selector.EntitySelectorConfig(multiple=True)
+                    vol.Optional(CONF_EXCLUDED_DEVICES, default=[]): selector.DeviceSelector(
+                        selector.DeviceSelectorConfig(multiple=True)
                     ),
                 }
             ),
@@ -497,10 +497,10 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                         default=cur.get(CONF_EXCLUDED_DOMAINS, []),
                     ): _DOMAIN_SELECTOR,
                     vol.Optional(
-                        CONF_EXCLUDED_ENTITIES,
-                        default=cur.get(CONF_EXCLUDED_ENTITIES, []),
-                    ): selector.EntitySelector(
-                        selector.EntitySelectorConfig(multiple=True)
+                        CONF_EXCLUDED_DEVICES,
+                        default=cur.get(CONF_EXCLUDED_DEVICES, []),
+                    ): selector.DeviceSelector(
+                        selector.DeviceSelectorConfig(multiple=True)
                     ),
                     vol.Optional(
                         CONF_REPAIRS_THRESHOLD,

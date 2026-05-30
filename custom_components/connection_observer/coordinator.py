@@ -24,6 +24,7 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_ALERT_DELAY,
     CONF_COOLDOWN,
+    CONF_EXCLUDED_DEVICES,
     CONF_EXCLUDED_DOMAINS,
     CONF_EXCLUDED_ENTITIES,
     CONF_INCLUDE_AREA,
@@ -243,6 +244,7 @@ class ConnectionObserverCoordinator:
         self._listeners: list[Callable[[], None]] = []
         self._watch_label_entities: set[str] = set()
         self._active_repairs: set[str] = set()
+        self._excluded_device_ids: set[str] = set()
 
     # ------------------------------------------------------------------
     # Public API
@@ -302,6 +304,7 @@ class ConnectionObserverCoordinator:
         self._setup_summary_scheduler()
         self._setup_watchdog()
         self._setup_watch_label_listener()
+        self._refresh_excluded_devices()
 
     async def async_unload(self) -> None:
         for cancel_fn in self._pending_disconnects.values():
@@ -321,10 +324,12 @@ class ConnectionObserverCoordinator:
         self._unsub.clear()
         self._startup_complete = True
         self._watch_label_entities.clear()
+        self._excluded_device_ids.clear()
         self._setup_state_listener()
         self._setup_summary_scheduler()
         self._setup_watchdog()
         self._setup_watch_label_listener()
+        self._refresh_excluded_devices()
 
     # ------------------------------------------------------------------
     # Setup
@@ -435,6 +440,26 @@ class ConnectionObserverCoordinator:
             self.hass.bus.async_listen("entity_registry_updated", _on_registry_updated)
         )
 
+    def _refresh_excluded_devices(self) -> None:
+        """Build a set of excluded device IDs from config.
+
+        New configs store device IDs directly (CONF_EXCLUDED_DEVICES).
+        Legacy configs stored entity IDs (CONF_EXCLUDED_ENTITIES) — those are
+        migrated on the fly by resolving their device IDs.
+        """
+        self._excluded_device_ids.clear()
+        # New: device IDs stored directly
+        for device_id in self._cfg.get(CONF_EXCLUDED_DEVICES, []):
+            self._excluded_device_ids.add(device_id)
+        # Legacy migration: entity IDs → resolve to device IDs
+        legacy: list[str] = self._cfg.get(CONF_EXCLUDED_ENTITIES, [])
+        if legacy:
+            er = async_get_entity_registry(self.hass)
+            for eid in legacy:
+                entry = er.async_get(eid)
+                if entry and entry.device_id:
+                    self._excluded_device_ids.add(entry.device_id)
+
     # ------------------------------------------------------------------
     # State change
     # ------------------------------------------------------------------
@@ -476,8 +501,12 @@ class ConnectionObserverCoordinator:
             return
         if entity_domain in self._cfg.get(CONF_EXCLUDED_DOMAINS, []):
             return
-        if entity_id in self._cfg.get(CONF_EXCLUDED_ENTITIES, []):
-            return
+        # Device exclusion: skip all entities of an excluded device.
+        if self._excluded_device_ids:
+            er = async_get_entity_registry(self.hass)
+            entry = er.async_get(entity_id)
+            if entry and entry.device_id and entry.device_id in self._excluded_device_ids:
+                return
         protocol = self._get_entity_protocol(entity_id)
         if not protocol or protocol not in self._cfg.get(CONF_PROTOCOLS, []):
             return

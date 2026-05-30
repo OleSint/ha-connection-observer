@@ -26,7 +26,7 @@
 - **Minimum offline duration** – opt-in: suppress short blips from the summary without losing them
 - **Room / area** – opt-in: include the HA area name in notifications
 - **Manufacturer & model** – opt-in: include device info in immediate notifications
-- **Per-entity exclusions** – exclude specific noisy entities from monitoring
+- **Device exclusions** – exclude specific devices from monitoring entirely
 - **Domain exclusions** – exclude entire entity domains (e.g. `sensor`, `button`) from monitoring; `device_tracker` is always excluded automatically
 - **Per-protocol alert delays** *(v1.1.0)* – set individual alert delays per integration family; use "Apply recommended delays" for a one-click starting point
 - **Watch label – custom offline indicators** *(v1.1.0)* – label any HA entity (e.g. a template binary sensor) to monitor devices that never go `unavailable`, such as passive BLE sensors (BTHome, GARDENA Bluetooth)
@@ -89,7 +89,7 @@ Only integrations that are actually configured in your HA instance appear as opt
 6. **Step 4 – Advanced** *(all optional, 0 = disabled)*:
    - Alert delay, cooldown, minimum offline duration
    - Room/area and device info in notifications
-   - Excluded entities
+   - Excluded devices
 
 All settings — plus notification templates and the HA Repairs threshold — can be changed later via the **Configure** button on the integration card.
 
@@ -191,7 +191,7 @@ Im Setup-Assistenten erscheinen nur Integrationen, die in der jeweiligen HA-Inst
 6. **Schritt 4 – Erweitert** *(alle Felder optional, 0 = deaktiviert)*:
    - Verzögerung, Cooldown, Mindestausfallzeit
    - Raum/Bereich und Geräteinformationen in Benachrichtigungen
-   - Ausgeschlossene Entitäten
+   - Ausgeschlossene Geräte
 7. **Schritt 5 – Experte** *(optional)*:
    - Protokollspezifische Verzögerungen (oder „Empfohlene Verzögerungen anwenden")
    - Watch-Label für benutzerdefinierte Offline-Indikatoren

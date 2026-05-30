@@ -142,7 +142,7 @@ De **globale vertraging** die hier wordt ingesteld, geldt voor alle protocollen,
 | **Ruimte / zone opnemen** | HA-zonenaam weergeven in meldingen. Standaard: **uit**. |
 | **Fabrikant & model opnemen** | Apparaatinformatie weergeven. Standaard: **uit**. |
 | **Uitgesloten entiteitsdomeinen** | Sluit volledige entiteitsdomeinen uit (bijv. `sensor`, `button`). `device_tracker`-entiteiten worden altijd automatisch uitgesloten. |
-| **Uitgesloten entiteiten** | Lijst van specifieke entiteiten die worden uitgesloten van bewaking. |
+| **Uitgesloten apparaten** | Lijst van specifieke apparaten die volledig worden uitgesloten van bewaking. |
 
 ### Stap 5 – Expert
 
@@ -608,7 +608,7 @@ Selecteer meerdere diensten in het meldingsdienstveld. Alle diensten ontvangen e
 
 ### Een specifieke entiteit uitsluiten
 
-Voeg deze toe aan de lijst *Uitgesloten entiteiten* in de geavanceerde instellingen. De andere entiteiten van het apparaat blijven bewaakt.
+Voeg het toe aan de lijst *Uitgesloten apparaten* in de geavanceerde instellingen. Alle entiteiten van dat apparaat worden dan genegeerd.
 
 ---
 

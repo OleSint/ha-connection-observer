@@ -142,7 +142,7 @@ Le **délai d'alerte global** défini ici s'applique à tous les protocoles, sau
 | **Inclure la pièce / zone** | Afficher le nom de la zone HA dans les notifications. Par défaut : **désactivé**. |
 | **Inclure fabricant & modèle** | Afficher les informations de l'appareil. Par défaut : **désactivé**. |
 | **Domaines d'entités exclus** | Exclure des domaines d'entités entiers de la surveillance (ex. `sensor`, `button`). Les entités `device_tracker` sont toujours exclues automatiquement. |
-| **Entités exclues** | Liste d'entités spécifiques à exclure de la surveillance. |
+| **Appareils exclus** | Liste d'appareils spécifiques à exclure entièrement de la surveillance. |
 
 ### Étape 5 – Expert
 
@@ -606,7 +606,7 @@ Sélectionnez plusieurs services dans le champ de service de notification. Tous 
 
 ### Exclure une entité spécifique
 
-Ajoutez-la à la liste *Entités exclues* dans les paramètres avancés. Les autres entités de l'appareil restent surveillées.
+Ajoutez-le à la liste *Appareils exclus* dans les paramètres avancés. Toutes les entités de l'appareil seront ignorées.
 
 ---
 

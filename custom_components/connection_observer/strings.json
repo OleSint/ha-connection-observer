@@ -38,7 +38,7 @@
           "include_area": "Include room / area in notifications",
           "include_device_info": "Include manufacturer & model in notifications",
           "excluded_domains": "Excluded entity domains (e.g. sensor, button)",
-          "excluded_entities": "Excluded entities (optional)"
+          "excluded_devices": "Excluded devices (optional)"
         },
         "data_description": {
           "alert_delay": "0 = instant. This is the default for all protocols unless overridden in the next step."
@@ -288,7 +288,7 @@
           "include_area": "Include room / area in notifications",
           "include_device_info": "Include manufacturer & model in notifications",
           "excluded_domains": "Excluded entity domains (e.g. sensor, button)",
-          "excluded_entities": "Excluded entities",
+          "excluded_devices": "Excluded devices",
           "repairs_threshold": "HA Repairs issue after N hours offline (0 = disabled)"
         },
         "data_description": {

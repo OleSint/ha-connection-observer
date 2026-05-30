@@ -142,7 +142,7 @@ Die hier eingestellte **globale Verzögerung** gilt für alle Protokolle, sofern
 | **Raum / Bereich anzeigen** | HA-Bereichsname in Benachrichtigungen einblenden. Standard: **aus**. |
 | **Hersteller & Modell anzeigen** | Geräteinformationen in Sofortmeldungen einblenden. Standard: **aus**. |
 | **Ausgeschlossene Entitätsdomänen** | Ganze Entitätsdomänen von der Überwachung ausschließen (z. B. `sensor`, `button`). Aus der Liste auswählen oder eigene Domäne eingeben. `device_tracker`-Entitäten werden immer automatisch ignoriert und müssen hier nicht eingetragen werden. |
-| **Ausgeschlossene Entitäten** | Liste von Entitäten, die von der Überwachung ausgenommen werden. |
+| **Ausgeschlossene Geräte** | Liste von Geräten, die vollständig von der Überwachung ausgenommen werden. |
 
 ### Schritt 5 – Experte
 
@@ -608,9 +608,9 @@ action:
 
 Wähle mehrere Dienste im Benachrichtigungsdienst-Feld aus. Alle Dienste erhalten jede Benachrichtigung gleichzeitig.
 
-### Entität ausschließen
+### Gerät ausschließen
 
-Füge sie zur Liste *Ausgeschlossene Entitäten* in den Erweitert-Einstellungen hinzu. Die anderen Entitäten des Geräts werden weiter überwacht.
+Füge es zur Liste *Ausgeschlossene Geräte* in den Erweitert-Einstellungen hinzu. Alle Entitäten des Geräts werden dann ignoriert.
 
 ---
 

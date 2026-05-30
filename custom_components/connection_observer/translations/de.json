@@ -38,7 +38,7 @@
           "include_area": "Raum / Bereich in Benachrichtigungen anzeigen",
           "include_device_info": "Hersteller & Modell in Benachrichtigungen anzeigen",
           "excluded_domains": "Ausgeschlossene Entitätsdomänen (z. B. sensor, button)",
-          "excluded_entities": "Ausgeschlossene Entitäten (optional)"
+          "excluded_devices": "Ausgeschlossene Geräte (optional)"
         },
         "data_description": {
           "alert_delay": "0 = sofort. Dieser Wert gilt für alle Protokolle, sofern im nächsten Schritt kein eigener Wert gesetzt wird."
@@ -288,7 +288,7 @@
           "include_area": "Raum / Bereich in Benachrichtigungen anzeigen",
           "include_device_info": "Hersteller & Modell in Benachrichtigungen anzeigen",
           "excluded_domains": "Ausgeschlossene Entitätsdomänen (z. B. sensor, button)",
-          "excluded_entities": "Ausgeschlossene Entitäten",
+          "excluded_devices": "Ausgeschlossene Geräte",
           "repairs_threshold": "HA-Reparaturen-Eintrag nach N Stunden offline (0 = deaktiviert)"
         },
         "data_description": {

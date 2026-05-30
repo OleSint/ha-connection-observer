@@ -142,7 +142,7 @@ El **retraso de alerta global** configurado aquí se aplica a todos los protocol
 | **Incluir habitación / área** | Mostrar el nombre del área de HA en las notificaciones. Por defecto: **desactivado**. |
 | **Incluir fabricante y modelo** | Mostrar información del dispositivo. Por defecto: **desactivado**. |
 | **Dominios de entidades excluidos** | Excluye dominios de entidades completos (p. ej. `sensor`, `button`). Las entidades `device_tracker` siempre se excluyen automáticamente. |
-| **Entidades excluidas** | Lista de entidades específicas a excluir de la monitorización. |
+| **Dispositivos excluidos** | Lista de dispositivos específicos a excluir completamente de la monitorización. |
 
 ### Paso 5 – Experto
 
@@ -608,7 +608,7 @@ Selecciona varios servicios en el campo de servicio de notificación. Todos reci
 
 ### Excluir una entidad específica
 
-Añádela a la lista *Entidades excluidas* en los ajustes avanzados. Las demás entidades del dispositivo siguen siendo monitorizadas.
+Añádelo a la lista *Dispositivos excluidos* en los ajustes avanzados. Todas las entidades de ese dispositivo serán ignoradas.
 
 ---
 

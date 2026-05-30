@@ -38,7 +38,7 @@
           "include_area": "Ruimte / zone opnemen in meldingen",
           "include_device_info": "Fabrikant en model opnemen in meldingen",
           "excluded_domains": "Uitgesloten entiteitsdomeinen (bijv. sensor, button)",
-          "excluded_entities": "Uitgesloten entiteiten (optioneel)"
+          "excluded_devices": "Uitgesloten apparaten (optioneel)"
         },
         "data_description": {
           "alert_delay": "0 = direct. Standaardwaarde voor alle protocollen, tenzij overschreven in de volgende stap."
@@ -288,7 +288,7 @@
           "include_area": "Ruimte / zone opnemen in meldingen",
           "include_device_info": "Fabrikant en model opnemen in meldingen",
           "excluded_domains": "Uitgesloten entiteitsdomeinen (bijv. sensor, button)",
-          "excluded_entities": "Uitgesloten entiteiten",
+          "excluded_devices": "Uitgesloten apparaten",
           "repairs_threshold": "HA Repairs-melding na N uur offline (0 = uitgeschakeld)"
         },
         "data_description": {

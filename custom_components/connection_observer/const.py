@@ -247,7 +247,8 @@ CONF_NOTIFY_RECONNECT = "notify_reconnect"
 CONF_LANGUAGE = "language"
 
 # Config keys – advanced
-CONF_EXCLUDED_ENTITIES = "excluded_entities"
+CONF_EXCLUDED_ENTITIES = "excluded_entities"  # legacy – kept for migration only
+CONF_EXCLUDED_DEVICES = "excluded_devices"
 CONF_EXCLUDED_DOMAINS = "excluded_domains"
 CONF_ALERT_DELAY = "alert_delay"
 CONF_COOLDOWN = "cooldown"

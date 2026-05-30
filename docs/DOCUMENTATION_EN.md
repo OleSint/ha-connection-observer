@@ -148,7 +148,7 @@ The **global alert delay** set here applies to all protocols unless overridden i
 | **Include room / area** | If enabled, the HA area assigned to the device is included in notifications. Default: **off**. |
 | **Include manufacturer & model** | If enabled, device info from the device registry is appended to immediate notifications. Default: **off**. |
 | **Excluded entity domains** | Exclude entire entity domains from monitoring (e.g. `sensor`, `button`). Select from the list or type a custom domain. `device_tracker` entities are always excluded automatically and do not need to be added here. |
-| **Excluded entities** | A list of specific entities to exclude from monitoring. |
+| **Excluded devices** | A list of specific devices to exclude from monitoring entirely. |
 
 ### Step 5 – Expert
 
@@ -627,9 +627,9 @@ action:
 
 Select multiple services in the notification service field. All services receive every notification simultaneously.
 
-### Excluding a specific entity
+### Excluding a specific device
 
-Add it to the *Excluded entities* list in the Advanced settings. The device's other entities remain monitored.
+Add it to the *Excluded devices* list in the Advanced settings. All entities of that device will be ignored.
 
 ---
 
