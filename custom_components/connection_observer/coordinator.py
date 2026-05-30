@@ -58,6 +58,8 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 EVENT_RETENTION_DAYS = 30
+FLOOD_THRESHOLD = 5          # devices within window → flood mode
+FLOOD_COLLECT_SECONDS = 5    # collect window: wait this long before flushing the buffer
 
 # Watch-label state sets: accept binary_sensor ("on"/"off") as well as template
 # sensor variants ("True"/"False", "1"/"0") so users don't need to worry about
@@ -84,6 +86,10 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "imm_msg": "⚠️ {device_name} ({protocol}) lost connection at {time}.",
         "rec_title": "Connection Restored",
         "rec_msg": "✅ {device_name} is back online.",
+        "flood_dis_title": "Connection Outage – {count} devices",
+        "flood_dis_msg": "⚠️ {count} devices went offline simultaneously — likely an infrastructure issue (e.g. router restart).\n{devices}",
+        "flood_rec_title": "Connection Restored – {count} devices",
+        "flood_rec_msg": "✅ {count} devices came back online:\n{devices}",
         "sum_title": "Connection Summary",
         "sum_header": "📋 {count} device(s) affected since last summary:",
         "sum_resolved": "• {device_name}{area} ({protocol}): offline since {time_offline}, back online at {time_online}",
@@ -97,6 +103,10 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "imm_msg": "⚠️ {device_name} ({protocol}) hat um {time} die Verbindung verloren.",
         "rec_title": "Verbindung wiederhergestellt",
         "rec_msg": "✅ {device_name} ist wieder online.",
+        "flood_dis_title": "Verbindungsausfall – {count} Geräte",
+        "flood_dis_msg": "⚠️ {count} Geräte gleichzeitig offline — vermutlich ein Infrastruktur-Problem (z. B. Router-Neustart).\n{devices}",
+        "flood_rec_title": "Verbindung wiederhergestellt – {count} Geräte",
+        "flood_rec_msg": "✅ {count} Geräte wieder online:\n{devices}",
         "sum_title": "Verbindungs-Zusammenfassung",
         "sum_header": "📋 {count} Gerät(e) seit der letzten Zusammenfassung betroffen:",
         "sum_resolved": "• {device_name}{area} ({protocol}): offline seit {time_offline}, wieder online um {time_online}",
@@ -110,6 +120,10 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "imm_msg": "⚠️ {device_name} ({protocol}) a perdu la connexion à {time}.",
         "rec_title": "Connexion rétablie",
         "rec_msg": "✅ {device_name} est de nouveau en ligne.",
+        "flood_dis_title": "Panne de connexion – {count} appareils",
+        "flood_dis_msg": "⚠️ {count} appareils hors ligne simultanément — probable problème d'infrastructure (ex. redémarrage du routeur).\n{devices}",
+        "flood_rec_title": "Connexion rétablie – {count} appareils",
+        "flood_rec_msg": "✅ {count} appareils de nouveau en ligne :\n{devices}",
         "sum_title": "Résumé des connexions",
         "sum_header": "📋 {count} appareil(s) affecté(s) depuis le dernier résumé :",
         "sum_resolved": "• {device_name}{area} ({protocol}) : hors ligne depuis {time_offline}, de nouveau en ligne à {time_online}",
@@ -123,6 +137,10 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "imm_msg": "⚠️ {device_name} ({protocol}) heeft om {time} de verbinding verbroken.",
         "rec_title": "Verbinding hersteld",
         "rec_msg": "✅ {device_name} is weer online.",
+        "flood_dis_title": "Verbindingsuitval – {count} apparaten",
+        "flood_dis_msg": "⚠️ {count} apparaten tegelijk offline — waarschijnlijk een infrastructuurprobleem (bijv. router herstart).\n{devices}",
+        "flood_rec_title": "Verbinding hersteld – {count} apparaten",
+        "flood_rec_msg": "✅ {count} apparaten weer online:\n{devices}",
         "sum_title": "Verbindingsoverzicht",
         "sum_header": "📋 {count} apparaat/apparaten getroffen sinds het laatste overzicht:",
         "sum_resolved": "• {device_name}{area} ({protocol}): offline sinds {time_offline}, weer online om {time_online}",
@@ -136,6 +154,10 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "imm_msg": "⚠️ {device_name} ({protocol}) perdió la conexión a las {time}.",
         "rec_title": "Conexión restaurada",
         "rec_msg": "✅ {device_name} está de nuevo en línea.",
+        "flood_dis_title": "Fallo de conexión – {count} dispositivos",
+        "flood_dis_msg": "⚠️ {count} dispositivos sin conexión simultáneamente — probable problema de infraestructura (p. ej. reinicio del router).\n{devices}",
+        "flood_rec_title": "Conexión restaurada – {count} dispositivos",
+        "flood_rec_msg": "✅ {count} dispositivos de nuevo en línea:\n{devices}",
         "sum_title": "Resumen de conexiones",
         "sum_header": "📋 {count} dispositivo(s) afectado(s) desde el último resumen:",
         "sum_resolved": "• {device_name}{area} ({protocol}): sin conexión desde {time_offline}, de nuevo en línea a las {time_online}",
@@ -245,6 +267,11 @@ class ConnectionObserverCoordinator:
         self._watch_label_entities: set[str] = set()
         self._active_repairs: set[str] = set()
         self._excluded_device_ids: set[str] = set()
+        # Flood detection buffers
+        self._disconnect_flood_buffer: list[DisconnectEvent] = []
+        self._disconnect_flood_unsub: Callable | None = None
+        self._reconnect_flood_buffer: list[str] = []
+        self._reconnect_flood_unsub: Callable | None = None
 
     # ------------------------------------------------------------------
     # Public API
@@ -299,12 +326,14 @@ class ConnectionObserverCoordinator:
 
     async def async_setup(self) -> None:
         await self._load_store()
+        await self._maybe_catchup_summary()
         self._setup_startup_guard()
         self._setup_state_listener()
         self._setup_summary_scheduler()
         self._setup_watchdog()
         self._setup_watch_label_listener()
         self._refresh_excluded_devices()
+        await self._purge_excluded_events()
 
     async def async_unload(self) -> None:
         for cancel_fn in self._pending_disconnects.values():
@@ -313,6 +342,14 @@ class ConnectionObserverCoordinator:
         for unsub in self._unsub:
             unsub()
         self._unsub.clear()
+        if self._disconnect_flood_unsub:
+            self._disconnect_flood_unsub()
+            self._disconnect_flood_unsub = None
+        if self._reconnect_flood_unsub:
+            self._reconnect_flood_unsub()
+            self._reconnect_flood_unsub = None
+        self._disconnect_flood_buffer.clear()
+        self._reconnect_flood_buffer.clear()
         await self._save_store()
 
     async def async_update_options(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -330,6 +367,7 @@ class ConnectionObserverCoordinator:
         self._setup_watchdog()
         self._setup_watch_label_listener()
         self._refresh_excluded_devices()
+        await self._purge_excluded_events()
 
     # ------------------------------------------------------------------
     # Setup
@@ -575,7 +613,7 @@ class ConnectionObserverCoordinator:
             self._async_notify_listeners()
             self.hass.async_create_task(self._save_store())
             if self._cfg.get(CONF_NOTIFY_RECONNECT):
-                self.hass.async_create_task(self._send_reconnect(device_name))
+                self._buffer_reconnect_notification(device_name)
 
     @callback
     def _create_event(self, device_key: str, device_name: str, entity_id: str, protocol: str) -> None:
@@ -595,13 +633,18 @@ class ConnectionObserverCoordinator:
         self._async_notify_listeners()
         self.hass.async_create_task(self._save_store())
         if self._cfg.get(CONF_NOTIFY_IMMEDIATE):
-            cooldown = int(self._cfg.get(CONF_COOLDOWN, 0))
-            if cooldown > 0:
-                last = self._last_notified.get(device_key)
-                if last and (dt_util.now() - last).total_seconds() < cooldown * 60:
-                    return
-            self._last_notified[device_key] = dt_util.now()
-            self.hass.async_create_task(self._send_immediate(evt))
+            # Buffer the notification — flush after FLOOD_COLLECT_SECONDS.
+            # If ≥ FLOOD_THRESHOLD events accumulate, one grouped notification is sent
+            # instead of individual ones (flood / infrastructure-event detection).
+            self._disconnect_flood_buffer.append(evt)
+            if self._disconnect_flood_unsub is None:
+                @callback
+                def _flush_dis(_now: Any) -> None:
+                    self._disconnect_flood_unsub = None
+                    self.hass.async_create_task(self._flush_disconnect_buffer())
+                self._disconnect_flood_unsub = async_call_later(
+                    self.hass, FLOOD_COLLECT_SECONDS, _flush_dis
+                )
 
     # ------------------------------------------------------------------
     # Watchdog
@@ -643,7 +686,7 @@ class ConnectionObserverCoordinator:
                     async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
                     self._active_repairs.discard(ev.device_key)
                     if self._cfg.get(CONF_NOTIFY_RECONNECT):
-                        self.hass.async_create_task(self._send_reconnect(ev.device_name))
+                        self._buffer_reconnect_notification(ev.device_name)
                     continue
 
             # Create HA Repairs entry if offline long enough (only once per event)
@@ -677,6 +720,146 @@ class ConnectionObserverCoordinator:
 
     # ------------------------------------------------------------------
     # Notifications
+    # ------------------------------------------------------------------
+
+    # ------------------------------------------------------------------
+    # Excluded-device cleanup (remove open events when a device is excluded)
+    # ------------------------------------------------------------------
+
+    async def _purge_excluded_events(self) -> None:
+        """Remove open offline events for devices that are now excluded.
+
+        Called after _refresh_excluded_devices() so that excluding an offline
+        device immediately clears it from the offline list and HA Repairs.
+        Pending disconnect timers for excluded devices are also cancelled.
+        """
+        if not self._excluded_device_ids:
+            return
+        # Cancel pending disconnect confirmations for excluded devices
+        to_cancel = [
+            dk for dk in list(self._pending_disconnects)
+            if dk in self._excluded_device_ids
+        ]
+        for dk in to_cancel:
+            cancel_fn = self._pending_disconnects.pop(dk)
+            cancel_fn()
+        # Remove open events and tidy up HA Repairs
+        before = len(self._events)
+        purged: list[str] = []
+        kept: list[DisconnectEvent] = []
+        for ev in self._events:
+            if ev.reconnected_at is None and ev.device_key in self._excluded_device_ids:
+                async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
+                self._active_repairs.discard(ev.device_key)
+                purged.append(ev.device_name)
+            else:
+                kept.append(ev)
+        if len(kept) != before:
+            self._events = kept
+            await self._save_store()
+            self._async_notify_listeners()
+            _LOGGER.info(
+                "Connection Observer: purged excluded device(s) from offline list: %s",
+                ", ".join(purged),
+            )
+
+    # ------------------------------------------------------------------
+    # Catch-up summary (missed scheduled time after reload/restart)
+    # ------------------------------------------------------------------
+
+    async def _maybe_catchup_summary(self) -> None:
+        """Send the scheduled summary if it was missed today (e.g. after a config-entry reload)."""
+        if not self._cfg.get(CONF_NOTIFY_SUMMARY):
+            return
+        hour, minute = _parse_summary_time(self._cfg.get(CONF_SUMMARY_TIME, "08:00"))
+        days = {int(d) for d in self._cfg.get(CONF_SUMMARY_DAYS, [str(i) for i in range(7)])}
+        now = dt_util.now()
+        if now.weekday() not in days:
+            return
+        today_at = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if now < today_at:
+            return  # scheduled time not yet reached today
+        if self._last_summary and self._last_summary >= today_at:
+            return  # already sent today
+        _LOGGER.debug("Connection Observer: catch-up summary (scheduled time was missed)")
+        await self._send_summary()
+
+    # ------------------------------------------------------------------
+    # Flood detection helpers
+    # ------------------------------------------------------------------
+
+    @callback
+    def _buffer_reconnect_notification(self, device_name: str) -> None:
+        """Buffer a reconnect notification; send grouped if flood threshold is reached."""
+        self._reconnect_flood_buffer.append(device_name)
+        if self._reconnect_flood_unsub is None:
+            @callback
+            def _flush_rec(_now: Any) -> None:
+                self._reconnect_flood_unsub = None
+                self.hass.async_create_task(self._flush_reconnect_buffer())
+            self._reconnect_flood_unsub = async_call_later(
+                self.hass, FLOOD_COLLECT_SECONDS, _flush_rec
+            )
+
+    async def _flush_disconnect_buffer(self) -> None:
+        """Flush buffered disconnect notifications: grouped if flood, individual otherwise."""
+        buffer = self._disconnect_flood_buffer.copy()
+        self._disconnect_flood_buffer.clear()
+        if not buffer:
+            return
+        if len(buffer) >= FLOOD_THRESHOLD:
+            await self._send_disconnect_flood(buffer)
+        else:
+            now = dt_util.now()
+            cooldown = int(self._cfg.get(CONF_COOLDOWN, 0))
+            for evt in buffer:
+                if cooldown > 0:
+                    last = self._last_notified.get(evt.device_key)
+                    if last and (now - last).total_seconds() < cooldown * 60:
+                        continue
+                self._last_notified[evt.device_key] = now
+                await self._send_immediate(evt)
+
+    async def _send_disconnect_flood(self, events: list[DisconnectEvent]) -> None:
+        """Send a single grouped notification for a flood of simultaneous disconnects."""
+        services = self._notify_services()
+        if not services:
+            return
+        count = len(events)
+        device_list = "\n".join(
+            f"• {ev.device_name} ({ev.protocol})" for ev in events
+        )
+        title = self._msg("flood_dis_title", count=count)
+        msg = self._msg("flood_dis_msg", count=count, devices=device_list)
+        await self._notify_all(services, title, msg)
+        _LOGGER.info("Connection Observer: flood notification sent for %d devices", count)
+
+    async def _flush_reconnect_buffer(self) -> None:
+        """Flush buffered reconnect notifications: grouped if flood, individual otherwise."""
+        buffer = self._reconnect_flood_buffer.copy()
+        self._reconnect_flood_buffer.clear()
+        if not buffer:
+            return
+        if len(buffer) >= FLOOD_THRESHOLD:
+            await self._send_reconnect_flood(buffer)
+        else:
+            for device_name in buffer:
+                await self._send_reconnect(device_name)
+
+    async def _send_reconnect_flood(self, device_names: list[str]) -> None:
+        """Send a single grouped notification for a flood of simultaneous reconnects."""
+        services = self._notify_services()
+        if not services:
+            return
+        count = len(device_names)
+        device_list = "\n".join(f"• {name}" for name in device_names)
+        title = self._msg("flood_rec_title", count=count)
+        msg = self._msg("flood_rec_msg", count=count, devices=device_list)
+        await self._notify_all(services, title, msg)
+        _LOGGER.info("Connection Observer: flood reconnect notification sent for %d devices", count)
+
+    # ------------------------------------------------------------------
+    # Notification helpers
     # ------------------------------------------------------------------
 
     def _msg(self, key: str, **kwargs: Any) -> str:

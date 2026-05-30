@@ -6,8 +6,10 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import selector
+from homeassistant.helpers.device_registry import async_get as async_get_device_registry
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 
 from .const import (
     CONF_ALERT_DELAY,
@@ -125,6 +127,56 @@ def _available_notify_services(hass) -> list[str]:
     return sorted(
         f"notify.{name}"
         for name in hass.services.async_services().get("notify", {})
+    )
+
+
+def _excluded_device_selector(
+    hass: HomeAssistant,
+    protocols: list[str],
+    current_excluded: list[str],
+) -> selector.SelectSelector:
+    """Build a SelectSelector listing only devices that have entities on monitored protocols.
+
+    Devices that are currently excluded but whose protocol is no longer configured
+    are kept in the list so they are not silently dropped on the next save.
+    """
+    er = async_get_entity_registry(hass)
+    dr = async_get_device_registry(hass)
+    protocol_set = set(protocols)
+
+    device_names: dict[str, str] = {}  # device_id → display name
+    for entry in er.entities.values():
+        if entry.platform not in protocol_set:
+            continue
+        if not entry.device_id or entry.device_id in device_names:
+            continue
+        device = dr.async_get(entry.device_id)
+        if device:
+            device_names[entry.device_id] = (
+                device.name_by_user or device.name or entry.device_id
+            )
+
+    # Keep currently-excluded devices in the list even if their protocol changed,
+    # so previously saved exclusions survive a protocol reconfiguration.
+    for device_id in current_excluded:
+        if device_id not in device_names:
+            device = dr.async_get(device_id)
+            if device:
+                device_names[device_id] = (
+                    device.name_by_user or device.name or device_id
+                )
+
+    options = sorted(
+        [{"label": name, "value": did} for did, name in device_names.items()],
+        key=lambda x: x["label"].lower(),
+    )
+
+    return selector.SelectSelector(
+        selector.SelectSelectorConfig(
+            options=options,
+            multiple=True,
+            mode=selector.SelectSelectorMode.DROPDOWN,
+        )
     )
 
 
@@ -314,6 +366,7 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._data.update(user_input)
             return await self.async_step_expert()
 
+        protocols: list[str] = self._data.get(CONF_PROTOCOLS, [])
         return self.async_show_form(
             step_id="advanced",
             data_schema=vol.Schema(
@@ -324,8 +377,8 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(CONF_INCLUDE_AREA, default=False): selector.BooleanSelector(),
                     vol.Optional(CONF_INCLUDE_DEVICE_INFO, default=False): selector.BooleanSelector(),
                     vol.Optional(CONF_EXCLUDED_DOMAINS, default=[]): _DOMAIN_SELECTOR,
-                    vol.Optional(CONF_EXCLUDED_DEVICES, default=[]): selector.DeviceSelector(
-                        selector.DeviceSelectorConfig(multiple=True)
+                    vol.Optional(CONF_EXCLUDED_DEVICES, default=[]): _excluded_device_selector(
+                        self.hass, protocols, []
                     ),
                 }
             ),
@@ -468,6 +521,8 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
             return await self.async_step_expert()
 
         cur = self._cur()
+        protocols: list[str] = self._data.get(CONF_PROTOCOLS, cur.get(CONF_PROTOCOLS, []))
+        current_excluded: list[str] = cur.get(CONF_EXCLUDED_DEVICES, [])
         return self.async_show_form(
             step_id="advanced",
             data_schema=vol.Schema(
@@ -498,9 +553,9 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                     ): _DOMAIN_SELECTOR,
                     vol.Optional(
                         CONF_EXCLUDED_DEVICES,
-                        default=cur.get(CONF_EXCLUDED_DEVICES, []),
-                    ): selector.DeviceSelector(
-                        selector.DeviceSelectorConfig(multiple=True)
+                        default=current_excluded,
+                    ): _excluded_device_selector(
+                        self.hass, protocols, current_excluded
                     ),
                     vol.Optional(
                         CONF_REPAIRS_THRESHOLD,
