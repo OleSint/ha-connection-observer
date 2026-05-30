@@ -26,7 +26,8 @@
 - **Minimum offline duration** – opt-in: suppress short blips from the summary without losing them
 - **Room / area** – opt-in: include the HA area name in notifications
 - **Manufacturer & model** – opt-in: include device info in immediate notifications
-- **Device exclusions** – exclude specific devices from monitoring entirely
+- **Flood detection** *(v1.1.12)* – when 5 or more devices go offline (or come back online) within 5 seconds, one grouped notification is sent instead of individual alerts — ideal for router reboots and brief infrastructure outages
+- **Device exclusions** – exclude specific devices from monitoring entirely; only monitorable devices (those with entities on a configured protocol) are shown in the selector
 - **Domain exclusions** – exclude entire entity domains (e.g. `sensor`, `button`) from monitoring; `device_tracker` is always excluded automatically
 - **Per-protocol alert delays** *(v1.1.0)* – set individual alert delays per integration family; use "Apply recommended delays" for a one-click starting point
 - **Watch label – custom offline indicators** *(v1.1.0)* – label any HA entity (e.g. a template binary sensor) to monitor devices that never go `unavailable`, such as passive BLE sensors (BTHome, GARDENA Bluetooth)
@@ -119,7 +120,6 @@ All settings — plus notification templates and the HA Repairs threshold — ca
 ### Funktionen
 
 - **Protokollbasierte Überwachung** – ganze Integrationsfamilien auswählen (Zigbee, Z-Wave, Hue, ESPHome, Shelly, Sonos, …) statt einzelner Entitäten. Über 100 Integrationen werden unterstützt.
-- **Domänen ausschließen** – ganze Entitätsdomänen von der Überwachung ausnehmen (z. B. `sensor`, `button`); `device_tracker` wird immer automatisch ignoriert
 - **Test im Options-Flow** – Testbenachrichtigung jederzeit neu senden, auch nach der Ersteinrichtung
 - **Sofortbenachrichtigung** – wird direkt gesendet, sobald ein Gerät offline geht
 - **Geplante Zusammenfassung** – Sammelnachricht zu konfigurierbaren Tagen und Uhrzeiten mit allen Verbindungsabbrüchen seit der letzten Zusammenfassung
@@ -130,7 +130,9 @@ All settings — plus notification templates and the HA Repairs threshold — ca
 - **Mindestausfallzeit** – opt-in: kurze Aussetzer werden aus der Zusammenfassung herausgefiltert
 - **Raum / Bereich** – opt-in: HA-Bereichsname in Benachrichtigungen einblenden
 - **Hersteller & Modell** – opt-in: Geräteinformationen in Sofortmeldungen einblenden
-- **Entitäten ausschließen** – einzelne, störungsanfällige Entitäten von der Überwachung ausnehmen
+- **Flood-Erkennung** *(v1.1.12)* – gehen 5 oder mehr Geräte innerhalb von 5 Sekunden offline (oder wieder online), wird eine einzige Sammelbenachrichtigung gesendet statt Einzelmeldungen — ideal bei Router-Neustarts oder kurzen Infrastrukturausfällen
+- **Geräte ausschließen** – einzelne Geräte vollständig von der Überwachung ausnehmen; der Selektor zeigt nur überwachbare Geräte (solche mit Entitäten eines konfigurierten Protokolls)
+- **Domänen ausschließen** – ganze Entitätsdomänen von der Überwachung ausnehmen (z. B. `sensor`, `button`); `device_tracker` wird immer automatisch ignoriert
 - **5 Sprachen** – Benachrichtigungen auf Englisch, Deutsch, Französisch, Niederländisch oder Spanisch (konfigurierbar)
 - **Benachrichtigungsvorlagen** – Texte beliebig anpassen mit Variablen wie `{device_name}`, `{protocol}` und `{time}`
 - **HA-Reparaturen** – nach einer konfigurierbaren Offline-Dauer erscheint ein Eintrag im HA Repairs-Panel; wird automatisch gelöst, wenn das Gerät zurückkommt

@@ -1,6 +1,6 @@
 # Connection Observer – Documentatie (Nederlands)
 
-**Versie:** 1.1.0  
+**Versie:** 1.1.12  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -142,7 +142,7 @@ De **globale vertraging** die hier wordt ingesteld, geldt voor alle protocollen,
 | **Ruimte / zone opnemen** | HA-zonenaam weergeven in meldingen. Standaard: **uit**. |
 | **Fabrikant & model opnemen** | Apparaatinformatie weergeven. Standaard: **uit**. |
 | **Uitgesloten entiteitsdomeinen** | Sluit volledige entiteitsdomeinen uit (bijv. `sensor`, `button`). `device_tracker`-entiteiten worden altijd automatisch uitgesloten. |
-| **Uitgesloten apparaten** | Lijst van specifieke apparaten die volledig worden uitgesloten van bewaking. |
+| **Uitgesloten apparaten** | Lijst van specifieke apparaten die volledig worden uitgesloten van bewaking. Alleen apparaten met minimaal één entiteit op een geconfigureerd protocol worden getoond — virtuele services (HACS, Supervisor, Add-ons, etc.) verschijnen niet. Wordt een apparaat uitgesloten terwijl het offline is, dan wordt het direct uit de offline-lijst verwijderd en een openstaand HA Repairs-probleem automatisch opgelost. |
 
 ### Stap 5 – Expert
 
@@ -563,6 +563,32 @@ data:
 > **Verbinding hersteld**
 > ✅ Woonkamer Stekker is weer online.
 
+### Groepsmelding bij gelijktijdige uitval (≥ 5 apparaten)
+
+Wanneer 5 of meer apparaten binnen 5 seconden offline gaan, wordt één groepsmelding verzonden in plaats van afzonderlijke meldingen. Dit voorkomt een stortvloed van meldingen bij een router-herstart of een korte infrastructuurstoring.
+
+**Verbindingsuitval:**
+> **Verbindingsuitval – 8 apparaten**
+> ⚠️ 8 apparaten tegelijk offline — waarschijnlijk een infrastructuurprobleem (bijv. router herstart).
+> • Woonkamer Stekker (shelly)
+> • Keuken Sensor (zha)
+> • Gang Lamp (hue)
+> • Slaapkamer Lamp (hue)
+> • Kantoor Schakelaar (esphome)
+> • …
+
+**Herverbinding:**
+> **Verbinding hersteld – 8 apparaten**
+> ✅ 8 apparaten weer online:
+> • Woonkamer Stekker
+> • Keuken Sensor
+> • Gang Lamp
+> • Slaapkamer Lamp
+> • Kantoor Schakelaar
+> • …
+
+Als minder dan 5 apparaten zijn getroffen, worden individuele meldingen verzonden zoals gebruikelijk (inclusief cooldown-controle).
+
 ### Samenvatting
 
 > **Verbindingsoverzicht**
@@ -608,7 +634,7 @@ Selecteer meerdere diensten in het meldingsdienstveld. Alle diensten ontvangen e
 
 ### Een specifieke entiteit uitsluiten
 
-Voeg het toe aan de lijst *Uitgesloten apparaten* in de geavanceerde instellingen. Alle entiteiten van dat apparaat worden dan genegeerd.
+Voeg het toe aan de lijst *Uitgesloten apparaten* in de geavanceerde instellingen. Alle entiteiten van dat apparaat worden dan genegeerd. Als het apparaat op het moment van opslaan offline is, wordt het direct uit de offline-lijst verwijderd en een openstaand HA Repairs-probleem automatisch opgelost.
 
 ---
 

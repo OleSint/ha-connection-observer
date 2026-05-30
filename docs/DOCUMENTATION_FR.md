@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (Français)
 
-**Version:** 1.1.0  
+**Version:** 1.1.12  
 **Dépôt :** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -142,7 +142,7 @@ Le **délai d'alerte global** défini ici s'applique à tous les protocoles, sau
 | **Inclure la pièce / zone** | Afficher le nom de la zone HA dans les notifications. Par défaut : **désactivé**. |
 | **Inclure fabricant & modèle** | Afficher les informations de l'appareil. Par défaut : **désactivé**. |
 | **Domaines d'entités exclus** | Exclure des domaines d'entités entiers de la surveillance (ex. `sensor`, `button`). Les entités `device_tracker` sont toujours exclues automatiquement. |
-| **Appareils exclus** | Liste d'appareils spécifiques à exclure entièrement de la surveillance. |
+| **Appareils exclus** | Liste d'appareils spécifiques à exclure entièrement de la surveillance. Seuls les appareils disposant d'au moins une entité sur un protocole configuré sont affichés — les services virtuels (HACS, Superviseur, Add-ons, etc.) n'apparaissent pas. Si un appareil est ajouté alors qu'il est hors ligne, il est immédiatement retiré de la liste hors ligne et tout problème HA Repairs ouvert est résolu. |
 
 ### Étape 5 – Expert
 
@@ -561,6 +561,32 @@ data:
 > **Connexion rétablie**
 > ✅ Prise Salon est de nouveau en ligne.
 
+### Notification groupée lors de pannes simultanées (≥ 5 appareils)
+
+Lorsque 5 appareils ou plus se déconnectent en 5 secondes, une seule notification groupée est envoyée à la place des alertes individuelles. Cela évite une avalanche de notifications lors des redémarrages du routeur ou des brèves pannes d'infrastructure.
+
+**Panne de connexion :**
+> **Panne de connexion – 8 appareils**
+> ⚠️ 8 appareils hors ligne simultanément — probable problème d'infrastructure (ex. redémarrage du routeur).
+> • Prise Salon (shelly)
+> • Capteur Cuisine (zha)
+> • Lampe Couloir (hue)
+> • Ampoule Chambre (hue)
+> • Interrupteur Bureau (esphome)
+> • …
+
+**Reconnexion :**
+> **Connexion rétablie – 8 appareils**
+> ✅ 8 appareils de nouveau en ligne :
+> • Prise Salon
+> • Capteur Cuisine
+> • Lampe Couloir
+> • Ampoule Chambre
+> • Interrupteur Bureau
+> • …
+
+Si moins de 5 appareils sont concernés, des notifications individuelles sont envoyées comme d'habitude (avec vérification du cooldown).
+
 ### Résumé
 
 > **Résumé des connexions**
@@ -606,7 +632,7 @@ Sélectionnez plusieurs services dans le champ de service de notification. Tous 
 
 ### Exclure une entité spécifique
 
-Ajoutez-le à la liste *Appareils exclus* dans les paramètres avancés. Toutes les entités de l'appareil seront ignorées.
+Ajoutez-le à la liste *Appareils exclus* dans les paramètres avancés. Toutes les entités de l'appareil seront ignorées. Si l'appareil est actuellement hors ligne au moment de la sauvegarde, il est immédiatement retiré de la liste hors ligne et tout problème HA Repairs ouvert est résolu automatiquement.
 
 ---
 

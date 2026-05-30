@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (English)
 
-**Version:** 1.1.0  
+**Version:** 1.1.12  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -148,7 +148,7 @@ The **global alert delay** set here applies to all protocols unless overridden i
 | **Include room / area** | If enabled, the HA area assigned to the device is included in notifications. Default: **off**. |
 | **Include manufacturer & model** | If enabled, device info from the device registry is appended to immediate notifications. Default: **off**. |
 | **Excluded entity domains** | Exclude entire entity domains from monitoring (e.g. `sensor`, `button`). Select from the list or type a custom domain. `device_tracker` entities are always excluded automatically and do not need to be added here. |
-| **Excluded devices** | A list of specific devices to exclude from monitoring entirely. |
+| **Excluded devices** | A list of specific devices to exclude from monitoring entirely. Only devices that have at least one entity on a configured protocol are shown — virtual services (HACS, Supervisor, Add-ons, etc.) do not appear. If a device is added while it is currently offline, it is immediately removed from the offline list and any open HA Repairs issue is resolved. |
 
 ### Step 5 – Expert
 
@@ -584,6 +584,32 @@ data:
 > **Connection Restored**
 > ✅ Living Room Plug is back online.
 
+### Flood notification (≥ 5 devices simultaneously)
+
+When 5 or more devices disconnect within 5 seconds, a single grouped notification is sent instead of individual alerts. This prevents notification floods during router reboots or brief infrastructure outages.
+
+**Disconnect flood:**
+> **Connection Outage – 8 devices**
+> ⚠️ 8 devices went offline simultaneously — likely an infrastructure issue (e.g. router restart).
+> • Living Room Plug (shelly)
+> • Kitchen Sensor (zha)
+> • Hallway Light (hue)
+> • Bedroom Bulb (hue)
+> • Office Switch (esphome)
+> • …
+
+**Reconnect flood:**
+> **Connection Restored – 8 devices**
+> ✅ 8 devices came back online:
+> • Living Room Plug
+> • Kitchen Sensor
+> • Hallway Light
+> • Bedroom Bulb
+> • Office Switch
+> • …
+
+If fewer than 5 devices are affected, individual notifications continue to be sent as usual (including cooldown checks).
+
 ### Summary notification
 
 > **Connection Summary**
@@ -629,7 +655,7 @@ Select multiple services in the notification service field. All services receive
 
 ### Excluding a specific device
 
-Add it to the *Excluded devices* list in the Advanced settings. All entities of that device will be ignored.
+Add it to the *Excluded devices* list in the Advanced settings. All entities of that device will be ignored. If the device is currently offline when you save, it is immediately removed from the offline list and any open HA Repairs issue is resolved automatically.
 
 ---
 

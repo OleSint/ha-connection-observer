@@ -1,6 +1,6 @@
 # Connection Observer – Documentación (Español)
 
-**Versión:** 1.1.0  
+**Versión:** 1.1.12  
 **Repositorio:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -142,7 +142,7 @@ El **retraso de alerta global** configurado aquí se aplica a todos los protocol
 | **Incluir habitación / área** | Mostrar el nombre del área de HA en las notificaciones. Por defecto: **desactivado**. |
 | **Incluir fabricante y modelo** | Mostrar información del dispositivo. Por defecto: **desactivado**. |
 | **Dominios de entidades excluidos** | Excluye dominios de entidades completos (p. ej. `sensor`, `button`). Las entidades `device_tracker` siempre se excluyen automáticamente. |
-| **Dispositivos excluidos** | Lista de dispositivos específicos a excluir completamente de la monitorización. |
+| **Dispositivos excluidos** | Lista de dispositivos específicos a excluir completamente de la monitorización. Solo se muestran los dispositivos que tienen al menos una entidad en un protocolo configurado — los servicios virtuales (HACS, Supervisor, complementos, etc.) no aparecen. Si se añade un dispositivo mientras está sin conexión, se elimina inmediatamente de la lista de dispositivos sin conexión y cualquier incidencia abierta en HA Repairs se resuelve automáticamente. |
 
 ### Paso 5 – Experto
 
@@ -563,6 +563,32 @@ data:
 > **Conexión restaurada**
 > ✅ Enchufe Salón está de nuevo en línea.
 
+### Notificación agrupada ante fallos simultáneos (≥ 5 dispositivos)
+
+Cuando 5 o más dispositivos se desconectan en 5 segundos, se envía una sola notificación agrupada en lugar de alertas individuales. Esto evita una avalancha de notificaciones durante reinicios del router o breves cortes de infraestructura.
+
+**Fallo de conexión:**
+> **Fallo de conexión – 8 dispositivos**
+> ⚠️ 8 dispositivos sin conexión simultáneamente — probable problema de infraestructura (p. ej. reinicio del router).
+> • Enchufe Salón (shelly)
+> • Sensor Cocina (zha)
+> • Lámpara Pasillo (hue)
+> • Bombilla Dormitorio (hue)
+> • Interruptor Oficina (esphome)
+> • …
+
+**Reconexión:**
+> **Conexión restaurada – 8 dispositivos**
+> ✅ 8 dispositivos de nuevo en línea:
+> • Enchufe Salón
+> • Sensor Cocina
+> • Lámpara Pasillo
+> • Bombilla Dormitorio
+> • Interruptor Oficina
+> • …
+
+Si hay menos de 5 dispositivos afectados, se envían notificaciones individuales como de costumbre (incluida la comprobación del cooldown).
+
 ### Resumen
 
 > **Resumen de conexiones**
@@ -608,7 +634,7 @@ Selecciona varios servicios en el campo de servicio de notificación. Todos reci
 
 ### Excluir una entidad específica
 
-Añádelo a la lista *Dispositivos excluidos* en los ajustes avanzados. Todas las entidades de ese dispositivo serán ignoradas.
+Añádelo a la lista *Dispositivos excluidos* en los ajustes avanzados. Todas las entidades de ese dispositivo serán ignoradas. Si el dispositivo está sin conexión en el momento de guardar, se elimina inmediatamente de la lista de dispositivos sin conexión y cualquier incidencia abierta en HA Repairs se resuelve automáticamente.
 
 ---
 

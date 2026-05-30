@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation (Deutsch)
 
-**Version:** 1.1.0  
+**Version:** 1.1.12  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -142,7 +142,7 @@ Die hier eingestellte **globale Verzögerung** gilt für alle Protokolle, sofern
 | **Raum / Bereich anzeigen** | HA-Bereichsname in Benachrichtigungen einblenden. Standard: **aus**. |
 | **Hersteller & Modell anzeigen** | Geräteinformationen in Sofortmeldungen einblenden. Standard: **aus**. |
 | **Ausgeschlossene Entitätsdomänen** | Ganze Entitätsdomänen von der Überwachung ausschließen (z. B. `sensor`, `button`). Aus der Liste auswählen oder eigene Domäne eingeben. `device_tracker`-Entitäten werden immer automatisch ignoriert und müssen hier nicht eingetragen werden. |
-| **Ausgeschlossene Geräte** | Liste von Geräten, die vollständig von der Überwachung ausgenommen werden. |
+| **Ausgeschlossene Geräte** | Liste von Geräten, die vollständig von der Überwachung ausgenommen werden. Es werden nur Geräte angezeigt, die mindestens eine Entität mit einem konfigurierten Protokoll besitzen — virtuelle Dienste (HACS, Supervisor, Add-ons usw.) erscheinen nicht. Wird ein Gerät ausgeschlossen, während es gerade offline ist, wird es sofort aus der Offline-Liste entfernt und ein offener HA-Reparatureintrag automatisch aufgelöst. |
 
 ### Schritt 5 – Experte
 
@@ -565,6 +565,32 @@ data:
 > **Verbindung wiederhergestellt**
 > ✅ Wohnzimmer Steckdose ist wieder online.
 
+### Sammelbenachrichtigung bei gleichzeitigen Ausfällen (≥ 5 Geräte)
+
+Gehen 5 oder mehr Geräte innerhalb von 5 Sekunden offline, wird statt Einzelmeldungen eine einzige Sammelbenachrichtigung gesendet. Das verhindert eine Benachrichtigungsflut bei Router-Neustarts oder kurzen Infrastrukturausfällen.
+
+**Verbindungsausfall:**
+> **Verbindungsausfall – 8 Geräte**
+> ⚠️ 8 Geräte gleichzeitig offline — vermutlich ein Infrastruktur-Problem (z. B. Router-Neustart).
+> • Wohnzimmer Steckdose (shelly)
+> • Küchen-Sensor (zha)
+> • Flurlampe (hue)
+> • Schlafzimmer Birne (hue)
+> • Büro Schalter (esphome)
+> • …
+
+**Wiederverbindung:**
+> **Verbindung wiederhergestellt – 8 Geräte**
+> ✅ 8 Geräte wieder online:
+> • Wohnzimmer Steckdose
+> • Küchen-Sensor
+> • Flurlampe
+> • Schlafzimmer Birne
+> • Büro Schalter
+> • …
+
+Sind weniger als 5 Geräte betroffen, werden weiterhin normale Einzelbenachrichtigungen gesendet (inkl. Cooldown-Prüfung).
+
 ### Zusammenfassung
 
 > **Verbindungs-Zusammenfassung**
@@ -610,7 +636,7 @@ Wähle mehrere Dienste im Benachrichtigungsdienst-Feld aus. Alle Dienste erhalte
 
 ### Gerät ausschließen
 
-Füge es zur Liste *Ausgeschlossene Geräte* in den Erweitert-Einstellungen hinzu. Alle Entitäten des Geräts werden dann ignoriert.
+Füge es zur Liste *Ausgeschlossene Geräte* in den Erweitert-Einstellungen hinzu. Alle Entitäten des Geräts werden dann ignoriert. Ist das Gerät zum Zeitpunkt des Speicherns offline, wird es sofort aus der Offline-Liste entfernt und ein offener HA-Reparatureintrag automatisch aufgelöst.
 
 ---
 
