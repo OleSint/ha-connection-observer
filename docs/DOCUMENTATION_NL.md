@@ -1,6 +1,6 @@
 # Connection Observer – Documentatie (Nederlands)
 
-**Versie:** 1.1.12  
+**Versie:** 1.1.13  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---

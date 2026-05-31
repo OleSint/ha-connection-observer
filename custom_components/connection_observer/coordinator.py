@@ -326,6 +326,7 @@ class ConnectionObserverCoordinator:
 
     async def async_setup(self) -> None:
         await self._load_store()
+        await self._purge_stale_protocol_events()
         await self._maybe_catchup_summary()
         self._setup_startup_guard()
         self._setup_state_listener()
@@ -368,6 +369,7 @@ class ConnectionObserverCoordinator:
         self._setup_watch_label_listener()
         self._refresh_excluded_devices()
         await self._purge_excluded_events()
+        await self._purge_stale_protocol_events()
 
     # ------------------------------------------------------------------
     # Setup
@@ -760,6 +762,41 @@ class ConnectionObserverCoordinator:
             self._async_notify_listeners()
             _LOGGER.info(
                 "Connection Observer: purged excluded device(s) from offline list: %s",
+                ", ".join(purged),
+            )
+
+    async def _purge_stale_protocol_events(self) -> None:
+        """Close open events for protocols that are no longer monitored.
+
+        When a protocol is removed from the config its devices can never
+        recover via state_changed, so they would linger as open events and
+        generate stale HA Repairs entries indefinitely.  We remove them here
+        so the offline list stays clean after a protocol reconfiguration.
+
+        Watch-label events (protocol == "custom") are never purged — they are
+        managed independently of the protocol list.
+        """
+        active_protocols: set[str] = set(self._cfg.get(CONF_PROTOCOLS, []))
+        kept: list[DisconnectEvent] = []
+        purged: list[str] = []
+        for ev in self._events:
+            if (
+                ev.reconnected_at is None
+                and ev.protocol != "custom"
+                and ev.protocol not in active_protocols
+            ):
+                async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
+                self._active_repairs.discard(ev.device_key)
+                purged.append(f"{ev.device_name} ({ev.protocol})")
+            else:
+                kept.append(ev)
+        if purged:
+            self._events = kept
+            await self._save_store()
+            self._async_notify_listeners()
+            _LOGGER.info(
+                "Connection Observer: removed %d stale event(s) for inactive protocol(s): %s",
+                len(purged),
                 ", ".join(purged),
             )
 
