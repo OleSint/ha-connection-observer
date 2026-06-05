@@ -2,8 +2,12 @@
   "config": {
     "step": {
       "user": {
+        "title": "Connection Observer – Labels",
+        "description": "In deinem Home Assistant wurden drei Labels angelegt:\n\n🔴 **observer_critical** — Gerät mit höchster Priorität überwachen: kein Delay, kein Cooldown, immer sofort benachrichtigt, in der Zusammenfassung markiert.\n\n👁️ **observer_watch** — Gerät nach den globalen Einstellungen überwachen.\n\n🚫 **observer_ignore** — Gerät von der Überwachung ausschließen.\n\nWeise diese Labels unter **Einstellungen → Labels** beliebigen Entitäten zu. Labels funktionieren unabhängig von Protokollen — du kannst beides kombinieren.\n\n**Dieser Schritt ist optional.** Wenn du nur Protokolle nutzen möchtest, klicke einfach auf Weiter."
+      },
+      "protocols": {
         "title": "Connection Observer – Protokolle",
-        "description": "Wähle die Verbindungsprotokolle, die überwacht werden sollen. Es werden nur Protokolle angezeigt, die in deiner HA-Instanz bereits eingerichtet sind.",
+        "description": "Wähle die Verbindungsprotokolle, die überwacht werden sollen. Es werden nur Protokolle angezeigt, die in deiner HA-Instanz bereits eingerichtet sind.\n\n**Optional** — leer lassen, wenn du nur Labels nutzt.",
         "data": {
           "protocols": "Zu überwachende Protokolle",
           "language": "Sprache der Benachrichtigungen"
@@ -253,15 +257,18 @@
       "test_failed": "Testbenachrichtigung fehlgeschlagen. Prüfe, ob der Benachrichtigungsdienst korrekt eingerichtet ist, und versuche es erneut. Deaktiviere das Kontrollkästchen, um den Test zu überspringen und fortzufahren."
     },
     "abort": {
-      "already_configured": "Connection Observer ist bereits eingerichtet.",
-      "no_protocols": "Keine unterstützten Protokolle gefunden. Bitte richte zuerst Zigbee, Z-Wave, Bluetooth oder eine andere unterstützte Integration ein."
+      "already_configured": "Connection Observer ist bereits eingerichtet."
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "Connection Observer – Labels",
+        "description": "In deinem Home Assistant stehen drei Labels zur Verfügung:\n\n🔴 **observer_critical** — Gerät mit höchster Priorität überwachen: kein Delay, kein Cooldown, immer sofort benachrichtigt, in der Zusammenfassung markiert.\n\n👁️ **observer_watch** — Gerät nach den globalen Einstellungen überwachen.\n\n🚫 **observer_ignore** — Gerät von der Überwachung ausschließen.\n\nWeise diese Labels unter **Einstellungen → Labels** beliebigen Entitäten zu. Labels funktionieren unabhängig von Protokollen — du kannst beides kombinieren.\n\n**Dieser Schritt ist optional.** Wenn du nur Protokolle nutzt, klicke einfach auf Weiter."
+      },
+      "protocols": {
         "title": "Connection Observer – Protokolle",
-        "description": "Wähle die Verbindungsprotokolle, die überwacht werden sollen. Es werden nur Protokolle angezeigt, die in deiner HA-Instanz bereits eingerichtet sind.",
+        "description": "Wähle die Verbindungsprotokolle, die überwacht werden sollen. Es werden nur Protokolle angezeigt, die in deiner HA-Instanz bereits eingerichtet sind.\n\n**Optional** — leer lassen, wenn du nur Labels nutzt.",
         "data": {
           "protocols": "Zu überwachende Protokolle",
           "language": "Sprache der Benachrichtigungen"

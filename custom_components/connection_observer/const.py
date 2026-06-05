@@ -270,6 +270,19 @@ CONF_TMPL_SUM_TITLE = "tmpl_sum_title"
 CONF_TMPL_SUM_LINE_RESOLVED = "tmpl_sum_resolved"
 CONF_TMPL_SUM_LINE_ONGOING = "tmpl_sum_ongoing"
 
+# Observer labels — auto-created in HA on first setup
+# Users assign these to entities; Connection Observer monitors the whole device.
+LABEL_CRITICAL = "observer_critical"   # no delay, no cooldown, always notify, 🔴 in summary
+LABEL_WATCH = "observer_watch"         # monitor with global settings
+LABEL_IGNORE = "observer_ignore"       # exclude from monitoring
+
+# label_id → (display name, color, icon)
+OBSERVER_LABELS: dict[str, tuple[str, str, str]] = {
+    LABEL_CRITICAL: ("Observer: Critical", "red", "mdi:alert-circle"),
+    LABEL_WATCH: ("Observer: Watch", "blue", "mdi:eye"),
+    LABEL_IGNORE: ("Observer: Ignore", "grey", "mdi:eye-off"),
+}
+
 # Storage
 STORAGE_KEY = f"{DOMAIN}_events"
 STORAGE_VERSION = 1

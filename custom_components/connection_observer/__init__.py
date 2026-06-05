@@ -8,7 +8,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN
+from homeassistant.helpers.label_registry import async_get as async_get_label_registry
+
+from .const import DOMAIN, OBSERVER_LABELS
 from .coordinator import ConnectionObserverCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,7 +18,18 @@ _LOGGER = logging.getLogger(__name__)
 _PLATFORMS = ["sensor", "binary_sensor"]
 
 
+async def _ensure_observer_labels(hass: HomeAssistant) -> None:
+    """Create the three observer labels in HA if they don't exist yet."""
+    lr = async_get_label_registry(hass)
+    existing_ids = {entry.label_id for entry in lr.labels.values()}
+    for label_id, (name, color, icon) in OBSERVER_LABELS.items():
+        if label_id not in existing_ids:
+            lr.async_create(name=name, color=color, icon=icon)
+            _LOGGER.debug("Connection Observer: created HA label '%s'", label_id)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    await _ensure_observer_labels(hass)
     coordinator = ConnectionObserverCoordinator(hass, entry)
     await coordinator.async_setup()
 

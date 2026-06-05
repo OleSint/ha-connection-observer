@@ -2,8 +2,12 @@
   "config": {
     "step": {
       "user": {
+        "title": "Connection Observer – Etiquetas",
+        "description": "Se han creado tres etiquetas en tu Home Assistant:\n\n🔴 **observer_critical** — monitorizar este dispositivo con la máxima prioridad: sin retraso, sin cooldown, siempre notificado inmediatamente, marcado en el resumen.\n\n👁️ **observer_watch** — monitorizar este dispositivo según la configuración global.\n\n🚫 **observer_ignore** — excluir este dispositivo de toda monitorización.\n\nAsigna estas etiquetas a cualquier entidad en **Ajustes → Etiquetas**. Las etiquetas funcionan independientemente de los protocolos — puedes combinar ambos.\n\n**Este paso es opcional.** Si solo usas protocolos, simplemente haz clic en Siguiente."
+      },
+      "protocols": {
         "title": "Connection Observer – Protocolos",
-        "description": "Selecciona los protocolos de conexión que deseas monitorizar. Solo se muestran los protocolos ya configurados en tu instancia de Home Assistant.",
+        "description": "Selecciona los protocolos de conexión que deseas monitorizar. Solo se muestran los protocolos ya configurados en tu instancia de Home Assistant.\n\n**Opcional** — déjalo vacío si solo usas etiquetas.",
         "data": {
           "protocols": "Protocolos a monitorizar",
           "language": "Idioma de las notificaciones"
@@ -253,15 +257,18 @@
       "test_failed": "Error al enviar la notificación de prueba. Comprueba que el servicio de notificación esté correctamente configurado e inténtalo de nuevo. Desmarca la casilla para omitir la prueba y continuar de todas formas."
     },
     "abort": {
-      "already_configured": "Connection Observer ya está configurado.",
-      "no_protocols": "No se encontraron protocolos compatibles. Configura primero Zigbee, Z-Wave, Bluetooth u otra integración compatible."
+      "already_configured": "Connection Observer ya está configurado."
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "Connection Observer – Etiquetas",
+        "description": "Hay tres etiquetas disponibles en tu Home Assistant:\n\n🔴 **observer_critical** — monitorizar este dispositivo con la máxima prioridad: sin retraso, sin cooldown, siempre notificado inmediatamente, marcado en el resumen.\n\n👁️ **observer_watch** — monitorizar este dispositivo según la configuración global.\n\n🚫 **observer_ignore** — excluir este dispositivo de toda monitorización.\n\nAsigna estas etiquetas a cualquier entidad en **Ajustes → Etiquetas**. Las etiquetas funcionan independientemente de los protocolos — puedes combinar ambos.\n\n**Este paso es opcional.** Si solo usas protocolos, simplemente haz clic en Siguiente."
+      },
+      "protocols": {
         "title": "Connection Observer – Protocolos",
-        "description": "Selecciona los protocolos de conexión que deseas monitorizar. Solo se muestran los protocolos ya configurados en tu instancia de Home Assistant.",
+        "description": "Selecciona los protocolos de conexión que deseas monitorizar. Solo se muestran los protocolos ya configurados en tu instancia de Home Assistant.\n\n**Opcional** — déjalo vacío si solo usas etiquetas.",
         "data": {
           "protocols": "Protocolos a monitorizar",
           "language": "Idioma de las notificaciones"

@@ -243,7 +243,7 @@ def _parse_protocol_delays(
 
 
 # ---------------------------------------------------------------------------
-# Config flow  (5 steps: protocols → notifications → test → advanced → expert)
+# Config flow  (6 steps: labels → protocols → notifications → test → advanced → expert)
 # ---------------------------------------------------------------------------
 
 class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -254,23 +254,32 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         self._data = {}
 
-    # Step 1 – protocols + language
+    # Step 1 – observer labels (informational)
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.FlowResult:
+        if user_input is not None:
+            return await self.async_step_protocols()
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema({}),
+        )
+
+    # Step 2 – protocols + language
+    async def async_step_protocols(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.FlowResult:
         protocols = _available_protocols(self.hass)
-        if not protocols:
-            return self.async_abort(reason="no_protocols")
 
         if user_input is not None:
             self._data.update(user_input)
             return await self.async_step_notifications()
 
         return self.async_show_form(
-            step_id="user",
+            step_id="protocols",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_PROTOCOLS): _protocol_selector(protocols),
+                    vol.Optional(CONF_PROTOCOLS, default=[]): _protocol_selector(protocols),
                     vol.Required(CONF_LANGUAGE, default=LANG_EN): selector.SelectSelector(
                         selector.SelectSelectorConfig(options=_LANGUAGE_OPTIONS)
                     ),
@@ -427,7 +436,7 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 # ---------------------------------------------------------------------------
-# Options flow  (6 steps: protocols → notifications → advanced → expert → templates → test)
+# Options flow  (7 steps: labels → protocols → notifications → advanced → expert → templates → test)
 # ---------------------------------------------------------------------------
 
 class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
@@ -440,8 +449,19 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
         """Merged current config (data + options) as single dict."""
         return {**self._entry.data, **self._entry.options}
 
-    # Step 1 – protocols + language
+    # Step 1 – observer labels (informational)
     async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.FlowResult:
+        if user_input is not None:
+            return await self.async_step_protocols()
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({}),
+        )
+
+    # Step 2 – protocols + language
+    async def async_step_protocols(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.FlowResult:
         if user_input is not None:
@@ -451,10 +471,10 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
         cur = self._cur()
         protocols = _available_protocols(self.hass)
         return self.async_show_form(
-            step_id="init",
+            step_id="protocols",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
+                    vol.Optional(
                         CONF_PROTOCOLS, default=cur.get(CONF_PROTOCOLS, [])
                     ): _protocol_selector(protocols),
                     vol.Required(

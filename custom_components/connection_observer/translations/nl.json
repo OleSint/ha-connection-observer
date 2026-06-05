@@ -2,8 +2,12 @@
   "config": {
     "step": {
       "user": {
+        "title": "Connection Observer – Labels",
+        "description": "Er zijn drie labels aangemaakt in jouw Home Assistant:\n\n🔴 **observer_critical** — bewaak dit apparaat met de hoogste prioriteit: geen vertraging, geen cooldown, altijd direct gemeld, gemarkeerd in de samenvatting.\n\n👁️ **observer_watch** — bewaak dit apparaat volgens de globale instellingen.\n\n🚫 **observer_ignore** — sluit dit apparaat volledig uit van bewaking.\n\nWijs deze labels toe aan willekeurige entiteiten via **Instellingen → Labels**. Labels werken onafhankelijk van protocollen — je kunt beide combineren.\n\n**Deze stap is optioneel.** Als je alleen protocollen gebruikt, klik dan gewoon op Volgende."
+      },
+      "protocols": {
         "title": "Connection Observer – Protocollen",
-        "description": "Selecteer de verbindingsprotocollen die je wilt bewaken. Alleen protocollen die al zijn geconfigureerd in jouw Home Assistant-instantie worden getoond.",
+        "description": "Selecteer de verbindingsprotocollen die je wilt bewaken. Alleen protocollen die al zijn geconfigureerd in jouw Home Assistant-instantie worden getoond.\n\n**Optioneel** — laat leeg als je alleen labels gebruikt.",
         "data": {
           "protocols": "Te bewaken protocollen",
           "language": "Taal van meldingen"
@@ -253,15 +257,18 @@
       "test_failed": "Testmelding mislukt. Controleer of de meldingsdienst correct is geconfigureerd en probeer het opnieuw. Vink het vakje uit om de test over te slaan en toch verder te gaan."
     },
     "abort": {
-      "already_configured": "Connection Observer is al geconfigureerd.",
-      "no_protocols": "Geen ondersteunde protocollen gevonden. Configureer eerst Zigbee, Z-Wave, Bluetooth of een andere ondersteunde integratie."
+      "already_configured": "Connection Observer is al geconfigureerd."
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "Connection Observer – Labels",
+        "description": "Er zijn drie labels beschikbaar in jouw Home Assistant:\n\n🔴 **observer_critical** — bewaak dit apparaat met de hoogste prioriteit: geen vertraging, geen cooldown, altijd direct gemeld, gemarkeerd in de samenvatting.\n\n👁️ **observer_watch** — bewaak dit apparaat volgens de globale instellingen.\n\n🚫 **observer_ignore** — sluit dit apparaat volledig uit van bewaking.\n\nWijs deze labels toe aan willekeurige entiteiten via **Instellingen → Labels**. Labels werken onafhankelijk van protocollen — je kunt beide combineren.\n\n**Deze stap is optioneel.** Als je alleen protocollen gebruikt, klik dan gewoon op Volgende."
+      },
+      "protocols": {
         "title": "Connection Observer – Protocollen",
-        "description": "Selecteer de verbindingsprotocollen die je wilt bewaken. Alleen protocollen die al zijn geconfigureerd in jouw Home Assistant-instantie worden getoond.",
+        "description": "Selecteer de verbindingsprotocollen die je wilt bewaken. Alleen protocollen die al zijn geconfigureerd in jouw Home Assistant-instantie worden getoond.\n\n**Optioneel** — laat leeg als je alleen labels gebruikt.",
         "data": {
           "protocols": "Te bewaken protocollen",
           "language": "Taal van meldingen"

@@ -2,8 +2,12 @@
   "config": {
     "step": {
       "user": {
+        "title": "Connection Observer – Labels",
+        "description": "Trois labels ont été créés dans votre Home Assistant :\n\n🔴 **observer_critical** — surveiller cet appareil en priorité absolue : aucun délai, aucun cooldown, notification immédiate garantie, marqué dans le résumé.\n\n👁️ **observer_watch** — surveiller cet appareil selon les paramètres globaux.\n\n🚫 **observer_ignore** — exclure cet appareil de toute surveillance.\n\nAssignez ces labels à n'importe quelle entité dans **Paramètres → Labels**. Les labels fonctionnent indépendamment des protocoles — les deux peuvent être combinés.\n\n**Cette étape est facultative.** Si vous n'utilisez que des protocoles, cliquez simplement sur Suivant."
+      },
+      "protocols": {
         "title": "Connection Observer – Protocoles",
-        "description": "Sélectionnez les protocoles de connexion à surveiller. Seuls les protocoles déjà configurés dans votre instance Home Assistant sont affichés.",
+        "description": "Sélectionnez les protocoles de connexion à surveiller. Seuls les protocoles déjà configurés dans votre instance Home Assistant sont affichés.\n\n**Facultatif** — laissez vide si vous n'utilisez que des labels.",
         "data": {
           "protocols": "Protocoles à surveiller",
           "language": "Langue des notifications"
@@ -253,15 +257,18 @@
       "test_failed": "Échec de la notification de test. Vérifiez que le service de notification est correctement configuré, puis réessayez. Décochez la case pour ignorer le test et continuer quand même."
     },
     "abort": {
-      "already_configured": "Connection Observer est déjà configuré.",
-      "no_protocols": "Aucun protocole pris en charge n'a été trouvé. Veuillez d'abord configurer Zigbee, Z-Wave, Bluetooth ou une autre intégration prise en charge."
+      "already_configured": "Connection Observer est déjà configuré."
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "Connection Observer – Labels",
+        "description": "Trois labels sont disponibles dans votre Home Assistant :\n\n🔴 **observer_critical** — surveiller cet appareil en priorité absolue : aucun délai, aucun cooldown, notification immédiate garantie, marqué dans le résumé.\n\n👁️ **observer_watch** — surveiller cet appareil selon les paramètres globaux.\n\n🚫 **observer_ignore** — exclure cet appareil de toute surveillance.\n\nAssignez ces labels à n'importe quelle entité dans **Paramètres → Labels**. Les labels fonctionnent indépendamment des protocoles — les deux peuvent être combinés.\n\n**Cette étape est facultative.** Si vous n'utilisez que des protocoles, cliquez simplement sur Suivant."
+      },
+      "protocols": {
         "title": "Connection Observer – Protocoles",
-        "description": "Sélectionnez les protocoles de connexion à surveiller. Seuls les protocoles déjà configurés dans votre instance Home Assistant sont affichés.",
+        "description": "Sélectionnez les protocoles de connexion à surveiller. Seuls les protocoles déjà configurés dans votre instance Home Assistant sont affichés.\n\n**Facultatif** — laissez vide si vous n'utilisez que des labels.",
         "data": {
           "protocols": "Protocoles à surveiller",
           "language": "Langue des notifications"

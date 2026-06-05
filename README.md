@@ -26,7 +26,8 @@
 - **Minimum offline duration** – opt-in: suppress short blips from the summary without losing them
 - **Room / area** – opt-in: include the HA area name in notifications
 - **Manufacturer & model** – opt-in: include device info in immediate notifications
-- **Flood detection** *(v1.1.12)* – when 5 or more devices go offline (or come back online) within 5 seconds, one grouped notification is sent instead of individual alerts — ideal for router reboots and brief infrastructure outages
+- **Label-based monitoring** *(v1.2.0)* – assign `observer_critical`, `observer_watch`, or `observer_ignore` labels to any HA entity; works independently of protocols, no config-flow changes needed after setup
+- **Flood detection** *(v1.2.0)* – when 5 or more devices go offline (or come back online) within 5 seconds, one grouped notification is sent instead of individual alerts — ideal for router reboots and brief infrastructure outages
 - **Device exclusions** – exclude specific devices from monitoring entirely; only monitorable devices (those with entities on a configured protocol) are shown in the selector
 - **Domain exclusions** – exclude entire entity domains (e.g. `sensor`, `button`) from monitoring; `device_tracker` is always excluded automatically
 - **Per-protocol alert delays** *(v1.1.0)* – set individual alert delays per integration family; use "Apply recommended delays" for a one-click starting point
@@ -130,7 +131,8 @@ All settings — plus notification templates and the HA Repairs threshold — ca
 - **Mindestausfallzeit** – opt-in: kurze Aussetzer werden aus der Zusammenfassung herausgefiltert
 - **Raum / Bereich** – opt-in: HA-Bereichsname in Benachrichtigungen einblenden
 - **Hersteller & Modell** – opt-in: Geräteinformationen in Sofortmeldungen einblenden
-- **Flood-Erkennung** *(v1.1.12)* – gehen 5 oder mehr Geräte innerhalb von 5 Sekunden offline (oder wieder online), wird eine einzige Sammelbenachrichtigung gesendet statt Einzelmeldungen — ideal bei Router-Neustarts oder kurzen Infrastrukturausfällen
+- **Label-basierte Überwachung** *(v1.2.0)* – `observer_critical`, `observer_watch` oder `observer_ignore` Labels an beliebige HA-Entitäten vergeben; funktioniert unabhängig von Protokollen, keine Konfigurationsänderung nach dem Setup nötig
+- **Flood-Erkennung** *(v1.2.0)* – gehen 5 oder mehr Geräte innerhalb von 5 Sekunden offline (oder wieder online), wird eine einzige Sammelbenachrichtigung gesendet statt Einzelmeldungen — ideal bei Router-Neustarts oder kurzen Infrastrukturausfällen
 - **Geräte ausschließen** – einzelne Geräte vollständig von der Überwachung ausnehmen; der Selektor zeigt nur überwachbare Geräte (solche mit Entitäten eines konfigurierten Protokolls)
 - **Domänen ausschließen** – ganze Entitätsdomänen von der Überwachung ausnehmen (z. B. `sensor`, `button`); `device_tracker` wird immer automatisch ignoriert
 - **5 Sprachen** – Benachrichtigungen auf Englisch, Deutsch, Französisch, Niederländisch oder Spanisch (konfigurierbar)
