@@ -12,6 +12,7 @@
 3. [Installation](#3-installation)
 4. [Assistant de configuration](#4-assistant-de-configuration)
 5. [Options de configuration](#5-options-de-configuration)
+   - [Labels Observer](#labels-observer)
    - [Délais d'alerte par protocole](#délais-dalerte-par-protocole)
    - [Watch label – indicateurs hors ligne personnalisés](#watch-label--indicateurs-hors-ligne-personnalisés)
 6. [Modèles de notification](#6-modèles-de-notification)
@@ -89,26 +90,44 @@ Toutes les 5 minutes, Connection Observer vérifie activement si les appareils a
 
 ## 4. Assistant de configuration
 
-L'assistant de configuration vous guide à travers cinq étapes. Tous les paramètres peuvent être modifiés ensuite via le bouton **Configurer** de la carte d'intégration.
+L'assistant de configuration vous guide à travers six étapes. Tous les paramètres peuvent être modifiés ensuite via le bouton **Configurer** de la carte d'intégration.
 
-### Étape 1 – Protocoles
+### Étape 1 – Labels
+
+**Connection Observer a automatiquement créé trois labels dans votre instance HA lors de la configuration.**
+
+Cette étape est purement informative — aucune saisie requise. Cliquez simplement sur Soumettre pour continuer.
+
+Les labels sont immédiatement visibles sous **Paramètres → Labels** :
+
+| Label | Signification |
+|---|---|
+| `observer_critical` | Critique – aucun délai, aucun cooldown. Alerte immédiate quelle que soit la configuration. Marqué avec 🔴 dans les résumés. |
+| `observer_watch` | Surveiller – surveillance normale selon les paramètres globaux. |
+| `observer_ignore` | Ignorer – exclusion totale de toute surveillance. |
+
+Assignez un label à n'importe quelle entité de l'appareil souhaité — Connection Observer le prend en compte immédiatement, sans redémarrage. Détails dans [Section 5 – Labels Observer](#labels-observer).
+
+### Étape 2 – Protocoles
 
 **Ce que vous sélectionnez ici détermine quels appareils sont surveillés.**
 
 L'assistant n'affiche que les familles d'intégration réellement configurées dans votre instance HA.
 
+> **Remarque :** La sélection des protocoles est optionnelle. Si vous souhaitez surveiller exclusivement via le [système de labels](#labels-observer), vous pouvez laisser cette étape vide et cliquer sur Soumettre.
+
 | Champ | Description |
 |---|---|
-| **Protocoles à surveiller** | Sélection multiple. Choisissez une ou plusieurs familles d'intégration. |
+| **Protocoles à surveiller** | Sélection multiple, optionnelle. Choisissez une ou plusieurs familles d'intégration. |
 | **Langue des notifications** | Choisissez English, Deutsch, Français, Nederlands ou Español. |
 
 > **Conseil :** Vous pouvez toujours ajouter ou supprimer des protocoles ultérieurement. Les nouveaux appareils d'un protocole sélectionné sont automatiquement pris en charge.
 
-> **Utilisateurs de Zigbee2MQTT :** Les appareils Zigbee2MQTT apparaissent dans HA sous le domaine d'intégration `mqtt` — il n'existe pas d'entrée Zigbee2MQTT séparée. Sélectionnez **MQTT** pour les surveiller. Notez que cela inclura également tous les autres appareils MQTT de votre installation (p. ex. Tasmota, capteurs personnalisés). Un filtrage par étiquettes (labels) est prévu pour une version future afin de permettre un contrôle plus précis.
+> **Utilisateurs de Zigbee2MQTT :** Les appareils Zigbee2MQTT apparaissent dans HA sous le domaine d'intégration `mqtt` — il n'existe pas d'entrée Zigbee2MQTT séparée. Sélectionnez **MQTT** pour les surveiller. Notez que cela inclura également tous les autres appareils MQTT de votre installation (p. ex. Tasmota, capteurs personnalisés). Pour un contrôle plus précis, utilisez le [système de labels](#labels-observer) : assignez `observer_watch` aux appareils MQTT spécifiques à surveiller.
 
 > ⚠️ **Important :** Connection Observer ne peut détecter les appareils que lorsque HA les passe à `unavailable`. Zigbee2MQTT ne le fait **pas** par défaut — vous devez d'abord activer les contrôles de disponibilité : **Zigbee2MQTT → Paramètres → Disponibilité → activé**. Sans ce paramètre, Connection Observer ne peut pas détecter les appareils Z2M hors ligne.
 
-### Étape 2 – Notifications
+### Étape 3 – Notifications
 
 **Configurez comment et quand recevoir des alertes.**
 
@@ -121,7 +140,7 @@ L'assistant n'affiche que les familles d'intégration réellement configurées d
 | **Jours du résumé** | Jours de la semaine pour le résumé. Par défaut : tous les jours. |
 | **Notifier à la reconnexion** | Opt-in. Notification lorsqu'un appareil revient en ligne. Par défaut : **désactivé**. |
 
-### Étape 3 – Test
+### Étape 4 – Test
 
 Une étape de test optionnelle envoie une notification à tous vos services sélectionnés pour vérifier que tout fonctionne correctement.
 
@@ -129,10 +148,10 @@ Une étape de test optionnelle envoie une notification à tous vos services sél
 - Décochez la case pour ignorer cette étape.
 - En cas d'échec, une erreur s'affiche. Vous pouvez réessayer ou décocher la case pour continuer quand même.
 
-### Étape 4 – Avancé
+### Étape 5 – Avancé
 
 **Tous les champs sont facultatifs. La valeur 0 désactive la fonctionnalité correspondante.**  
-Le **délai d'alerte global** défini ici s'applique à tous les protocoles, sauf si un délai spécifique est défini à l'étape 5.
+Le **délai d'alerte global** défini ici s'applique à tous les protocoles, sauf si un délai spécifique est défini à l'étape 6.
 
 | Champ | Description |
 |---|---|
@@ -144,13 +163,13 @@ Le **délai d'alerte global** défini ici s'applique à tous les protocoles, sau
 | **Domaines d'entités exclus** | Exclure des domaines d'entités entiers de la surveillance (ex. `sensor`, `button`). Les entités `device_tracker` sont toujours exclues automatiquement. |
 | **Appareils exclus** | Liste d'appareils spécifiques à exclure entièrement de la surveillance. Seuls les appareils disposant d'au moins une entité sur un protocole configuré sont affichés — les services virtuels (HACS, Superviseur, Add-ons, etc.) n'apparaissent pas. Si un appareil est ajouté alors qu'il est hors ligne, il est immédiatement retiré de la liste hors ligne et tout problème HA Repairs ouvert est résolu. |
 
-### Étape 5 – Expert
+### Étape 6 – Expert
 
 **Les deux fonctions sont facultatives. Ignorez cette étape si vous n'avez besoin que du délai global.**
 
 #### Délais d'alerte par protocole
 
-Chaque protocole sélectionné à l'étape 1 apparaît ici avec son propre champ de délai. Une valeur **0** signifie « utiliser le délai d'alerte global de l'étape 4 ». Saisissez une valeur positive pour remplacer le délai global pour ce protocole spécifique.
+Chaque protocole sélectionné à l'étape 2 apparaît ici avec son propre champ de délai. Une valeur **0** signifie « utiliser le délai d'alerte global de l'étape 5 ». Saisissez une valeur positive pour remplacer le délai global pour ce protocole spécifique.
 
 **Conseil : Appliquer les délais recommandés**  
 Cochez la case **Appliquer les délais recommandés pour tous les protocoles** et cliquez sur Soumettre. Tous les champs de délai sont pré-remplis avec les valeurs recommandées pour chaque protocole. Vous pouvez ensuite ajuster les valeurs individuelles ou les accepter telles quelles.
@@ -201,6 +220,27 @@ Voir la [Section 7](#7-intégration-ha-repairs) pour plus de détails.
 Sept champs de texte optionnels permettent de personnaliser le format de n'importe quelle notification. Laissez un champ vide pour utiliser le texte par défaut selon la langue.
 
 Voir la [Section 6](#6-modèles-de-notification) pour plus de détails.
+
+### Labels Observer
+
+Connection Observer crée automatiquement trois labels dans Home Assistant lors de la configuration. Ils apparaissent immédiatement sous **Paramètres → Labels** et peuvent être assignés à n'importe quelle entité — sans redémarrage, sans modification de configuration.
+
+| Label | Couleur | Comportement |
+|---|---|---|
+| `observer_critical` | 🔴 Rouge | Aucun délai, aucun cooldown — alerte immédiate indépendamment de tous les paramètres globaux. Marqué avec 🔴 dans les résumés. Contourne le tampon de flood. |
+| `observer_watch` | 🔵 Bleu | Surveillance normale selon les paramètres globaux (délai, cooldown, etc.). |
+| `observer_ignore` | ⚫ Gris | Exclusion totale — l'appareil est complètement ignoré par Connection Observer. |
+
+**Priorité :** `observer_ignore` > `observer_critical` > `observer_watch` > surveillance par protocole
+
+**Conflits :** Si un appareil possède à la fois `observer_ignore` et `observer_critical` ou `observer_watch`, `observer_ignore` l'emporte toujours. Un avertissement apparaît dans le prochain résumé.
+
+**Propriétés clés :**
+- Un label sur **une seule entité** de l'appareil suffit — tout l'appareil est traité en conséquence.
+- Les labels prennent effet **immédiatement** et **indépendamment de la sélection des protocoles**.
+- Les appareils peuvent être couverts à la fois par des protocoles et des labels — le label a la priorité.
+
+> **Conseil :** Assignez `observer_critical` aux appareils critiques (détecteurs d'eau, détecteurs de fumée), utilisez `observer_ignore` pour les appareils bruyants et `observer_watch` pour surveiller un seul appareil sans activer tout un protocole.
 
 ### Délais d'alerte par protocole
 
@@ -591,9 +631,11 @@ Si moins de 5 appareils sont concernés, des notifications individuelles sont en
 
 > **Résumé des connexions**
 > 📋 3 appareil(s) affecté(s) depuis le dernier résumé :
-> • Capteur Cuisine [Cuisine] (zha) : hors ligne depuis 05/19 07:15, de nouveau en ligne à 07:42
+> • 🔴 Détecteur d'eau Cave [Cave] (zha) : hors ligne depuis 05/19 07:15, de nouveau en ligne à 07:42
 > • Ampoule Chambre [Chambre] (hue) : hors ligne depuis 05/19 09:05 ⚠️ toujours hors ligne
 > • Détecteur Couloir (esphome) : hors ligne depuis 05/19 11:20, de nouveau en ligne à 11:28
+
+Le préfixe 🔴 signale les appareils avec le label `observer_critical`.
 
 ---
 
@@ -633,6 +675,19 @@ Sélectionnez plusieurs services dans le champ de service de notification. Tous 
 ### Exclure une entité spécifique
 
 Ajoutez-le à la liste *Appareils exclus* dans les paramètres avancés. Toutes les entités de l'appareil seront ignorées. Si l'appareil est actuellement hors ligne au moment de la sauvegarde, il est immédiatement retiré de la liste hors ligne et tout problème HA Repairs ouvert est résolu automatiquement.
+
+### Contrôle précis avec les labels Observer
+
+Le système de labels permet des exceptions par appareil sans ouvrir la configuration :
+
+**Appareil critique (p. ex. détecteur d'eau, détecteur de fumée) :**  
+Assignez `observer_critical` à une entité de l'appareil → alerte immédiate, sans délai, sans cooldown, 🔴 dans les résumés.
+
+**Exclure temporairement un appareil (p. ex. pendant des travaux) :**  
+Assignez `observer_ignore` → l'appareil est totalement silencieux. Retirez le label une fois les travaux terminés.
+
+**Surveiller un seul appareil MQTT sans activer tout le protocole MQTT :**  
+Assignez `observer_watch` → seul cet appareil est pris en charge.
 
 ---
 

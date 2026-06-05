@@ -241,6 +241,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.2.0 *(released)*
+
+**Label-based scope filtering**  
+Three HA labels are created automatically during setup: `observer_critical` (immediate alert, no delay, no cooldown, 🔴 in summaries), `observer_watch` (normal monitoring per global settings), and `observer_ignore` (full exclusion). Assign a label to any entity of a device — it takes effect immediately with no restart or config change needed. Labels work independently of protocol selection and override protocol-based monitoring.
+
 ### v1.1.0 *(released)*
 
 **Per-protocol alert delays**  
@@ -248,12 +253,6 @@ Each integration family can now have its own alert delay overriding the global s
 
 **Watch label – custom offline indicators**  
 Label any HA entity with a custom HA label name. Connection Observer monitors those entities and creates an offline event when their state turns `on`, and closes it when the state returns to `off`. This enables real-time monitoring of passive BLE devices (BTHome, GARDENA Bluetooth), cloud devices, or any custom scenario where `unavailable` is not used — pair it with a template binary sensor watching `last_updated` for a complete BTHome freshness monitor.
-
-## Roadmap
-
-### v1.2.0 — Label-based scope filtering *(planned)*
-
-Use HA's label system to define monitoring scope without maintaining entity lists — monitor everything tagged `critical`, exclude anything tagged `ignore`.
 
 ---
 

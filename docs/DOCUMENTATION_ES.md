@@ -12,6 +12,7 @@
 3. [Instalación](#3-instalación)
 4. [Asistente de configuración](#4-asistente-de-configuración)
 5. [Opciones de configuración](#5-opciones-de-configuración)
+   - [Labels de Observer](#labels-de-observer)
    - [Retrasos de alerta por protocolo](#retrasos-de-alerta-por-protocolo)
    - [Watch label – indicadores de desconexión personalizados](#watch-label--indicadores-de-desconexión-personalizados)
 6. [Plantillas de notificación](#6-plantillas-de-notificación)
@@ -89,26 +90,44 @@ Cada 5 minutos, Connection Observer verifica activamente si los dispositivos con
 
 ## 4. Asistente de configuración
 
-El asistente de configuración te guía a través de cinco pasos. Todos los ajustes pueden modificarse posteriormente mediante el botón **Configurar** de la tarjeta de integración.
+El asistente de configuración te guía a través de seis pasos. Todos los ajustes pueden modificarse posteriormente mediante el botón **Configurar** de la tarjeta de integración.
 
-### Paso 1 – Protocolos
+### Paso 1 – Labels
 
-**Lo que selecciones aquí determina qué dispositivos se monitorización.**
+**Connection Observer ha creado automáticamente tres labels en tu instancia de HA durante la configuración.**
+
+Este paso es puramente informativo — no se requiere ninguna entrada. Simplemente haz clic en Enviar para continuar.
+
+Los labels son inmediatamente visibles en **Ajustes → Etiquetas**:
+
+| Label | Significado |
+|---|---|
+| `observer_critical` | Crítico – sin retraso, sin cooldown. Alerta inmediata independientemente de todos los ajustes. Marcado con 🔴 en los resúmenes. |
+| `observer_watch` | Vigilar – monitorización normal según los ajustes globales. |
+| `observer_ignore` | Ignorar – exclusión total de toda monitorización. |
+
+Asigna un label a cualquier entidad del dispositivo deseado — Connection Observer lo detecta inmediatamente, sin reinicio. Detalles en [Sección 5 – Labels de Observer](#labels-de-observer).
+
+### Paso 2 – Protocolos
+
+**Lo que selecciones aquí determina qué dispositivos se monitorizan.**
 
 El asistente solo muestra las familias de integración que están realmente configuradas en tu instancia de HA.
 
+> **Nota:** La selección de protocolos es opcional. Si deseas monitorizar exclusivamente mediante el [sistema de labels](#labels-de-observer), puedes dejar este paso vacío y hacer clic en Enviar.
+
 | Campo | Descripción |
 |---|---|
-| **Protocolos a monitorizar** | Selección múltiple. Elige una o más familias de integración. |
+| **Protocolos a monitorizar** | Selección múltiple, opcional. Elige una o más familias de integración. |
 | **Idioma de las notificaciones** | Elige English, Deutsch, Français, Nederlands o Español. |
 
 > **Consejo:** Siempre puedes añadir o eliminar protocolos más tarde. Los nuevos dispositivos de un protocolo seleccionado se incluyen automáticamente.
 
-> **Usuarios de Zigbee2MQTT:** Los dispositivos Zigbee2MQTT aparecen en HA bajo el dominio de integración `mqtt` — no existe una entrada separada para Zigbee2MQTT. Selecciona **MQTT** para monitorizarlos. Ten en cuenta que esto también incluirá el resto de dispositivos MQTT de tu instalación (p. ej. Tasmota, sensores personalizados). Para un control más preciso, el filtrado por etiquetas (labels) está previsto para una versión futura.
+> **Usuarios de Zigbee2MQTT:** Los dispositivos Zigbee2MQTT aparecen en HA bajo el dominio de integración `mqtt` — no existe una entrada separada para Zigbee2MQTT. Selecciona **MQTT** para monitorizarlos. Ten en cuenta que esto también incluirá el resto de dispositivos MQTT de tu instalación (p. ej. Tasmota, sensores personalizados). Para un control más preciso, usa el [sistema de labels](#labels-de-observer): asigna `observer_watch` a los dispositivos MQTT específicos que desees monitorizar.
 
 > ⚠️ **Importante:** Connection Observer solo puede detectar dispositivos cuando HA los pone en `unavailable`. Zigbee2MQTT **no** lo hace por defecto — primero debes activar las comprobaciones de disponibilidad: **Zigbee2MQTT → Ajustes → Disponibilidad → activado**. Sin este ajuste, Connection Observer no puede detectar los dispositivos Z2M sin conexión.
 
-### Paso 2 – Notificaciones
+### Paso 3 – Notificaciones
 
 **Configura cómo y cuándo recibir alertas.**
 
@@ -121,7 +140,7 @@ El asistente solo muestra las familias de integración que están realmente conf
 | **Días del resumen** | Días de la semana para el resumen. Por defecto: todos los días. |
 | **Notificar al reconectarse** | Opt-in. Notificación cuando un dispositivo vuelve a estar en línea. Por defecto: **desactivado**. |
 
-### Paso 3 – Prueba
+### Paso 4 – Prueba
 
 Un paso de prueba opcional envía una notificación a todos tus servicios seleccionados para verificar que todo funciona correctamente.
 
@@ -129,10 +148,10 @@ Un paso de prueba opcional envía una notificación a todos tus servicios selecc
 - Desmarca la casilla para omitir este paso.
 - Si la prueba falla, se muestra un error. Puedes intentarlo de nuevo o desmarcar la casilla para continuar de todas formas.
 
-### Paso 4 – Avanzado
+### Paso 5 – Avanzado
 
 **Todos los campos son opcionales. El valor 0 desactiva la función correspondiente.**  
-El **retraso de alerta global** configurado aquí se aplica a todos los protocolos, salvo que se defina un retraso específico en el Paso 5.
+El **retraso de alerta global** configurado aquí se aplica a todos los protocolos, salvo que se defina un retraso específico en el Paso 6.
 
 | Campo | Descripción |
 |---|---|
@@ -144,13 +163,13 @@ El **retraso de alerta global** configurado aquí se aplica a todos los protocol
 | **Dominios de entidades excluidos** | Excluye dominios de entidades completos (p. ej. `sensor`, `button`). Las entidades `device_tracker` siempre se excluyen automáticamente. |
 | **Dispositivos excluidos** | Lista de dispositivos específicos a excluir completamente de la monitorización. Solo se muestran los dispositivos que tienen al menos una entidad en un protocolo configurado — los servicios virtuales (HACS, Supervisor, complementos, etc.) no aparecen. Si se añade un dispositivo mientras está sin conexión, se elimina inmediatamente de la lista de dispositivos sin conexión y cualquier incidencia abierta en HA Repairs se resuelve automáticamente. |
 
-### Paso 5 – Experto
+### Paso 6 – Experto
 
 **Ambas funciones son opcionales. Omite este paso si solo necesitas el retraso global.**
 
 #### Retrasos de alerta por protocolo
 
-Cada protocolo que seleccionaste en el Paso 1 aparece aquí con su propio campo de retraso. Un valor de **0** significa "usar el retraso de alerta global del Paso 4". Introduce un valor positivo para anular el retraso global para ese protocolo específico.
+Cada protocolo que seleccionaste en el Paso 2 aparece aquí con su propio campo de retraso. Un valor de **0** significa "usar el retraso de alerta global del Paso 5". Introduce un valor positivo para anular el retraso global para ese protocolo específico.
 
 **Consejo: Aplicar retrasos recomendados**  
 Marca la casilla **Aplicar retrasos recomendados para todos los protocolos** y haz clic en Enviar. Todos los campos de retraso se rellenan automáticamente con los valores recomendados. Puedes ajustar los valores individuales o aceptarlos tal como están.
@@ -201,6 +220,27 @@ Consulta la [Sección 7](#7-integración-ha-repairs) para más detalles.
 Siete campos de texto opcionales permiten personalizar el formato de cualquier notificación. Deja un campo vacío para usar el texto predeterminado según el idioma.
 
 Consulta la [Sección 6](#6-plantillas-de-notificación) para más detalles.
+
+### Labels de Observer
+
+Connection Observer crea automáticamente tres labels en Home Assistant durante la configuración. Son inmediatamente visibles en **Ajustes → Etiquetas** y pueden asignarse a cualquier entidad — sin reinicio, sin cambios de configuración.
+
+| Label | Color | Comportamiento |
+|---|---|---|
+| `observer_critical` | 🔴 Rojo | Sin retraso, sin cooldown — alerta inmediata independientemente de todos los ajustes globales. Marcado con 🔴 en los resúmenes. Omite el búfer de flood. |
+| `observer_watch` | 🔵 Azul | Monitorización normal según los ajustes globales (retraso, cooldown, etc.). |
+| `observer_ignore` | ⚫ Gris | Exclusión total — el dispositivo es completamente ignorado por Connection Observer. |
+
+**Prioridad:** `observer_ignore` > `observer_critical` > `observer_watch` > monitorización basada en protocolo
+
+**Conflictos:** Si un dispositivo tiene tanto `observer_ignore` como `observer_critical` o `observer_watch`, `observer_ignore` siempre prevalece. Aparece una advertencia en el próximo resumen.
+
+**Propiedades clave:**
+- Un label en **cualquier entidad** del dispositivo es suficiente — todo el dispositivo se trata en consecuencia.
+- Los labels surten efecto **inmediatamente** e **independientemente de la selección de protocolos**.
+- Los dispositivos pueden estar cubiertos tanto por protocolos como por labels simultáneamente — el label tiene prioridad.
+
+> **Consejo:** Asigna `observer_critical` a dispositivos críticos (detectores de agua, detectores de humo), usa `observer_ignore` para silenciar dispositivos ruidosos y `observer_watch` para monitorizar un dispositivo individual sin activar todo un protocolo.
 
 ### Retrasos de alerta por protocolo
 
@@ -593,9 +633,11 @@ Si hay menos de 5 dispositivos afectados, se envían notificaciones individuales
 
 > **Resumen de conexiones**
 > 📋 3 dispositivo(s) afectado(s) desde el último resumen:
-> • Sensor Cocina [Cocina] (zha): sin conexión desde 05/19 07:15, de nuevo en línea a las 07:42
+> • 🔴 Detector de agua Sótano [Sótano] (zha): sin conexión desde 05/19 07:15, de nuevo en línea a las 07:42
 > • Bombilla Dormitorio [Dormitorio] (hue): sin conexión desde 05/19 09:05 ⚠️ todavía sin conexión
 > • Detector Pasillo (esphome): sin conexión desde 05/19 11:20, de nuevo en línea a las 11:28
+
+El prefijo 🔴 indica dispositivos con el label `observer_critical`.
 
 ---
 
@@ -635,6 +677,19 @@ Selecciona varios servicios en el campo de servicio de notificación. Todos reci
 ### Excluir una entidad específica
 
 Añádelo a la lista *Dispositivos excluidos* en los ajustes avanzados. Todas las entidades de ese dispositivo serán ignoradas. Si el dispositivo está sin conexión en el momento de guardar, se elimina inmediatamente de la lista de dispositivos sin conexión y cualquier incidencia abierta en HA Repairs se resuelve automáticamente.
+
+### Control granular con los labels de Observer
+
+El sistema de labels permite excepciones por dispositivo sin abrir la configuración:
+
+**Dispositivo crítico (p. ej. detector de agua, detector de humo):**  
+Asigna `observer_critical` a una entidad del dispositivo → alerta inmediata sin retraso ni cooldown, 🔴 en los resúmenes.
+
+**Excluir temporalmente un dispositivo (p. ej. durante obras):**  
+Asigna `observer_ignore` → el dispositivo queda totalmente silenciado. Elimina el label cuando terminen las obras.
+
+**Monitorizar un solo dispositivo MQTT sin activar todo el protocolo MQTT:**  
+Asigna `observer_watch` → solo ese dispositivo es monitorizado.
 
 ---
 

@@ -12,6 +12,7 @@
 3. [Installation](#3-installation)
 4. [Setup-Assistent](#4-setup-assistent)
 5. [Konfigurationsoptionen](#5-konfigurationsoptionen)
+   - [Observer-Labels](#observer-labels)
    - [Protokollspezifische Verzögerungen](#protokollspezifische-verzögerungen)
    - [Watch-Label – eigene Offline-Indikatoren](#watch-label--eigene-offline-indikatoren)
 6. [Benachrichtigungsvorlagen](#6-benachrichtigungsvorlagen)
@@ -89,26 +90,44 @@ Alle 5 Minuten prüft Connection Observer aktiv, ob Geräte mit offenen Ereignis
 
 ## 4. Setup-Assistent
 
-Der Setup-Assistent führt dich durch fünf Schritte. Alle Einstellungen können anschließend über den **Konfigurieren**-Button der Integrationskarte geändert werden.
+Der Setup-Assistent führt dich durch sechs Schritte. Alle Einstellungen können anschließend über den **Konfigurieren**-Button der Integrationskarte geändert werden.
 
-### Schritt 1 – Protokolle
+### Schritt 1 – Labels
+
+**Connection Observer hat beim Setup automatisch drei Labels in deiner HA-Instanz angelegt.**
+
+Dieser Schritt ist rein informativ — keine Eingabe erforderlich. Klicke einfach auf Weiter.
+
+Die Labels sind sofort unter **Einstellungen → Labels** sichtbar:
+
+| Label | Bedeutung |
+|---|---|
+| `observer_critical` | Kritisch – kein Delay, kein Cooldown. Sofortige Meldung, unabhängig von allen Einstellungen. In der Zusammenfassung mit 🔴 markiert. |
+| `observer_watch` | Überwachen – normale Überwachung gemäß den globalen Einstellungen. |
+| `observer_ignore` | Ignorieren – vollständiger Ausschluss von jeder Überwachung. |
+
+Weise ein Label einer beliebigen Entität des gewünschten Geräts zu — Connection Observer erkennt es sofort, ohne Neustart oder Konfigurationsänderung. Details in [Abschnitt 5 – Observer-Labels](#observer-labels).
+
+### Schritt 2 – Protokolle
 
 **Was du hier auswählst, legt fest, welche Geräte überwacht werden.**
 
 Der Assistent zeigt nur Integrationsfamilien an, die in deiner HA-Instanz tatsächlich eingerichtet sind.
 
+> **Hinweis:** Die Protokollauswahl ist optional. Wenn du ausschließlich das [Label-System](#observer-labels) zur Überwachung nutzen möchtest, kannst du diesen Schritt leer lassen und direkt auf Weiter klicken.
+
 | Feld | Beschreibung |
 |---|---|
-| **Zu überwachende Protokolle** | Mehrfachauswahl. Wähle eine oder mehrere Integrationsfamilien aus. |
+| **Zu überwachende Protokolle** | Mehrfachauswahl, optional. Wähle eine oder mehrere Integrationsfamilien aus. |
 | **Benachrichtigungssprache** | Wähle Englisch, Deutsch, Français, Nederlands oder Español. |
 
 > **Tipp:** Du kannst Protokolle jederzeit hinzufügen oder entfernen. Neu hinzugefügte Geräte eines ausgewählten Protokolls werden automatisch erfasst.
 
-> **Zigbee2MQTT-Nutzer:** Zigbee2MQTT-Geräte erscheinen in HA unter dem `mqtt`-Integrations-Domain — es gibt keinen separaten Zigbee2MQTT-Eintrag. Wähle **MQTT**, um sie zu überwachen. Beachte dabei, dass dadurch auch alle anderen MQTT-basierten Geräte erfasst werden (z.B. Tasmota, eigene Sensoren). Für eine feinere Steuerung ist eine Label-basierte Filterung in einer zukünftigen Version geplant.
+> **Zigbee2MQTT-Nutzer:** Zigbee2MQTT-Geräte erscheinen in HA unter dem `mqtt`-Integrations-Domain — es gibt keinen separaten Zigbee2MQTT-Eintrag. Wähle **MQTT**, um sie zu überwachen. Beachte dabei, dass dadurch auch alle anderen MQTT-basierten Geräte erfasst werden (z. B. Tasmota, eigene Sensoren). Für eine feinere Steuerung nutze das [Label-System](#observer-labels): Weise einzelnen MQTT-Geräten das Label `observer_watch` zu.
 >
 > ⚠️ **Wichtig:** Connection Observer erkennt Geräte nur, wenn HA sie auf `unavailable` setzt. Zigbee2MQTT tut dies standardmäßig **nicht** — die Verfügbarkeitsprüfung muss erst aktiviert werden: **Zigbee2MQTT → Einstellungen → Verfügbarkeit → aktiviert**. Ohne diese Einstellung bleibt Connection Observer für Z2M-Geräte wirkungslos.
 
-### Schritt 2 – Benachrichtigungen
+### Schritt 3 – Benachrichtigungen
 
 **Lege fest, wie und wann du Benachrichtigungen erhältst.**
 
@@ -121,7 +140,7 @@ Der Assistent zeigt nur Integrationsfamilien an, die in deiner HA-Instanz tatsä
 | **Tage der Zusammenfassung** | Wochentage für die Zusammenfassung. Standard: täglich. |
 | **Benachrichtigung bei Wiederverbindung** | Opt-in. Benachrichtigung, wenn ein Gerät wieder online geht. Standard: **aus**. |
 
-### Schritt 3 – Test
+### Schritt 4 – Test
 
 Ein optionaler Testschritt sendet eine Benachrichtigung an alle ausgewählten Dienste, damit du prüfen kannst, ob alles korrekt funktioniert.
 
@@ -129,10 +148,10 @@ Ein optionaler Testschritt sendet eine Benachrichtigung an alle ausgewählten Di
 - Deaktiviere das Kontrollkästchen, um diesen Schritt zu überspringen.
 - Schlägt der Test fehl, wird eine Fehlermeldung angezeigt. Du kannst es erneut versuchen oder das Kontrollkästchen deaktivieren und trotzdem fortfahren.
 
-### Schritt 4 – Erweitert
+### Schritt 5 – Erweitert
 
 **Alle Felder in diesem Schritt sind optional. Der Wert 0 deaktiviert die jeweilige Funktion.**  
-Die hier eingestellte **globale Verzögerung** gilt für alle Protokolle, sofern in Schritt 5 kein eigener Wert gesetzt wird.
+Die hier eingestellte **globale Verzögerung** gilt für alle Protokolle, sofern in Schritt 6 kein eigener Wert gesetzt wird.
 
 | Feld | Beschreibung |
 |---|---|
@@ -144,13 +163,13 @@ Die hier eingestellte **globale Verzögerung** gilt für alle Protokolle, sofern
 | **Ausgeschlossene Entitätsdomänen** | Ganze Entitätsdomänen von der Überwachung ausschließen (z. B. `sensor`, `button`). Aus der Liste auswählen oder eigene Domäne eingeben. `device_tracker`-Entitäten werden immer automatisch ignoriert und müssen hier nicht eingetragen werden. |
 | **Ausgeschlossene Geräte** | Liste von Geräten, die vollständig von der Überwachung ausgenommen werden. Es werden nur Geräte angezeigt, die mindestens eine Entität mit einem konfigurierten Protokoll besitzen — virtuelle Dienste (HACS, Supervisor, Add-ons usw.) erscheinen nicht. Wird ein Gerät ausgeschlossen, während es gerade offline ist, wird es sofort aus der Offline-Liste entfernt und ein offener HA-Reparatureintrag automatisch aufgelöst. |
 
-### Schritt 5 – Experte
+### Schritt 6 – Experte
 
 **Beide Felder sind optional. Überspringe diesen Schritt, wenn du nur die globale Verzögerung benötigst.**
 
 #### Protokollspezifische Verzögerungen
 
-Jedes in Schritt 1 gewählte Protokoll erscheint hier mit einem eigenen Verzögerungsfeld. Der Wert **0** bedeutet „globale Verzögerung aus Schritt 4 verwenden". Ein positiver Wert überschreibt die globale Verzögerung für dieses Protokoll.
+Jedes in Schritt 2 gewählte Protokoll erscheint hier mit einem eigenen Verzögerungsfeld. Der Wert **0** bedeutet „globale Verzögerung aus Schritt 5 verwenden". Ein positiver Wert überschreibt die globale Verzögerung für dieses Protokoll.
 
 **Tipp: Ein-Klick-Empfehlungen**  
 Setze das Häkchen bei **Empfohlene Verzögerungen für alle Protokolle anwenden** und klicke auf Weiter. Alle Felder werden automatisch mit den empfohlenen Werten gefüllt. Du kannst einzelne Werte danach noch anpassen.
@@ -201,6 +220,27 @@ Siehe [Abschnitt 7](#7-ha-reparaturen-integration) für Details.
 Sieben optionale Textfelder ermöglichen es, das Standard-Benachrichtigungsformat für jeden Benachrichtigungstyp anzupassen. Ein leeres Feld verwendet den sprachabhängigen Standard.
 
 Siehe [Abschnitt 6](#6-benachrichtigungsvorlagen) für Details.
+
+### Observer-Labels
+
+Connection Observer legt beim Setup automatisch drei Labels in Home Assistant an. Sie erscheinen sofort unter **Einstellungen → Labels** und können beliebigen Entitäten zugewiesen werden — ohne Neustart, ohne Konfigurationsänderung.
+
+| Label | Farbe | Verhalten |
+|---|---|---|
+| `observer_critical` | 🔴 Rot | Kein Delay, kein Cooldown — immer sofortige Benachrichtigung, unabhängig von allen globalen Einstellungen. In der Zusammenfassung mit 🔴 markiert. Bypasses den Flood-Buffer. |
+| `observer_watch` | 🔵 Blau | Normale Überwachung gemäß den globalen Einstellungen (Delay, Cooldown usw.). |
+| `observer_ignore` | ⚫ Grau | Vollständiger Ausschluss — das Gerät wird von Connection Observer komplett ignoriert. |
+
+**Priorität:** `observer_ignore` > `observer_critical` > `observer_watch` > Protokoll-basierte Überwachung
+
+**Konflikte:** Hat ein Gerät sowohl `observer_ignore` als auch `observer_critical` oder `observer_watch`, gewinnt `observer_ignore` immer. Ein Warnhinweis erscheint in der nächsten Zusammenfassung.
+
+**Eigenschaften:**
+- Ein Label an **einer einzigen Entität** des Geräts genügt — das gesamte Gerät wird entsprechend behandelt.
+- Labels wirken **sofort** und **protokoll-unabhängig**.
+- Geräte können gleichzeitig über Protokolle und Labels überwacht werden — das Label hat dabei Vorrang.
+
+> **Tipp:** Weise kritischen Geräten (Wassermelder, Rauchmelder) `observer_critical` zu, störende Geräte mit `observer_ignore` ausschließen und `observer_watch` nutzen, um Einzelgeräte ohne Protokollauswahl zu erfassen.
 
 ### Protokollspezifische Verzögerungen
 
@@ -595,9 +635,11 @@ Sind weniger als 5 Geräte betroffen, werden weiterhin normale Einzelbenachricht
 
 > **Verbindungs-Zusammenfassung**
 > 📋 3 Gerät(e) seit der letzten Zusammenfassung betroffen:
-> • Küchen-Sensor [Küche] (zha): offline seit 19.05. 07:15, wieder online um 07:42
+> • 🔴 Wassermelder Keller [Keller] (zha): offline seit 19.05. 07:15, wieder online um 07:42
 > • Schlafzimmer Birne [Schlafzimmer] (hue): offline seit 19.05. 09:05 ⚠️ noch offline
 > • Flur Bewegungsmelder (esphome): offline seit 19.05. 11:20, wieder online um 11:28
+
+Das 🔴-Präfix markiert Geräte mit dem Label `observer_critical`.
 
 ---
 
@@ -637,6 +679,19 @@ Wähle mehrere Dienste im Benachrichtigungsdienst-Feld aus. Alle Dienste erhalte
 ### Gerät ausschließen
 
 Füge es zur Liste *Ausgeschlossene Geräte* in den Erweitert-Einstellungen hinzu. Alle Entitäten des Geräts werden dann ignoriert. Ist das Gerät zum Zeitpunkt des Speicherns offline, wird es sofort aus der Offline-Liste entfernt und ein offener HA-Reparatureintrag automatisch aufgelöst.
+
+### Geräte mit Observer-Labels gezielt steuern
+
+Das Label-System bietet feingranulare Ausnahmen, ohne die Konfiguration öffnen zu müssen:
+
+**Kritisches Gerät (z. B. Wassermelder, Rauchmelder):**  
+`observer_critical` an einer Entität des Geräts vergeben → sofortige Meldung ohne Delay und Cooldown, 🔴-Markierung in der Zusammenfassung.
+
+**Gerät temporär ausschließen (z. B. während einer Renovierung):**  
+`observer_ignore` vergeben → Gerät wird vollständig ignoriert. Label einfach wieder entfernen, wenn die Renovierung abgeschlossen ist.
+
+**Einzelnes MQTT-Gerät überwachen, ohne das gesamte MQTT-Protokoll zu aktivieren:**  
+`observer_watch` vergeben → nur dieses eine Gerät wird erfasst.
 
 ---
 

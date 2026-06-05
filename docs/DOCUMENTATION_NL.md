@@ -12,6 +12,7 @@
 3. [Installatie](#3-installatie)
 4. [Installatiewizard](#4-installatiewizard)
 5. [Configuratieopties](#5-configuratieopties)
+   - [Observer-labels](#observer-labels)
    - [Vertragingen per protocol](#vertragingen-per-protocol)
    - [Watch label – aangepaste offline-indicatoren](#watch-label--aangepaste-offline-indicatoren)
 6. [Meldingssjablonen](#6-meldingssjablonen)
@@ -89,26 +90,44 @@ Elke 5 minuten controleert Connection Observer actief of apparaten met open verb
 
 ## 4. Installatiewizard
 
-De installatiewizard leidt je door vijf stappen. Alle instellingen kunnen achteraf worden gewijzigd via de knop **Configureren** op de integratiekaart.
+De installatiewizard leidt je door zes stappen. Alle instellingen kunnen achteraf worden gewijzigd via de knop **Configureren** op de integratiekaart.
 
-### Stap 1 – Protocollen
+### Stap 1 – Labels
+
+**Connection Observer heeft tijdens de installatie automatisch drie labels aangemaakt in jouw HA-instantie.**
+
+Deze stap is puur informatief — er is geen invoer vereist. Klik gewoon op Verzenden om door te gaan.
+
+De labels zijn onmiddellijk zichtbaar onder **Instellingen → Labels**:
+
+| Label | Betekenis |
+|---|---|
+| `observer_critical` | Kritiek – geen vertraging, geen cooldown. Directe melding ongeacht alle instellingen. Gemarkeerd met 🔴 in samenvattingen. |
+| `observer_watch` | Bewaken – normale bewaking volgens de globale instellingen. |
+| `observer_ignore` | Negeren – volledige uitsluiting van alle bewaking. |
+
+Wijs een label toe aan een willekeurige entiteit van het gewenste apparaat — Connection Observer pikt het onmiddellijk op, zonder herstart. Details in [Sectie 5 – Observer-labels](#observer-labels).
+
+### Stap 2 – Protocollen
 
 **Wat je hier selecteert, bepaalt welke apparaten worden bewaakt.**
 
 De wizard toont alleen integratifamilies die daadwerkelijk zijn geconfigureerd in jouw HA-instantie.
 
+> **Opmerking:** Protocolselectie is optioneel. Als je uitsluitend via het [labelsysteem](#observer-labels) wilt bewaken, kun je deze stap leeg laten en direct op Verzenden klikken.
+
 | Veld | Beschrijving |
 |---|---|
-| **Te bewaken protocollen** | Meervoudige selectie. Kies één of meer integratifamilies. |
+| **Te bewaken protocollen** | Meervoudige selectie, optioneel. Kies één of meer integratifamilies. |
 | **Taal van meldingen** | Kies English, Deutsch, Français, Nederlands of Español. |
 
 > **Tip:** Je kunt protocollen altijd later toevoegen of verwijderen. Nieuwe apparaten van een geselecteerd protocol worden automatisch meegenomen.
 
-> **Zigbee2MQTT-gebruikers:** Zigbee2MQTT-apparaten verschijnen in HA onder het `mqtt`-integratiedomein — er is geen apart Zigbee2MQTT-item. Selecteer **MQTT** om ze te bewaken. Let op: dit omvat ook alle andere MQTT-gebaseerde apparaten in je installatie (bijv. Tasmota, eigen sensoren). Voor fijnere controle is labelgebaseerde filtering gepland voor een toekomstige versie.
+> **Zigbee2MQTT-gebruikers:** Zigbee2MQTT-apparaten verschijnen in HA onder het `mqtt`-integratiedomein — er is geen apart Zigbee2MQTT-item. Selecteer **MQTT** om ze te bewaken. Let op: dit omvat ook alle andere MQTT-gebaseerde apparaten in je installatie (bijv. Tasmota, eigen sensoren). Voor fijnere controle gebruik je het [labelsysteem](#observer-labels): wijs `observer_watch` toe aan de specifieke MQTT-apparaten die je wilt bewaken.
 
 > ⚠️ **Belangrijk:** Connection Observer kan apparaten alleen detecteren wanneer HA ze op `unavailable` zet. Zigbee2MQTT doet dit standaard **niet** — beschikbaarheidscontroles moeten eerst worden ingeschakeld: **Zigbee2MQTT → Instellingen → Beschikbaarheid → ingeschakeld**. Zonder deze instelling kan Connection Observer Z2M-apparaten niet detecteren.
 
-### Stap 2 – Meldingen
+### Stap 3 – Meldingen
 
 **Stel in hoe en wanneer je waarschuwingen ontvangt.**
 
@@ -121,7 +140,7 @@ De wizard toont alleen integratifamilies die daadwerkelijk zijn geconfigureerd i
 | **Dagen van samenvatting** | Weekdagen waarop de samenvatting wordt verzonden. Standaard: elke dag. |
 | **Melding bij herverbinding** | Opt-in. Melding wanneer een apparaat weer online komt. Standaard: **uit**. |
 
-### Stap 3 – Test
+### Stap 4 – Test
 
 Een optionele teststap stuurt een melding naar al je geselecteerde diensten om te controleren of alles correct werkt.
 
@@ -129,10 +148,10 @@ Een optionele teststap stuurt een melding naar al je geselecteerde diensten om t
 - Vink het vakje uit om deze stap over te slaan.
 - Als de test mislukt, wordt een foutmelding getoond. Je kunt het opnieuw proberen of het vakje uitvinken om toch verder te gaan.
 
-### Stap 4 – Geavanceerd
+### Stap 5 – Geavanceerd
 
 **Alle velden zijn optioneel. De waarde 0 schakelt de betreffende functie uit.**  
-De **globale vertraging** die hier wordt ingesteld, geldt voor alle protocollen, tenzij er in Stap 5 een specifieke vertraging per protocol is ingesteld.
+De **globale vertraging** die hier wordt ingesteld, geldt voor alle protocollen, tenzij er in Stap 6 een specifieke vertraging per protocol is ingesteld.
 
 | Veld | Beschrijving |
 |---|---|
@@ -144,13 +163,13 @@ De **globale vertraging** die hier wordt ingesteld, geldt voor alle protocollen,
 | **Uitgesloten entiteitsdomeinen** | Sluit volledige entiteitsdomeinen uit (bijv. `sensor`, `button`). `device_tracker`-entiteiten worden altijd automatisch uitgesloten. |
 | **Uitgesloten apparaten** | Lijst van specifieke apparaten die volledig worden uitgesloten van bewaking. Alleen apparaten met minimaal één entiteit op een geconfigureerd protocol worden getoond — virtuele services (HACS, Supervisor, Add-ons, etc.) verschijnen niet. Wordt een apparaat uitgesloten terwijl het offline is, dan wordt het direct uit de offline-lijst verwijderd en een openstaand HA Repairs-probleem automatisch opgelost. |
 
-### Stap 5 – Expert
+### Stap 6 – Expert
 
 **Beide functies zijn optioneel. Sla deze stap over als je alleen de globale vertraging nodig hebt.**
 
 #### Vertragingen per protocol
 
-Elk protocol dat je in Stap 1 hebt geselecteerd, verschijnt hier met een eigen vertragingsveld. Een waarde van **0** betekent "gebruik de globale vertraging uit Stap 4". Voer een positieve waarde in om de globale vertraging voor dat specifieke protocol te overschrijven.
+Elk protocol dat je in Stap 2 hebt geselecteerd, verschijnt hier met een eigen vertragingsveld. Een waarde van **0** betekent "gebruik de globale vertraging uit Stap 5". Voer een positieve waarde in om de globale vertraging voor dat specifieke protocol te overschrijven.
 
 **Tip: Aanbevolen vertragingen toepassen**  
 Vink **Aanbevolen vertragingen toepassen voor alle protocollen** aan en klik op Verzenden. Alle vertragingsvelden worden automatisch ingevuld met de aanbevolen waarden. Je kunt de waarden daarna individueel aanpassen of ze zo accepteren.
@@ -201,6 +220,27 @@ Zie [Sectie 7](#7-ha-repairs-integratie) voor details.
 Zeven optionele tekstvelden waarmee je het formaat van elke melding kunt aanpassen. Laat een veld leeg om de taalstandaard te gebruiken.
 
 Zie [Sectie 6](#6-meldingssjablonen) voor details.
+
+### Observer-labels
+
+Connection Observer maakt tijdens de installatie automatisch drie labels aan in Home Assistant. Ze zijn onmiddellijk zichtbaar onder **Instellingen → Labels** en kunnen aan elke entiteit worden toegewezen — zonder herstart, zonder configuratiewijziging.
+
+| Label | Kleur | Gedrag |
+|---|---|---|
+| `observer_critical` | 🔴 Rood | Geen vertraging, geen cooldown — directe melding ongeacht alle globale instellingen. Gemarkeerd met 🔴 in samenvattingen. Omzeilt de flood-buffer. |
+| `observer_watch` | 🔵 Blauw | Normale bewaking volgens de globale instellingen (vertraging, cooldown, enz.). |
+| `observer_ignore` | ⚫ Grijs | Volledige uitsluiting — het apparaat wordt volledig genegeerd door Connection Observer. |
+
+**Prioriteit:** `observer_ignore` > `observer_critical` > `observer_watch` > protocolgebaseerde bewaking
+
+**Conflicten:** Als een apparaat zowel `observer_ignore` als `observer_critical` of `observer_watch` heeft, wint `observer_ignore` altijd. Een waarschuwing verschijnt in de volgende samenvatting.
+
+**Eigenschappen:**
+- Een label op **één enkele entiteit** van het apparaat is voldoende — het hele apparaat wordt dienovereenkomstig behandeld.
+- Labels worden **onmiddellijk** van kracht en werken **onafhankelijk van protocolselectie**.
+- Apparaten kunnen tegelijkertijd door protocollen en labels worden gedekt — het label heeft prioriteit.
+
+> **Tip:** Wijs `observer_critical` toe aan kritieke apparaten (waterdetectors, rookmelders), gebruik `observer_ignore` voor storende apparaten en `observer_watch` om één apparaat te bewaken zonder een heel protocol in te schakelen.
 
 ### Vertragingen per protocol
 
@@ -593,9 +633,11 @@ Als minder dan 5 apparaten zijn getroffen, worden individuele meldingen verzonde
 
 > **Verbindingsoverzicht**
 > 📋 3 apparaat/apparaten getroffen sinds het laatste overzicht:
-> • Keuken Sensor [Keuken] (zha): offline sinds 05/19 07:15, weer online om 07:42
+> • 🔴 Waterdetector Kelder [Kelder] (zha): offline sinds 05/19 07:15, weer online om 07:42
 > • Slaapkamer Lamp [Slaapkamer] (hue): offline sinds 05/19 09:05 ⚠️ nog steeds offline
 > • Gang Bewegingssensor (esphome): offline sinds 05/19 11:20, weer online om 11:28
+
+Het 🔴-voorvoegsel markeert apparaten met het label `observer_critical`.
 
 ---
 
@@ -635,6 +677,19 @@ Selecteer meerdere diensten in het meldingsdienstveld. Alle diensten ontvangen e
 ### Een specifieke entiteit uitsluiten
 
 Voeg het toe aan de lijst *Uitgesloten apparaten* in de geavanceerde instellingen. Alle entiteiten van dat apparaat worden dan genegeerd. Als het apparaat op het moment van opslaan offline is, wordt het direct uit de offline-lijst verwijderd en een openstaand HA Repairs-probleem automatisch opgelost.
+
+### Fijnmazige controle met Observer-labels
+
+Het labelsysteem maakt per-apparaat uitzonderingen mogelijk zonder de configuratie te openen:
+
+**Kritiek apparaat (bijv. waterdetector, rookmelder):**  
+Wijs `observer_critical` toe aan een entiteit van het apparaat → directe melding zonder vertraging en cooldown, 🔴 in samenvattingen.
+
+**Apparaat tijdelijk uitsluiten (bijv. tijdens verbouwing):**  
+Wijs `observer_ignore` toe → apparaat wordt volledig genegeerd. Verwijder het label als de verbouwing klaar is.
+
+**Eén MQTT-apparaat bewaken zonder het hele MQTT-protocol in te schakelen:**  
+Wijs `observer_watch` toe → alleen dat apparaat wordt meegenomen.
 
 ---
 

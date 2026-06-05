@@ -12,6 +12,7 @@
 3. [Installation](#3-installation)
 4. [Setup wizard](#4-setup-wizard)
 5. [Configuration options](#5-configuration-options)
+   - [Observer labels](#observer-labels)
    - [Per-protocol alert delays](#per-protocol-alert-delays)
    - [Watch label – custom offline indicators](#watch-label--custom-offline-indicators)
 6. [Notification templates](#6-notification-templates)
@@ -95,26 +96,44 @@ HACS (Home Assistant Community Store) is the recommended way to install custom i
 
 ## 4. Setup wizard
 
-The setup wizard walks you through five steps. All settings can be changed afterwards via the **Configure** button on the integration card.
+The setup wizard walks you through six steps. All settings can be changed afterwards via the **Configure** button on the integration card.
 
-### Step 1 – Protocols
+### Step 1 – Labels
+
+**Connection Observer has automatically created three labels in your HA instance during setup.**
+
+This step is informational only — no input required. Simply click Submit to continue.
+
+The labels are immediately visible under **Settings → Labels**:
+
+| Label | Meaning |
+|---|---|
+| `observer_critical` | Critical – no delay, no cooldown. Immediate alert regardless of all settings. Marked with 🔴 in summaries. |
+| `observer_watch` | Watch – normal monitoring according to global settings. |
+| `observer_ignore` | Ignore – full exclusion from all monitoring. |
+
+Assign a label to any entity of the desired device — Connection Observer picks it up immediately, no restart or config change needed. Details in [Section 5 – Observer labels](#observer-labels).
+
+### Step 2 – Protocols
 
 **What you select here determines which devices are monitored.**
 
 The wizard only shows integration families that are actually configured in your HA instance. If you have ZHA and ESPHome set up, only those two will appear — there is no need to scroll through a list of 100 unsupported entries.
 
+> **Note:** Protocol selection is optional. If you want to monitor exclusively via the [label system](#observer-labels), you can leave this step empty and click Submit.
+
 | Field | Description |
 |---|---|
-| **Protocols to monitor** | Multi-select. Choose one or more integration families. Every device belonging to a selected integration is automatically monitored. |
+| **Protocols to monitor** | Multi-select, optional. Choose one or more integration families. Every device belonging to a selected integration is automatically monitored. |
 | **Notification language** | Choose English, Deutsch, Français, Nederlands, or Español. This controls the language of all notification messages. |
 
 > **Tip:** You can always come back and add or remove protocols later. Newly added devices in a selected protocol are automatically picked up — no reconfiguration needed.
 
-> **Zigbee2MQTT users:** Zigbee2MQTT devices appear in HA under the `mqtt` integration domain — there is no separate Zigbee2MQTT entry. Select **MQTT** to monitor them. Note that this will also include any other MQTT-based devices in your setup (e.g. Tasmota, custom sensors). For finer control, label-based filtering is planned for a future release.
+> **Zigbee2MQTT users:** Zigbee2MQTT devices appear in HA under the `mqtt` integration domain — there is no separate Zigbee2MQTT entry. Select **MQTT** to monitor them. Note that this will also include any other MQTT-based devices in your setup (e.g. Tasmota, custom sensors). For finer control, use the [label system](#observer-labels): assign `observer_watch` to the specific MQTT devices you want to monitor.
 >
 > ⚠️ **Important:** Connection Observer only detects devices when HA marks them as `unavailable`. Zigbee2MQTT does **not** do this by default — availability checks must be enabled: **Zigbee2MQTT → Settings → Availability → enabled**. Without this setting, Connection Observer cannot detect Z2M devices going offline.
 
-### Step 2 – Notifications
+### Step 3 – Notifications
 
 **Configure how and when you receive alerts.**
 
@@ -127,7 +146,7 @@ The wizard only shows integration families that are actually configured in your 
 | **Summary days** | Days of the week on which the summary should be sent. Multiple days can be selected. Default: every day. |
 | **Notify on reconnect** | Opt-in. If enabled, a notification is sent when a device comes back online. Default: **off**. |
 
-### Step 3 – Test
+### Step 4 – Test
 
 An optional test step sends a notification to all your selected services so you can verify everything is connected correctly.
 
@@ -135,10 +154,10 @@ An optional test step sends a notification to all your selected services so you 
 - Uncheck it to skip the test and proceed directly.
 - If the test fails (e.g. the service is not reachable), an error is shown and you can try again or uncheck the box to proceed anyway.
 
-### Step 4 – Advanced
+### Step 5 – Advanced
 
 **All fields in this step are optional. Setting a value to 0 disables that feature.**  
-The **global alert delay** set here applies to all protocols unless overridden in Step 5.
+The **global alert delay** set here applies to all protocols unless overridden in Step 6.
 
 | Field | Description |
 |---|---|
@@ -150,13 +169,13 @@ The **global alert delay** set here applies to all protocols unless overridden i
 | **Excluded entity domains** | Exclude entire entity domains from monitoring (e.g. `sensor`, `button`). Select from the list or type a custom domain. `device_tracker` entities are always excluded automatically and do not need to be added here. |
 | **Excluded devices** | A list of specific devices to exclude from monitoring entirely. Only devices that have at least one entity on a configured protocol are shown — virtual services (HACS, Supervisor, Add-ons, etc.) do not appear. If a device is added while it is currently offline, it is immediately removed from the offline list and any open HA Repairs issue is resolved. |
 
-### Step 5 – Expert
+### Step 6 – Expert
 
 **Both fields are optional. Skip this step if you only need the global delay.**
 
 #### Per-protocol alert delays
 
-Each protocol you selected in Step 1 appears here with its own delay field. A value of **0** means "use the global alert delay from Step 4". Set a positive value to override the global delay for that specific protocol.
+Each protocol you selected in Step 2 appears here with its own delay field. A value of **0** means "use the global alert delay from Step 5". Set a positive value to override the global delay for that specific protocol.
 
 **Tip: Apply recommended delays**  
 Check the **Apply recommended delays for all protocols** box and click Submit. All delay fields are pre-filled with the recommended values for each protocol. You can then adjust individual values or accept them as-is.
@@ -207,6 +226,27 @@ See [Section 7](#7-ha-repairs-integration) for details.
 Seven optional text fields let you override the default notification format for any notification type. Leave a field empty to use the language-appropriate default.
 
 See [Section 6](#6-notification-templates) for details.
+
+### Observer labels
+
+Connection Observer automatically creates three labels in Home Assistant during setup. They are immediately visible under **Settings → Labels** and can be assigned to any entity — no restart or config change required.
+
+| Label | Colour | Behaviour |
+|---|---|---|
+| `observer_critical` | 🔴 Red | No delay, no cooldown — immediate alert regardless of all global settings. Marked with 🔴 in summaries. Bypasses the flood buffer. |
+| `observer_watch` | 🔵 Blue | Normal monitoring according to the global settings (delay, cooldown, etc.). |
+| `observer_ignore` | ⚫ Grey | Full exclusion — the device is completely ignored by Connection Observer. |
+
+**Priority:** `observer_ignore` > `observer_critical` > `observer_watch` > protocol-based monitoring
+
+**Conflicts:** If a device has both `observer_ignore` and `observer_critical` or `observer_watch`, `observer_ignore` always wins. A warning appears in the next summary.
+
+**Key properties:**
+- A label on **any single entity** of the device is enough — the whole device is treated accordingly.
+- Labels take effect **immediately** and **independently of protocol selection**.
+- Devices can be covered by both protocols and labels simultaneously — the label takes priority.
+
+> **Tip:** Assign `observer_critical` to safety-critical devices (water sensors, smoke detectors), use `observer_ignore` to silence noisy devices, and use `observer_watch` to monitor individual devices without enabling a whole protocol.
 
 ### Per-protocol alert delays
 
@@ -614,9 +654,11 @@ If fewer than 5 devices are affected, individual notifications continue to be se
 
 > **Connection Summary**
 > 📋 3 device(s) affected since last summary:
-> • Kitchen Sensor [Kitchen] (zha): offline since 05/19 07:15, back online at 07:42
+> • 🔴 Basement Water Sensor [Basement] (zha): offline since 05/19 07:15, back online at 07:42
 > • Bedroom Bulb [Bedroom] (hue): offline since 05/19 09:05 ⚠️ still offline
 > • Hallway Motion (esphome): offline since 05/19 11:20, back online at 11:28
+
+The 🔴 prefix marks devices labelled `observer_critical`.
 
 ---
 
@@ -656,6 +698,19 @@ Select multiple services in the notification service field. All services receive
 ### Excluding a specific device
 
 Add it to the *Excluded devices* list in the Advanced settings. All entities of that device will be ignored. If the device is currently offline when you save, it is immediately removed from the offline list and any open HA Repairs issue is resolved automatically.
+
+### Using Observer labels for fine-grained control
+
+The label system provides per-device exceptions without ever opening the configuration:
+
+**Safety-critical device (e.g. water sensor, smoke detector):**  
+Assign `observer_critical` to any entity of the device → immediate alert, no delay, no cooldown, 🔴 in summaries.
+
+**Temporarily exclude a device (e.g. during renovation):**  
+Assign `observer_ignore` → device is fully silenced. Remove the label when you are done.
+
+**Monitor one specific MQTT device without enabling all of MQTT:**  
+Assign `observer_watch` → only that device is picked up.
 
 ---
 
