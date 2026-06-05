@@ -64,6 +64,15 @@ The built-in watchdog runs every 5 minutes and catches any reconnects that did n
 
 Only integrations that are actually configured in your HA instance appear as options during setup.
 
+**Two ways to define what gets monitored — use either or both:**
+
+| Approach | How |
+|---|---|
+| **Protocols** | Select entire integration families (Zigbee, ESPHome, Hue…) — every device of that type is automatically covered, including ones added later |
+| **Labels** | Assign `observer_critical`, `observer_watch`, or `observer_ignore` to any entity — takes effect immediately, no config changes needed |
+
+The label approach is especially powerful for day-to-day use: when you add a new device to HA, just assign a label and it's monitored. No need to ever open Connection Observer's configuration again.
+
 > ⚠️ **Zigbee2MQTT users:** Z2M disables availability checks by default — HA will never set Z2M devices to `unavailable` unless you enable them first: **Zigbee2MQTT → Settings → Availability → enabled**. Without this, Connection Observer cannot detect Z2M devices going offline.
 
 ### Installation
@@ -167,6 +176,15 @@ Connection Observer überwacht, wann Entitäten den Status `unavailable` annehme
 Der integrierte Watchdog läuft alle 5 Minuten und fängt Reconnects ab, die kein `state_changed`-Event ausgelöst haben, damit der Offline-Zähler immer korrekt bleibt.
 
 Im Setup-Assistenten erscheinen nur Integrationen, die in der jeweiligen HA-Instanz auch wirklich konfiguriert sind.
+
+**Zwei Wege, um festzulegen was überwacht wird — einzeln oder kombiniert:**
+
+| Ansatz | Wie |
+|---|---|
+| **Protokolle** | Ganze Integrationsfamilien auswählen (Zigbee, ESPHome, Hue…) — jedes Gerät dieser Familie wird automatisch erfasst, auch später hinzugefügte |
+| **Labels** | `observer_critical`, `observer_watch` oder `observer_ignore` an beliebige Entitäten vergeben — wirkt sofort, ohne Konfigurationsänderung |
+
+Das Label-System ist besonders praktisch im Alltag: Neues Gerät in HA hinzugefügt → Label vergeben → fertig. Die Konfiguration von Connection Observer muss dafür nie wieder geöffnet werden.
 
 > ⚠️ **Zigbee2MQTT-Nutzer:** Z2M deaktiviert die Verfügbarkeitsprüfung standardmäßig — HA setzt Z2M-Geräte deshalb nie auf `unavailable`, solange diese nicht aktiviert ist: **Zigbee2MQTT → Einstellungen → Verfügbarkeit → aktiviert**. Ohne diese Einstellung kann Connection Observer Z2M-Geräte nicht erkennen.
 
