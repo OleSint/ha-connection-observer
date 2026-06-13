@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation (Deutsch)
 
-**Version:** 1.2.0  
+**Version:** 1.3.0  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -519,6 +519,36 @@ condition:
 **Typ:** Sensor | **Einheit:** events | **Icon:** `mdi:clock-alert-outline`
 
 Zeigt die Anzahl der Ereignisse, die noch nicht in einer Zusammenfassung enthalten waren. Wird nach dem Senden einer Zusammenfassung oder nach `clear_history` auf 0 zurückgesetzt.
+
+---
+
+### `sensor.connection_observer_event_history`
+
+**Typ:** Sensor | **Einheit:** events | **Icon:** `mdi:history`
+
+Zeigt die Gesamtanzahl gespeicherter Verbindungsabbruch-Ereignisse.
+
+**Zustandsattribut `events`:** Liste der letzten 100 Ereignisse, neueste zuerst.
+
+```yaml
+events:
+  - device_name: "Wassermelder Keller"
+    area: "Keller"
+    protocol: "zha"
+    disconnected_at: "2026-06-10T07:15:00+02:00"
+    reconnected_at: "2026-06-10T07:42:00+02:00"
+    still_offline: false
+    is_critical: true
+  - device_name: "Schlafzimmer Birne"
+    area: "Schlafzimmer"
+    protocol: "hue"
+    disconnected_at: "2026-06-10T09:05:00+02:00"
+    reconnected_at: null
+    still_offline: true
+    is_critical: false
+```
+
+Ideal für Dashboard-Karten wie **flex-table-card** oder **mushroom-template-card**, um eine Verbindungshistorie pro Gerät darzustellen.
 
 ---
 

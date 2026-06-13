@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (English)
 
-**Version:** 1.2.0  
+**Version:** 1.3.0  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -538,6 +538,36 @@ condition:
 **Type:** Sensor | **Unit:** events | **Icon:** `mdi:clock-alert-outline`
 
 Shows the number of disconnect events not yet included in a summary. Resets to 0 after a summary is sent or after `clear_history` is called.
+
+---
+
+### `sensor.connection_observer_event_history`
+
+**Type:** Sensor | **Unit:** events | **Icon:** `mdi:history`
+
+Shows the total number of stored disconnect events.
+
+**State attribute `events`:** List of the last 100 events, newest first.
+
+```yaml
+events:
+  - device_name: "Basement Water Sensor"
+    area: "Basement"
+    protocol: "zha"
+    disconnected_at: "2026-06-10T07:15:00+02:00"
+    reconnected_at: "2026-06-10T07:42:00+02:00"
+    still_offline: false
+    is_critical: true
+  - device_name: "Bedroom Bulb"
+    area: "Bedroom"
+    protocol: "hue"
+    disconnected_at: "2026-06-10T09:05:00+02:00"
+    reconnected_at: null
+    still_offline: true
+    is_critical: false
+```
+
+Designed for dashboard cards like **flex-table-card** or **mushroom-template-card** to visualise per-device connection history.
 
 ---
 

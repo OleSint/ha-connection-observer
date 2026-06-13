@@ -26,6 +26,7 @@
 - **Minimum offline duration** – opt-in: suppress short blips from the summary without losing them
 - **Room / area** – opt-in: include the HA area name in notifications
 - **Manufacturer & model** – opt-in: include device info in immediate notifications
+- **Event history sensor** *(v1.3.0)* – `sensor.connection_observer_event_history` exposes the last 100 disconnect events as a structured `events` attribute with timestamps, area, protocol, and reconnect info — ready for flex-table-card or mushroom-template-card
 - **Label-based monitoring** *(v1.2.0)* – assign `observer_critical`, `observer_watch`, or `observer_ignore` labels to any HA entity; works independently of protocols, no config-flow changes needed after setup
 - **Flood detection** *(v1.2.0)* – when 5 or more devices go offline (or come back online) within 5 seconds, one grouped notification is sent instead of individual alerts — ideal for router reboots and brief infrastructure outages
 - **Device exclusions** – exclude specific devices from monitoring entirely; only monitorable devices (those with entities on a configured protocol) are shown in the selector
@@ -46,6 +47,7 @@
 |---|---|---|
 | `sensor.connection_observer_offline_devices` | Sensor | Number of devices currently offline. Attribute `devices` lists their names. |
 | `sensor.connection_observer_pending_summary_events` | Sensor | Number of events not yet included in a summary. |
+| `sensor.connection_observer_event_history` | Sensor | Last 100 disconnect events as a structured `events` attribute with timestamps, area, protocol, and reconnect info. |
 | `binary_sensor.connection_observer_connection_problem` | Binary Sensor | `ON` = at least one device is offline. Use in automations or dashboards. |
 
 ### Services
@@ -140,6 +142,7 @@ All settings — plus notification templates and the HA Repairs threshold — ca
 - **Mindestausfallzeit** – opt-in: kurze Aussetzer werden aus der Zusammenfassung herausgefiltert
 - **Raum / Bereich** – opt-in: HA-Bereichsname in Benachrichtigungen einblenden
 - **Hersteller & Modell** – opt-in: Geräteinformationen in Sofortmeldungen einblenden
+- **Event-History-Sensor** *(v1.3.0)* – `sensor.connection_observer_event_history` gibt die letzten 100 Verbindungsabbruch-Ereignisse als strukturiertes `events`-Attribut aus — mit Zeitstempeln, Bereich, Protokoll und Reconnect-Info, direkt verwendbar in flex-table-card oder mushroom-template-card
 - **Label-basierte Überwachung** *(v1.2.0)* – `observer_critical`, `observer_watch` oder `observer_ignore` Labels an beliebige HA-Entitäten vergeben; funktioniert unabhängig von Protokollen, keine Konfigurationsänderung nach dem Setup nötig
 - **Flood-Erkennung** *(v1.2.0)* – gehen 5 oder mehr Geräte innerhalb von 5 Sekunden offline (oder wieder online), wird eine einzige Sammelbenachrichtigung gesendet statt Einzelmeldungen — ideal bei Router-Neustarts oder kurzen Infrastrukturausfällen
 - **Geräte ausschließen** – einzelne Geräte vollständig von der Überwachung ausnehmen; der Selektor zeigt nur überwachbare Geräte (solche mit Entitäten eines konfigurierten Protokolls)
@@ -159,6 +162,7 @@ All settings — plus notification templates and the HA Repairs threshold — ca
 |---|---|---|
 | `sensor.connection_observer_offline_devices` | Sensor | Anzahl aktuell offline befindlicher Geräte. Attribut `devices` listet die Namen. |
 | `sensor.connection_observer_pending_summary_events` | Sensor | Anzahl der Ereignisse, die noch nicht in einer Zusammenfassung waren. |
+| `sensor.connection_observer_event_history` | Sensor | Die letzten 100 Verbindungsabbrüche als strukturiertes `events`-Attribut mit Zeitstempeln, Bereich, Protokoll und Reconnect-Info. |
 | `binary_sensor.connection_observer_connection_problem` | Binary Sensor | `EIN` = mindestens ein Gerät ist offline. Ideal für Automationen und Dashboards. |
 
 ### Services
@@ -240,6 +244,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 ---
 
 ## Changelog
+
+### v1.3.0 *(released)*
+
+**Event history sensor**  
+New `sensor.connection_observer_event_history` exposes the last 100 stored disconnect events as a structured `events` attribute — newest first. Each entry contains `device_name`, `area`, `protocol`, `disconnected_at`, `reconnected_at`, `still_offline`, and `is_critical`. Designed for use with flex-table-card or mushroom-template-card to build connection history dashboards.
 
 ### v1.2.0 *(released)*
 

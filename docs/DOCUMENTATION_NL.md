@@ -1,6 +1,6 @@
 # Connection Observer – Documentatie (Nederlands)
 
-**Versie:** 1.2.0  
+**Versie:** 1.3.0  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -519,6 +519,20 @@ condition:
 **Type:** Sensor | **Eenheid:** events | **Pictogram:** `mdi:clock-alert-outline`
 
 Toont het aantal verbrekingsgebeurtenissen dat nog niet in een samenvatting is opgenomen. Wordt gereset naar 0 na het verzenden van een samenvatting of na `clear_history`.
+
+---
+
+### `sensor.connection_observer_event_history`
+
+**Type:** Sensor | **Eenheid:** events | **Pictogram:** `mdi:history`
+
+Toont het totale aantal opgeslagen verbrekingsgebeurtenissen.
+
+**Toestandsattribuut `events`:** Lijst van de laatste 100 gebeurtenissen, nieuwste eerst.
+
+Elk item bevat: `device_name`, `area`, `protocol`, `disconnected_at`, `reconnected_at`, `still_offline`, `is_critical`.
+
+Ontworpen voor dashboard-kaarten zoals **flex-table-card** of **mushroom-template-card**.
 
 ---
 

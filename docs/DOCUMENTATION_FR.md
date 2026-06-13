@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (Français)
 
-**Version:** 1.2.0  
+**Version:** 1.3.0  
 **Dépôt :** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -519,6 +519,20 @@ condition:
 **Type :** Capteur | **Unité :** events | **Icône :** `mdi:clock-alert-outline`
 
 Indique le nombre d'événements de déconnexion non encore inclus dans un résumé. Se remet à 0 après l'envoi d'un résumé ou après `clear_history`.
+
+---
+
+### `sensor.connection_observer_event_history`
+
+**Type :** Capteur | **Unité :** events | **Icône :** `mdi:history`
+
+Indique le nombre total d'événements de déconnexion stockés.
+
+**Attribut d'état `events` :** Liste des 100 derniers événements, du plus récent au plus ancien.
+
+Chaque entrée contient : `device_name`, `area`, `protocol`, `disconnected_at`, `reconnected_at`, `still_offline`, `is_critical`.
+
+Conçu pour les cartes de tableau de bord comme **flex-table-card** ou **mushroom-template-card**.
 
 ---
 

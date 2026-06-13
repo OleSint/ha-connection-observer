@@ -21,6 +21,7 @@ async def async_setup_entry(
         [
             OfflineCountSensor(coordinator),
             PendingEventsSensor(coordinator),
+            EventHistorySensor(coordinator),
         ]
     )
 
@@ -114,3 +115,43 @@ class PendingEventsSensor(_CoordinatorEntity):
         return sum(
             1 for ev in self._coordinator.events if not ev.included_in_summary
         )
+
+
+class EventHistorySensor(_CoordinatorEntity):
+    """Structured event history for use in dashboards (e.g. flex-table-card)."""
+
+    _attr_icon = "mdi:history"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = "events"
+
+    def __init__(self, coordinator: ConnectionObserverCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_event_history"
+        self._attr_name = "Event History"
+
+    @property
+    def native_value(self) -> int:
+        return len(self._coordinator.events)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        # Newest first, capped at 100 to stay within HA attribute size limits
+        sorted_events = sorted(
+            self._coordinator.events,
+            key=lambda ev: ev.disconnected_at,
+            reverse=True,
+        )[:100]
+        return {
+            "events": [
+                {
+                    "device_name": ev.device_name,
+                    "area": ev.area_name,
+                    "protocol": ev.protocol,
+                    "disconnected_at": ev.disconnected_at.isoformat(),
+                    "reconnected_at": ev.reconnected_at.isoformat() if ev.reconnected_at else None,
+                    "still_offline": ev.reconnected_at is None,
+                    "is_critical": ev.is_critical,
+                }
+                for ev in sorted_events
+            ]
+        }
