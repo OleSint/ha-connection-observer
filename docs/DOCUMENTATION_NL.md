@@ -738,6 +738,12 @@ De watchdog draait elke 5 minuten en sluit de gebeurtenis automatisch. Je kunt o
 1. Controleer of de drempelwaarde niet op `0` staat.
 2. Het apparaat moet langer dan de drempelwaarde offline zijn. De watchdog maakt het item aan bij zijn volgende uitvoering (elke 5 minuten).
 
+### Waarschuwing „Maateenheid kan niet worden geconverteerd" na update naar v1.3.0
+
+Bij de eerste start na de update naar v1.3.0 kan HA een waarschuwing tonen voor `sensor.connection_observer_event_history`: de eenheid `events` wijkt af van de eerder opgeslagen lege eenheid.
+
+**Oplossing:** Kies **„Statistieken bijwerken"** in het waarschuwingsvenster — niet „Verwijderen". HA corrigeert alleen de eenheidsinvoer in de database; er gaan geen meetwaarden verloren.
+
 ---
 
 ## 13. Bekende beperkingen

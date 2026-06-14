@@ -736,6 +736,12 @@ Le watchdog s'exécute toutes les 5 minutes et fermera automatiquement l'événe
 1. Vérifiez que le seuil n'est pas à `0`.
 2. L'appareil doit être hors ligne plus longtemps que le seuil. Le watchdog crée l'entrée lors de sa prochaine exécution (toutes les 5 minutes).
 
+### Avertissement « L'unité de mesure ne peut pas être convertie » après la mise à jour vers v1.3.0
+
+Au premier démarrage après la mise à jour vers v1.3.0, HA peut afficher un avertissement pour `sensor.connection_observer_event_history` : l'unité `events` diffère de l'unité vide précédemment enregistrée.
+
+**Solution :** Choisissez **« Corriger les statistiques »** dans le dialogue d'avertissement — et non « Supprimer ». HA corrige uniquement l'entrée d'unité dans la base de données ; aucune valeur de mesure n'est perdue.
+
 ---
 
 ## 13. Limitations connues

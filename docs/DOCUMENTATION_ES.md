@@ -738,6 +738,12 @@ El watchdog se ejecuta cada 5 minutos y cerrará el evento automáticamente. Tam
 1. Comprueba que el umbral no está en `0`.
 2. El dispositivo debe llevar sin conexión más tiempo que el umbral. El watchdog crea la incidencia en su siguiente ejecución (cada 5 minutos).
 
+### Advertencia «La unidad de medida no puede convertirse» tras actualizar a v1.3.0
+
+Al arrancar por primera vez tras la actualización a v1.3.0, HA puede mostrar una advertencia para `sensor.connection_observer_event_history`: la unidad `events` difiere de la unidad vacía almacenada anteriormente.
+
+**Solución:** Elige **«Corregir estadísticas»** en el diálogo de advertencia — no «Eliminar». HA solo corrige la entrada de unidad en la base de datos; no se pierde ningún valor de medición.
+
 ---
 
 ## 13. Limitaciones conocidas

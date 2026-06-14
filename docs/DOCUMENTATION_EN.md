@@ -775,6 +775,12 @@ The watchdog runs every 5 minutes and will automatically close the event. You ca
 1. Check that **HA Repairs threshold** is not set to `0`.
 2. The device must be continuously offline for longer than the threshold — the watchdog creates the issue during its periodic run (every 5 minutes), so there may be a short delay after the threshold is crossed.
 
+### "Unit of measurement cannot be converted" warning after updating to v1.3.0
+
+When first starting after the update to v1.3.0, HA may show a warning for `sensor.connection_observer_event_history`: the unit `events` differs from the previously stored empty unit.
+
+**Solution:** Choose **"Fix statistics"** in the warning dialog — not "Delete". HA only corrects the unit entry in the database; no measurement values are lost.
+
 ---
 
 ## 13. Known limitations

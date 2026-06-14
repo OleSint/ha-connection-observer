@@ -756,6 +756,12 @@ Der Watchdog läuft alle 5 Minuten und schließt das Ereignis automatisch ab. Du
 1. Prüfe, ob **HA-Reparaturen-Eintrag nach N Stunden offline** nicht auf `0` gesetzt ist.
 2. Das Gerät muss länger als den Schwellwert offline sein. Der Watchdog erstellt den Eintrag bei seinem nächsten Lauf (alle 5 Minuten), daher kann es kurz nach dem Überschreiten des Schwellwerts noch einen Moment dauern.
 
+### Warnung „Maßeinheit kann nicht konvertiert werden" nach dem Update auf v1.3.0
+
+Beim ersten Start nach dem Update auf v1.3.0 zeigt HA möglicherweise eine Warnung für `sensor.connection_observer_event_history`: die Einheit `events` weicht von der zuvor gespeicherten leeren Einheit ab.
+
+**Lösung:** Im Warndialog **„Statistiken aktualisieren"** wählen — nicht „Löschen". HA korrigiert damit nur den Einheit-Eintrag in der Datenbank, keine Messwerte gehen verloren.
+
 ---
 
 ## 13. Bekannte Einschränkungen
