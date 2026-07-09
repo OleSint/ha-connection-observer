@@ -6,6 +6,18 @@
 
 📖 **[English](docs/DOCUMENTATION_EN.md)** · **[Deutsch](docs/DOCUMENTATION_DE.md)** · **[Français](docs/DOCUMENTATION_FR.md)** · **[Nederlands](docs/DOCUMENTATION_NL.md)** · **[Español](docs/DOCUMENTATION_ES.md)**
 
+---
+## ☕ Support this project
+
+If this integration saves you time, consider supporting its development:
+
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?logo=github)](https://github.com/sponsors/OleSint)
+
+This project is and will remain free and open source.
+--- 
+<br>
+
+
 > **Deutsch weiter unten** ↓
 
 ---
