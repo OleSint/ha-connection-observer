@@ -744,6 +744,21 @@ Al arrancar por primera vez tras la actualización a v1.3.0, HA puede mostrar un
 
 **Solución:** Elige **«Corregir estadísticas»** en el diálogo de advertencia — no «Eliminar». HA solo corrige la entrada de unidad en la base de datos; no se pierde ningún valor de medición.
 
+### Advertencia «State attributes … exceed maximum size of 16384 bytes» para `sensor.connection_observer_event_history`
+
+Con muchos dispositivos y/o un historial de eventos largo, los atributos de este sensor pueden superar el tamaño máximo de 16 KB que Home Assistant permite para el recorder. HA registra entonces una advertencia y no almacena los atributos de ese estado en la base de datos.
+
+Esto no es grave: el sensor sigue funcionando con normalidad y sigue entregando la lista completa de eventos en vivo a los paneles (p. ej. flex-table-card) — solo se omite el registro histórico de los atributos en la base de datos del recorder, lo cual aporta poco valor de todos modos para esta ventana móvil de 100 eventos.
+
+**Solución:** Excluye los atributos de este sensor del recorder para evitar la advertencia — la funcionalidad se mantiene completamente intacta:
+
+```yaml
+recorder:
+  exclude:
+    entities:
+      - sensor.connection_observer_event_history
+```
+
 ---
 
 ## 13. Limitaciones conocidas

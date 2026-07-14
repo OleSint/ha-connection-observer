@@ -781,6 +781,21 @@ When first starting after the update to v1.3.0, HA may show a warning for `senso
 
 **Solution:** Choose **"Fix statistics"** in the warning dialog — not "Delete". HA only corrects the unit entry in the database; no measurement values are lost.
 
+### "State attributes … exceed maximum size of 16384 bytes" warning for `sensor.connection_observer_event_history`
+
+With many devices and/or a long event history, this sensor's attributes can exceed the 16 KB maximum size Home Assistant allows for the recorder. HA then logs a warning and does not store the attributes for that state in the database.
+
+This is harmless: the sensor itself keeps working normally and still delivers the full event list live to dashboards (e.g. flex-table-card) — only the historical recording of the attributes in the recorder database is skipped, which provides little value anyway for this rolling 100-event window.
+
+**Solution:** Exclude this sensor's attributes from the recorder to avoid the warning — functionality is fully preserved:
+
+```yaml
+recorder:
+  exclude:
+    entities:
+      - sensor.connection_observer_event_history
+```
+
 ---
 
 ## 13. Known limitations

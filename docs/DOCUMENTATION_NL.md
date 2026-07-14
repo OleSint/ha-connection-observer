@@ -744,6 +744,21 @@ Bij de eerste start na de update naar v1.3.0 kan HA een waarschuwing tonen voor 
 
 **Oplossing:** Kies **„Statistieken bijwerken"** in het waarschuwingsvenster — niet „Verwijderen". HA corrigeert alleen de eenheidsinvoer in de database; er gaan geen meetwaarden verloren.
 
+### Waarschuwing „State attributes … exceed maximum size of 16384 bytes" voor `sensor.connection_observer_event_history`
+
+Bij veel apparaten en/of een lange gebeurtenisgeschiedenis kunnen de attributen van deze sensor de maximale grootte van 16 KB overschrijden die Home Assistant voor de recorder toestaat. HA registreert dan een waarschuwing en slaat de attributen voor die state niet op in de database.
+
+Dit is onschadelijk: de sensor blijft gewoon normaal werken en levert de volledige gebeurtenissenlijst nog steeds live aan dashboards (bijv. flex-table-card) — alleen de historische opslag van de attributen in de recorder-database wordt overgeslagen, wat voor dit rollende venster van 100 gebeurtenissen toch weinig waarde toevoegt.
+
+**Oplossing:** Sluit de attributen van deze sensor uit van de recorder om de waarschuwing te vermijden — de functionaliteit blijft volledig behouden:
+
+```yaml
+recorder:
+  exclude:
+    entities:
+      - sensor.connection_observer_event_history
+```
+
 ---
 
 ## 13. Bekende beperkingen
