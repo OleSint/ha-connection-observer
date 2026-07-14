@@ -522,7 +522,7 @@ Zeigt die Anzahl der Ereignisse, die noch nicht in einer Zusammenfassung enthalt
 
 ---
 
-### `sensor.connection_observer_event_history`
+### `sensor.event_history`
 
 **Typ:** Sensor | **Einheit:** events | **Icon:** `mdi:history`
 
@@ -758,11 +758,11 @@ Der Watchdog läuft alle 5 Minuten und schließt das Ereignis automatisch ab. Du
 
 ### Warnung „Maßeinheit kann nicht konvertiert werden" nach dem Update auf v1.3.0
 
-Beim ersten Start nach dem Update auf v1.3.0 zeigt HA möglicherweise eine Warnung für `sensor.connection_observer_event_history`: die Einheit `events` weicht von der zuvor gespeicherten leeren Einheit ab.
+Beim ersten Start nach dem Update auf v1.3.0 zeigt HA möglicherweise eine Warnung für `sensor.event_history`: die Einheit `events` weicht von der zuvor gespeicherten leeren Einheit ab.
 
 **Lösung:** Im Warndialog **„Statistiken aktualisieren"** wählen — nicht „Löschen". HA korrigiert damit nur den Einheit-Eintrag in der Datenbank, keine Messwerte gehen verloren.
 
-### Warnung „State attributes … exceed maximum size of 16384 bytes" für `sensor.connection_observer_event_history`
+### Warnung „State attributes … exceed maximum size of 16384 bytes" für `sensor.event_history`
 
 Bei vielen Geräten und/oder langer Event-Historie können die Attribute dieses Sensors die von Home Assistant für den Recorder erlaubte Maximalgröße von 16 KB überschreiten. HA protokolliert dann eine Warnung und speichert die Attribute für diesen State nicht in der Datenbank.
 
@@ -774,7 +774,7 @@ Das ist unkritisch: Der Sensor selbst funktioniert weiterhin normal und liefert 
 recorder:
   exclude:
     entities:
-      - sensor.connection_observer_event_history
+      - sensor.event_history
 ```
 
 ---

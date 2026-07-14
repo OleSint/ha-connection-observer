@@ -541,7 +541,7 @@ Shows the number of disconnect events not yet included in a summary. Resets to 0
 
 ---
 
-### `sensor.connection_observer_event_history`
+### `sensor.event_history`
 
 **Type:** Sensor | **Unit:** events | **Icon:** `mdi:history`
 
@@ -777,11 +777,11 @@ The watchdog runs every 5 minutes and will automatically close the event. You ca
 
 ### "Unit of measurement cannot be converted" warning after updating to v1.3.0
 
-When first starting after the update to v1.3.0, HA may show a warning for `sensor.connection_observer_event_history`: the unit `events` differs from the previously stored empty unit.
+When first starting after the update to v1.3.0, HA may show a warning for `sensor.event_history`: the unit `events` differs from the previously stored empty unit.
 
 **Solution:** Choose **"Fix statistics"** in the warning dialog — not "Delete". HA only corrects the unit entry in the database; no measurement values are lost.
 
-### "State attributes … exceed maximum size of 16384 bytes" warning for `sensor.connection_observer_event_history`
+### "State attributes … exceed maximum size of 16384 bytes" warning for `sensor.event_history`
 
 With many devices and/or a long event history, this sensor's attributes can exceed the 16 KB maximum size Home Assistant allows for the recorder. HA then logs a warning and does not store the attributes for that state in the database.
 
@@ -793,7 +793,7 @@ This is harmless: the sensor itself keeps working normally and still delivers th
 recorder:
   exclude:
     entities:
-      - sensor.connection_observer_event_history
+      - sensor.event_history
 ```
 
 ---

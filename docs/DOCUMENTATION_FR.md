@@ -522,7 +522,7 @@ Indique le nombre d'événements de déconnexion non encore inclus dans un résu
 
 ---
 
-### `sensor.connection_observer_event_history`
+### `sensor.event_history`
 
 **Type :** Capteur | **Unité :** events | **Icône :** `mdi:history`
 
@@ -738,11 +738,11 @@ Le watchdog s'exécute toutes les 5 minutes et fermera automatiquement l'événe
 
 ### Avertissement « L'unité de mesure ne peut pas être convertie » après la mise à jour vers v1.3.0
 
-Au premier démarrage après la mise à jour vers v1.3.0, HA peut afficher un avertissement pour `sensor.connection_observer_event_history` : l'unité `events` diffère de l'unité vide précédemment enregistrée.
+Au premier démarrage après la mise à jour vers v1.3.0, HA peut afficher un avertissement pour `sensor.event_history` : l'unité `events` diffère de l'unité vide précédemment enregistrée.
 
 **Solution :** Choisissez **« Corriger les statistiques »** dans le dialogue d'avertissement — et non « Supprimer ». HA corrige uniquement l'entrée d'unité dans la base de données ; aucune valeur de mesure n'est perdue.
 
-### Avertissement « State attributes … exceed maximum size of 16384 bytes » pour `sensor.connection_observer_event_history`
+### Avertissement « State attributes … exceed maximum size of 16384 bytes » pour `sensor.event_history`
 
 Avec de nombreux appareils et/ou un long historique d'événements, les attributs de ce capteur peuvent dépasser la taille maximale de 16 Ko autorisée par Home Assistant pour le recorder. HA enregistre alors un avertissement et ne stocke pas les attributs de cet état dans la base de données.
 
@@ -754,7 +754,7 @@ C'est sans gravité : le capteur continue de fonctionner normalement et fournit 
 recorder:
   exclude:
     entities:
-      - sensor.connection_observer_event_history
+      - sensor.event_history
 ```
 
 ---
