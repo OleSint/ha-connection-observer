@@ -257,6 +257,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.1 *(released)*
+
+**Bugfix: Already-offline devices were missed at startup**  
+The Observer now performs an initial scan when monitoring starts and immediately creates disconnect events for any entity already reporting `unavailable`. Previously, only state *changes* were detected — devices offline before setup or before a restart were never captured.
+
 ### v1.3.0 *(released)*
 
 **Event history sensor**  
