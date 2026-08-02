@@ -392,6 +392,7 @@ class ConnectionObserverCoordinator:
         self._refresh_label_devices()
         await self._purge_excluded_events()
         await self._purge_stale_protocol_events()
+        await self._scan_initial_states()
 
     # ------------------------------------------------------------------
     # Setup
@@ -400,6 +401,7 @@ class ConnectionObserverCoordinator:
     def _setup_startup_guard(self) -> None:
         if self.hass.state == CoreState.running:
             self._startup_complete = True
+            self.hass.async_create_task(self._scan_initial_states())
             return
 
         @callback
@@ -418,6 +420,73 @@ class ConnectionObserverCoordinator:
     def _mark_startup_complete(self, _now: Any) -> None:
         self._startup_complete = True
         _LOGGER.debug("Connection Observer: startup grace period ended, tracking active")
+        self.hass.async_create_task(self._scan_initial_states())
+
+    async def _scan_initial_states(self) -> None:
+        """Create disconnect events for entities already offline when monitoring starts."""
+        er = async_get_entity_registry(self.hass)
+        configured_protocols: list[str] = self._cfg.get(CONF_PROTOCOLS, [])
+        seen_device_keys: set[str] = set()
+
+        # Normal protocol/label-monitored entities
+        for entry in er.entities.values():
+            entity_id = entry.entity_id
+            entity_domain = entity_id.split(".", 1)[0]
+            if entity_domain == "device_tracker":
+                continue
+            if entity_domain in self._cfg.get(CONF_EXCLUDED_DOMAINS, []):
+                continue
+
+            device_id = entry.device_id
+            if device_id and device_id in self._excluded_device_ids:
+                continue
+            if device_id and device_id in self._ignore_label_device_ids:
+                continue
+
+            protocol = self._get_entity_protocol(entity_id)
+            is_critical = bool(device_id and device_id in self._critical_device_ids)
+            is_label_watched = is_critical or bool(device_id and device_id in self._watch_device_ids)
+
+            if not is_label_watched and (not protocol or protocol not in configured_protocols):
+                continue
+
+            state = self.hass.states.get(entity_id)
+            if state is None or state.state != "unavailable":
+                continue
+
+            device_key, _ = self._resolve_device(entity_id)
+            if device_key in seen_device_keys:
+                continue
+            if any(
+                ev.device_key == device_key and ev.reconnected_at is None and not ev.included_in_summary
+                for ev in self._events
+            ):
+                continue
+
+            seen_device_keys.add(device_key)
+            self._on_disconnect(entity_id, protocol or "unknown", is_critical=is_critical)
+
+        # Watch-label entities (binary sensor / template sensor "offline" signal)
+        for entity_id in self._watch_label_entities:
+            state = self.hass.states.get(entity_id)
+            if state is None or state.state.lower() not in _WATCH_OFFLINE:
+                continue
+            device_key, _ = self._resolve_device(entity_id)
+            if device_key in seen_device_keys:
+                continue
+            if any(
+                ev.device_key == device_key and ev.reconnected_at is None and not ev.included_in_summary
+                for ev in self._events
+            ):
+                continue
+            seen_device_keys.add(device_key)
+            self._on_disconnect(entity_id, self._get_protocol_for_watch_entity(entity_id))
+
+        if seen_device_keys:
+            _LOGGER.debug(
+                "Connection Observer: initial scan found %d already-offline device(s)", len(seen_device_keys)
+            )
+            await self._save_store()
 
     def _setup_state_listener(self) -> None:
         self._unsub.append(
