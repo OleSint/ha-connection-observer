@@ -609,6 +609,19 @@ class ConnectionObserverCoordinator:
             if LABEL_IGNORE in labels:
                 ignore.add(key)
 
+        # Also honour labels assigned directly to the device (not just to entities).
+        for device in dr.devices.values():
+            labels = device.labels or set()
+            if not (labels & {LABEL_CRITICAL, LABEL_WATCH, LABEL_IGNORE}):
+                continue
+            key = device.id
+            if LABEL_CRITICAL in labels:
+                critical.add(key)
+            if LABEL_WATCH in labels:
+                watch.add(key)
+            if LABEL_IGNORE in labels:
+                ignore.add(key)
+
         # Detect conflicts: ignore + (critical or watch) on the same device
         conflicts = ignore & (critical | watch)
         for key in conflicts:

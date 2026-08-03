@@ -257,6 +257,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.2 *(released)*
+
+**Bugfix: Device-level labels were ignored**  
+Observer labels (`observer_critical`, `observer_watch`, `observer_ignore`) now also work when assigned directly to a **device** in HA — not only when assigned to individual entities. Previously, only entity-level labels were read, which caused confusion since HA's device page has a prominent Labels field.
+
 ### v1.3.1 *(released)*
 
 **Bugfix: Already-offline devices were missed at startup**  
