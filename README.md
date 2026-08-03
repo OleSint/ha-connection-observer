@@ -257,6 +257,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.3 *(released)*
+
+**Bugfix: Datumsformat folgt jetzt der HA-Ländereinstellung**  
+Benachrichtigungen und Zusammenfassungen verwenden ab sofort das regional korrekte Datumsformat — basierend auf der in HA konfigurierten Ländereinstellung. US → MM/DD, deutschsprachig → TT.MM., alle anderen → TT/MM.
+
 ### v1.3.2 *(released)*
 
 **Bugfix: Device-level labels were ignored**  

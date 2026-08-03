@@ -1175,8 +1175,14 @@ class ConnectionObserverCoordinator:
             return
 
         lang = self._cfg.get(CONF_LANGUAGE, "en")
-        # Date format varies by language
-        dt_fmt = "%d.%m. %H:%M" if lang == "de" else "%m/%d %H:%M"
+        # Date format: US uses MM/DD, German-speaking regions use DD.MM., rest of world DD/MM.
+        country = (self.hass.config.country or "").upper()
+        if country == "US":
+            dt_fmt = "%m/%d %H:%M"
+        elif lang == "de" or country in {"DE", "AT", "CH"}:
+            dt_fmt = "%d.%m. %H:%M"
+        else:
+            dt_fmt = "%d/%m %H:%M"
 
         # Group events by device, preserving first-seen order
         groups: dict[str, list] = {}
