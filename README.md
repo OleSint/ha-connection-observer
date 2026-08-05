@@ -257,6 +257,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.4 *(released)*
+
+**Bugfix: Device-level labels were only applied after a restart**  
+v1.3.2 added support for reading observer labels assigned directly to a device, but the live-update listener only watched entity registry changes, not device registry changes. As a result, a label assigned to a device (rather than an entity) had no effect until Home Assistant was restarted. The coordinator now also listens for `device_registry_updated`, so device-level label changes (e.g. `observer_ignore`) take effect immediately, just like entity-level labels always have.
+
 ### v1.3.3 *(released)*
 
 **Bugfix: Datumsformat folgt jetzt der HA-Ländereinstellung**  

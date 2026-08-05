@@ -572,6 +572,9 @@ class ConnectionObserverCoordinator:
         self._unsub.append(
             self.hass.bus.async_listen("entity_registry_updated", _on_registry_updated)
         )
+        self._unsub.append(
+            self.hass.bus.async_listen("device_registry_updated", _on_registry_updated)
+        )
 
     def _refresh_label_devices(self) -> None:
         """Scan the entity registry for observer labels and build device caches.
