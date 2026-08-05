@@ -352,6 +352,7 @@ class ConnectionObserverCoordinator:
         self._refresh_excluded_devices()
         self._refresh_label_devices()
         await self._purge_excluded_events()
+        await self._purge_label_ignored_events()
 
     async def async_unload(self) -> None:
         for cancel_fn in self._pending_disconnects.values():
@@ -391,6 +392,7 @@ class ConnectionObserverCoordinator:
         self._refresh_excluded_devices()
         self._refresh_label_devices()
         await self._purge_excluded_events()
+        await self._purge_label_ignored_events()
         await self._purge_stale_protocol_events()
         await self._scan_initial_states()
 
@@ -568,6 +570,7 @@ class ConnectionObserverCoordinator:
         def _on_registry_updated(_event: Event) -> None:
             self._refresh_watch_label_entities()
             self._refresh_label_devices()
+            self.hass.async_create_task(self._purge_label_ignored_events())
 
         self._unsub.append(
             self.hass.bus.async_listen("entity_registry_updated", _on_registry_updated)
@@ -956,6 +959,42 @@ class ConnectionObserverCoordinator:
             self._async_notify_listeners()
             _LOGGER.info(
                 "Connection Observer: purged excluded device(s) from offline list: %s",
+                ", ".join(purged),
+            )
+
+    async def _purge_label_ignored_events(self) -> None:
+        """Remove open offline events for devices now carrying the observer_ignore label.
+
+        Mirrors _purge_excluded_events(): without this, a device that already had
+        an open (not-yet-reconnected) event at the moment observer_ignore was
+        assigned would keep generating summary notifications indefinitely, since
+        the ignore check in _handle_state_change only applies to new transitions.
+        """
+        if not self._ignore_label_device_ids:
+            return
+        to_cancel = [
+            dk for dk in list(self._pending_disconnects)
+            if dk in self._ignore_label_device_ids
+        ]
+        for dk in to_cancel:
+            cancel_fn = self._pending_disconnects.pop(dk)
+            cancel_fn()
+        before = len(self._events)
+        purged: list[str] = []
+        kept: list[DisconnectEvent] = []
+        for ev in self._events:
+            if ev.reconnected_at is None and ev.device_key in self._ignore_label_device_ids:
+                async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
+                self._active_repairs.discard(ev.device_key)
+                purged.append(ev.device_name)
+            else:
+                kept.append(ev)
+        if len(kept) != before:
+            self._events = kept
+            await self._save_store()
+            self._async_notify_listeners()
+            _LOGGER.info(
+                "Connection Observer: purged observer_ignore-labelled device(s) from offline list: %s",
                 ", ".join(purged),
             )
 

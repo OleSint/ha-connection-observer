@@ -259,8 +259,8 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ### v1.3.4 *(released)*
 
-**Bugfix: Device-level labels were only applied after a restart**  
-v1.3.2 added support for reading observer labels assigned directly to a device, but the live-update listener only watched entity registry changes, not device registry changes. As a result, a label assigned to a device (rather than an entity) had no effect until Home Assistant was restarted. The coordinator now also listens for `device_registry_updated`, so device-level label changes (e.g. `observer_ignore`) take effect immediately, just like entity-level labels always have.
+**Bugfix: `observer_ignore` at device level either didn't apply or only applied after a delay**  
+Two related issues fixed: (1) the live-update listener only watched entity registry changes, not device registry changes, so a label assigned directly to a device had no effect until Home Assistant was restarted; (2) if a device already had an open disconnect event at the moment the label was assigned, that event was never purged and kept triggering summary notifications regardless of the label — even after a restart. The coordinator now listens for `device_registry_updated` and automatically purges open events for `observer_ignore`-labelled devices on every label change and on startup.
 
 ### v1.3.3 *(released)*
 
