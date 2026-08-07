@@ -1,6 +1,6 @@
 # Connection Observer – Documentación (Español)
 
-**Versión:** 1.3.4  
+**Versión:** 1.3.5  
 **Repositorio:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -56,6 +56,8 @@ Connection Observer determina a qué *dispositivo* pertenece una entidad a trav�
 ### Protección en el arranque
 
 Cuando Home Assistant se reinicia, todas las integraciones necesitan un momento para reconectar sus dispositivos. Durante esta ventana, muchas entidades pasan brevemente por `unavailable`. Connection Observer espera 60 segundos tras el arranque completo de HA antes de comenzar a rastrear desconexiones. Esto evita una avalancha de falsas alarmas en cada reinicio.
+
+Un dispositivo que sigue `unavailable` tras esos 60 segundos se vuelve a comprobar, y solo se marca como desconectado si *sigue* sin responder al menos 150 segundos después del reinicio — esta segunda confirmación se aplica independientemente del retraso de alerta configurado, ya que algunas integraciones (enlace WiFi, enrutamiento de malla Zigbee/Z-Wave) pueden tardar legítimamente más de un minuto en reconectar todos los dispositivos *(desde v1.3.5)*.
 
 ### Almacenamiento persistente
 

@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation (Deutsch)
 
-**Version:** 1.3.4  
+**Version:** 1.3.5  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -56,6 +56,8 @@ Connection Observer ermittelt über die HA-Geräteregistrierung, zu welchem *Ger
 ### Startschutz
 
 Wenn Home Assistant neu startet, brauchen alle Integrationen einen Moment, um ihre Geräte wieder zu verbinden. In diesem Zeitfenster durchlaufen viele Entitäten kurzzeitig den Status `unavailable`. Connection Observer wartet 60 Sekunden, nachdem HA vollständig gestartet ist, bevor es mit dem Tracking beginnt. Das verhindert eine Flut von Fehlalarmen bei jedem HA-Neustart.
+
+Ein Gerät, das nach diesen 60 Sekunden noch `unavailable` ist, wird ein weiteres Mal geprüft und erst als offline markiert, wenn es auch nach mindestens 150 Sekunden seit dem Neustart *immer noch* nicht erreichbar ist — diese zweite Bestätigung gilt unabhängig vom konfigurierten Alert-Delay, da manche Integrationen (WLAN-Handshakes, Zigbee-/Z-Wave-Mesh-Aufbau) länger als eine Minute brauchen können, um alle Geräte neu zu verbinden *(ab v1.3.5)*.
 
 ### Persistenter Speicher
 

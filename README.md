@@ -257,6 +257,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.5 *(released)*
+
+**Bugfix: False-positive offline detection for devices still reconnecting after a HA restart**  
+The startup scan (added in v1.3.1) could flag a device as offline the moment it was still `unavailable` 60 seconds after HA fully started — with no re-check. Since the default alert delay is 0 minutes and per-protocol delay hints (e.g. Zigbee/Z-Wave: 5 min, ESPHome/WLED: 2 min) were only shown in the setup wizard and never actually enforced, any device that legitimately took longer than 60 seconds to reconnect (WiFi handshake, mesh routing, etc.) was immediately — and incorrectly — reported offline. The startup scan now always waits at least 150 seconds and re-confirms the device is still unavailable before creating an event, regardless of the configured alert delay. Affects all protocols; reported for ESPHome, WLED, Z-Wave JS, and ZHA.
+
 ### v1.3.4 *(released)*
 
 **Bugfix: `observer_ignore` at device level either didn't apply or only applied after a delay**  

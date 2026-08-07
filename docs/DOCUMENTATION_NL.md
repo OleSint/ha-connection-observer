@@ -1,6 +1,6 @@
 # Connection Observer – Documentatie (Nederlands)
 
-**Versie:** 1.3.4  
+**Versie:** 1.3.5  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -56,6 +56,8 @@ Connection Observer bepaalt via het HA-apparaatregister bij welk *apparaat* een 
 ### Opstartbeveiliging
 
 Wanneer Home Assistant herstart, hebben alle integraties even nodig om hun apparaten opnieuw te verbinden. Tijdens dit venster gaan veel entiteiten kort door `unavailable`. Connection Observer wacht 60 seconden na het volledig opstarten van HA voordat het verbrekingen begint bij te houden. Dit voorkomt een stroom van valse alarmen bij elke herstart.
+
+Een apparaat dat na deze 60 seconden nog steeds `unavailable` is, wordt nogmaals gecontroleerd en pas als offline gemarkeerd als het minstens 150 seconden na de herstart *nog steeds* onbereikbaar is — deze tweede bevestiging geldt ongeacht de ingestelde alert-vertraging, omdat sommige integraties (WiFi-handshakes, Zigbee-/Z-Wave-mesh-opbouw) legitiem langer dan een minuut kunnen duren om alle apparaten opnieuw te verbinden *(vanaf v1.3.5)*.
 
 ### Permanente opslag
 

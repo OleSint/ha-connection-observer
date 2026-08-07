@@ -297,3 +297,10 @@ LANG_ES = "es"
 # Timing
 STARTUP_GRACE_SECONDS = 60
 WATCHDOG_INTERVAL_SECONDS = 300
+
+# Minimum re-check delay before the startup scan flags a still-"unavailable" entity
+# as offline. Many integrations (WiFi handshakes, Zigbee/Z-Wave mesh routing, etc.)
+# legitimately take longer than STARTUP_GRACE_SECONDS to reconnect every device, so
+# "still unavailable right now" needs a second confirmation even if the user has
+# configured a 0-minute alert delay for live transitions.
+STARTUP_SCAN_CONFIRM_SECONDS = 150
