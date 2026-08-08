@@ -257,6 +257,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.6 *(released)*
+
+**Bugfix: A single permanently unavailable entity could flag an otherwise healthy device offline**  
+Some devices (notably Z-Wave) expose entities for capabilities they advertise but never actually report — those entities sit at `unavailable` permanently even though the rest of the device works fine. Connection Observer's device-level deduplication used to trigger an offline event from any single unavailable entity, without checking whether other entities on the same device were still reporting normally. A device is now only flagged offline once *all* of its entities are unavailable — if at least one other entity on the device is still reporting a real state, that single stuck entity is no longer treated as a disconnect. Already-open events caused by this are now also auto-resolved by the watchdog within 5 minutes, no restart required.
+
 ### v1.3.5 *(released)*
 
 **Bugfix: False-positive offline detection for devices still reconnecting after a HA restart**  

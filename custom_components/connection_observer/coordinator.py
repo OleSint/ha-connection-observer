@@ -464,6 +464,12 @@ class ConnectionObserverCoordinator:
             if state is None or state.state != "unavailable":
                 continue
 
+            # See the matching check in _handle_state_change: a single permanently
+            # unavailable entity (unsupported capability) must not flag an
+            # otherwise healthy device offline.
+            if device_id and self._device_has_other_available_entity(device_id, entity_id):
+                continue
+
             device_key, _ = self._resolve_device(entity_id)
             if device_key in seen_device_keys:
                 continue
@@ -751,6 +757,13 @@ class ConnectionObserverCoordinator:
             old_state.state == "unavailable" and new_state.state != "unavailable"
         )
         if going_unavailable:
+            # A device is only really offline once ALL of its entities go
+            # unavailable together. Some devices (notably Z-Wave) expose entities
+            # for capabilities they advertise but never actually report, which
+            # then sit at "unavailable" permanently — that alone must not flag an
+            # otherwise healthy device offline.
+            if device_id and self._device_has_other_available_entity(device_id, entity_id):
+                return
             self._on_disconnect(entity_id, protocol or "unknown", is_critical=is_critical)
         elif coming_back:
             self._on_reconnect(entity_id)
@@ -904,6 +917,15 @@ class ConnectionObserverCoordinator:
                     if is_watch
                     else state.state != "unavailable"
                 )
+                # The trigger entity itself may be a permanently unavailable
+                # capability (see _device_has_other_available_entity) — if some
+                # other entity on the device is reporting fine, treat it as
+                # recovered too, so already-open events from before this fix
+                # clear up automatically without waiting for a real reconnect.
+                if not recovered and not is_watch:
+                    recovered = self._device_has_other_available_entity(
+                        ev.device_key, ev.trigger_entity_id
+                    )
                 if recovered:
                     _LOGGER.debug("Watchdog: %s recovered (missed event)", ev.device_name)
                     ev.reconnected_at = dt_util.now()
@@ -1379,6 +1401,25 @@ class ConnectionObserverCoordinator:
         er = async_get_entity_registry(self.hass)
         entry = er.async_get(entity_id)
         return entry.platform if entry else None
+
+    def _device_has_other_available_entity(self, device_id: str, exclude_entity_id: str) -> bool:
+        """Return True if some other entity of this device is not `unavailable`.
+
+        Some devices (notably Z-Wave) expose entities for capabilities they
+        advertise but never actually report; those sit at `unavailable`
+        permanently even though the rest of the device works fine. A device is
+        only genuinely offline once ALL of its entities are unavailable — if any
+        other entity is still reporting a real state, this one entity's
+        unavailable status is not treated as a disconnect.
+        """
+        er = async_get_entity_registry(self.hass)
+        for entry in er.entities.values():
+            if entry.device_id != device_id or entry.entity_id == exclude_entity_id:
+                continue
+            state = self.hass.states.get(entry.entity_id)
+            if state is not None and state.state != "unavailable":
+                return True
+        return False
 
     def _resolve_device(self, entity_id: str) -> tuple[str, str]:
         er = async_get_entity_registry(self.hass)

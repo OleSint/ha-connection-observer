@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation (Deutsch)
 
-**Version:** 1.3.5  
+**Version:** 1.3.6  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -52,6 +52,8 @@ Connection Observer überwacht genau diesen Übergang: von einem beliebigen Stat
 Die meisten Geräte haben mehrere Entitäten in Home Assistant. Ein Zigbee-Stecker könnte Entitäten für den Schaltstatus, die aktuelle Leistung, die Gesamtenergie, die Spannung und mehr haben. Wenn dieser Stecker offline geht, werden alle Entitäten gleichzeitig `unavailable`.
 
 Connection Observer ermittelt über die HA-Geräteregistrierung, zu welchem *Gerät* eine Entität gehört, und erstellt nur **ein Ereignis pro Gerät** — unabhängig davon, wie viele Entitäten es hat. Das bedeutet eine Benachrichtigung pro Gerät, nicht fünf.
+
+Manche Geräte (insbesondere Z-Wave) haben Entitäten für Fähigkeiten, die sie zwar ankündigen, aber nie tatsächlich melden — diese können dauerhaft auf `unavailable` stehen, obwohl der Rest des Geräts einwandfrei funktioniert. Ein Gerät wird erst als offline markiert, wenn *alle* seine Entitäten unavailable sind; meldet mindestens eine andere Entität desselben Geräts weiterhin einen echten Zustand, wird diese eine hängende Entität nicht als Verbindungsabbruch gewertet *(ab v1.3.6)*.
 
 ### Startschutz
 
