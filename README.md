@@ -257,6 +257,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.7 *(released)*
+
+**Bugfix: Some very old open events could never be auto-resolved by the watchdog**  
+Events stored before the `trigger_entity_id` field was introduced load with an empty string as fallback, which the watchdog's recovery check treated as falsy and therefore skipped entirely — such legacy events could stay marked offline forever, even with the device fully back online, since they were never re-checked. The watchdog now falls back to checking whether any entity on the device is currently available when no trigger entity is recorded, so these old stuck events resolve automatically within 5 minutes of updating. If a device is still stuck after updating, the `connection_observer.clear_device` service can be used to reset it immediately.
+
 ### v1.3.6 *(released)*
 
 **Bugfix: A single permanently unavailable entity could flag an otherwise healthy device offline**  

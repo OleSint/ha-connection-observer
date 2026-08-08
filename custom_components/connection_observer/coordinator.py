@@ -926,15 +926,24 @@ class ConnectionObserverCoordinator:
                     recovered = self._device_has_other_available_entity(
                         ev.device_key, ev.trigger_entity_id
                     )
-                if recovered:
-                    _LOGGER.debug("Watchdog: %s recovered (missed event)", ev.device_name)
-                    ev.reconnected_at = dt_util.now()
-                    changed = True
-                    async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
-                    self._active_repairs.discard(ev.device_key)
-                    if self._cfg.get(CONF_NOTIFY_RECONNECT):
-                        self._buffer_reconnect_notification(ev.device_name)
-                    continue
+            else:
+                # Legacy event with no trigger_entity_id (created by a version
+                # predating that field, loaded from storage with the "" default).
+                # Without a specific entity to re-check, fall back to: is ANY
+                # entity on this device currently available? Such events used to
+                # be stuck open forever, since this branch was previously skipped
+                # entirely — the watchdog never re-checked them at all.
+                recovered = self._device_has_other_available_entity(ev.device_key, "")
+
+            if recovered:
+                _LOGGER.debug("Watchdog: %s recovered (missed event)", ev.device_name)
+                ev.reconnected_at = dt_util.now()
+                changed = True
+                async_delete_issue(self.hass, DOMAIN, _repair_issue_id(ev.device_key))
+                self._active_repairs.discard(ev.device_key)
+                if self._cfg.get(CONF_NOTIFY_RECONNECT):
+                    self._buffer_reconnect_notification(ev.device_name)
+                continue
 
             # Create HA Repairs entry if offline long enough (only once per event)
             if repairs_hours > 0 and ev.device_key not in self._active_repairs:
