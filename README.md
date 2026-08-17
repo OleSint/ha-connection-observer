@@ -259,13 +259,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ### v1.3.9 *(released)*
 
-**Improvement: Startup re-check delay is now configurable, and the default was raised**  
-The 150-second window (v1.3.5) used to re-confirm a device is genuinely offline after a restart wasn't enough for some setups — notably several WiFi devices reconnecting to the same router simultaneously, which can legitimately take longer to fully stabilize. The default has been raised to 5 minutes, and it's now a configurable setting (**Startup re-check delay**, in Advanced options) so it can be tuned further for setups with many simultaneously-reconnecting devices without waiting on a new release.
-
-### v1.3.8 *(released)*
-
 **Bugfix: `disconnected_at` reflected when the alert delay finished, not when the device actually went offline**  
 When an alert delay (global or per-protocol) was configured, the event's recorded `disconnected_at` timestamp was set at the moment the delay finished confirming the device was still offline — not at the moment it actually went unavailable. This made any duration computed from `disconnected_at`/`reconnected_at` (e.g. in `sensor.event_history` or a dashboard) misleadingly short, sometimes showing "0 min" outages for devices that had genuinely been offline for the full delay period. It could also make it look like the configured delay wasn't affecting notifications, since the event timestamp and the notification send time ended up very close together by coincidence. `disconnected_at` now always reflects the true moment the device was first detected as unavailable, regardless of any configured delay.
+
+**Improvement: Startup re-check delay is now configurable, and the default was raised**  
+The 150-second window (v1.3.5) used to re-confirm a device is genuinely offline after a restart wasn't enough for some setups — notably several WiFi devices reconnecting to the same router simultaneously, which can legitimately take longer to fully stabilize. The default has been raised to 5 minutes, and it's now a configurable setting (**Startup re-check delay**, in Advanced options) so it can be tuned further for setups with many simultaneously-reconnecting devices without waiting on a new release.
 
 ### v1.3.7 *(released)*
 
