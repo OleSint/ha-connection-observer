@@ -256,6 +256,7 @@ CONF_MIN_OFFLINE_DURATION = "min_offline_duration"
 CONF_INCLUDE_AREA = "include_area"
 CONF_INCLUDE_DEVICE_INFO = "include_device_info"
 CONF_REPAIRS_THRESHOLD = "repairs_threshold"  # hours offline before HA Repairs entry, 0 = off
+CONF_STARTUP_CONFIRM_DELAY = "startup_confirm_delay"  # minutes; startup-scan re-check window, see DEFAULT_STARTUP_CONFIRM_MINUTES
 
 # Config keys – v1.1.0
 CONF_PROTOCOL_DELAYS = "protocol_delays"   # dict[str, int]  protocol → delay minutes (overrides global)
@@ -298,9 +299,11 @@ LANG_ES = "es"
 STARTUP_GRACE_SECONDS = 60
 WATCHDOG_INTERVAL_SECONDS = 300
 
-# Minimum re-check delay before the startup scan flags a still-"unavailable" entity
-# as offline. Many integrations (WiFi handshakes, Zigbee/Z-Wave mesh routing, etc.)
-# legitimately take longer than STARTUP_GRACE_SECONDS to reconnect every device, so
-# "still unavailable right now" needs a second confirmation even if the user has
-# configured a 0-minute alert delay for live transitions.
-STARTUP_SCAN_CONFIRM_SECONDS = 150
+# Default minimum re-check delay (minutes) before the startup scan flags a still-
+# "unavailable" entity as offline. Many integrations (WiFi handshakes, Zigbee/Z-Wave
+# mesh routing, etc.) legitimately take longer than STARTUP_GRACE_SECONDS to
+# reconnect every device, so "still unavailable right now" needs a second
+# confirmation even if the user has configured a 0-minute alert delay for live
+# transitions. User-configurable via CONF_STARTUP_CONFIRM_DELAY (see below) —
+# setups with many simultaneously-reconnecting devices may need more than this.
+DEFAULT_STARTUP_CONFIRM_MINUTES = 5

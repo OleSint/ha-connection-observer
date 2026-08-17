@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation (Deutsch)
 
-**Version:** 1.3.7  
+**Version:** 1.3.9  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -59,7 +59,7 @@ Manche Geräte (insbesondere Z-Wave) haben Entitäten für Fähigkeiten, die sie
 
 Wenn Home Assistant neu startet, brauchen alle Integrationen einen Moment, um ihre Geräte wieder zu verbinden. In diesem Zeitfenster durchlaufen viele Entitäten kurzzeitig den Status `unavailable`. Connection Observer wartet 60 Sekunden, nachdem HA vollständig gestartet ist, bevor es mit dem Tracking beginnt. Das verhindert eine Flut von Fehlalarmen bei jedem HA-Neustart.
 
-Ein Gerät, das nach diesen 60 Sekunden noch `unavailable` ist, wird ein weiteres Mal geprüft und erst als offline markiert, wenn es auch nach mindestens 150 Sekunden seit dem Neustart *immer noch* nicht erreichbar ist — diese zweite Bestätigung gilt unabhängig vom konfigurierten Alert-Delay, da manche Integrationen (WLAN-Handshakes, Zigbee-/Z-Wave-Mesh-Aufbau) länger als eine Minute brauchen können, um alle Geräte neu zu verbinden *(ab v1.3.5)*.
+Ein Gerät, das nach diesen 60 Sekunden noch `unavailable` ist, wird ein weiteres Mal geprüft und erst als offline markiert, wenn es auch nach einigen weiteren Minuten seit dem Neustart *immer noch* nicht erreichbar ist — diese zweite Bestätigung gilt unabhängig vom konfigurierten Alert-Delay, da manche Integrationen (WLAN-Handshakes, Zigbee-/Z-Wave-Mesh-Aufbau) länger als eine Minute brauchen können, um alle Geräte neu zu verbinden *(ab v1.3.5)*. Dieses Bestätigungsfenster ist standardmäßig auf **5 Minuten** gesetzt und über [Bestätigungszeit beim Start](#bestätigungszeit-beim-start) in Abschnitt 5 konfigurierbar — erhöhe den Wert weiter, wenn bei dir viele Geräte gleichzeitig mit demselben Router/Koordinator neu verbinden *(konfigurierbar ab v1.3.9)*.
 
 ### Persistenter Speicher
 
@@ -218,6 +218,10 @@ Ganze Entitätsdomänen können auf der Optionsseite ausgeschlossen werden (iden
 Legt fest, nach wie vielen Stunden ein dauerhafter Eintrag unter **Einstellungen → Reparaturen** erstellt wird. Der Wert `0` deaktiviert diese Funktion. Standard: **24 Stunden**.
 
 Siehe [Abschnitt 7](#7-ha-reparaturen-integration) für Details.
+
+### Bestätigungszeit beim Start
+
+Ein Gerät, das nach Ablauf der Startup-Schonfrist noch `unavailable` ist, wird nicht sofort als offline markiert — es wird nach dieser Anzahl Minuten erneut geprüft und nur gemeldet, wenn es dann tatsächlich noch unavailable ist. Standard: **5 Minuten** *(ab v1.3.9)*. Erhöhe diesen Wert, wenn bei dir mehrere Geräte nach einem Neustart gleichzeitig neu verbinden (z. B. viele WLAN-Geräte am selben Router, die dafür legitim länger als ein paar Minuten brauchen können). Hintergrund siehe [Startschutz](#startschutz) in Abschnitt 2.
 
 ### Benachrichtigungsvorlagen
 
@@ -788,6 +792,7 @@ recorder:
 - **Nur-Cloud-Integrationen:** Geräte, die ausschließlich über einen Cloud-Dienst verbunden sind, werden möglicherweise nicht erkannt, wenn die Integration bei fehlender Cloud-Verbindung keinen `unavailable`-Status setzt.
 - **Polling-Integrationen:** Eine Verbindungsunterbrechung wird erst nach dem nächsten Abfragezyklus erkannt, was zu einer kurzen Verzögerung führen kann.
 - **Passive BLE-Geräte (BTHome etc.):** Bluetooth-Low-Energy-Sensoren wie BTHome-Tür-/Fenstersensoren halten keine dauerhafte Verbindung — sie senden periodische Advertisements. Geht ein solches Gerät offline (z. B. Batterie entfernt), setzt Home Assistant die Entitäten erst nach seinem eigenen internen Timeout auf `unavailable` — das kann mehrere Stunden dauern. Connection Observer kann erst reagieren, wenn HA `unavailable` meldet. Echtzeitüberwachung ist bei passiven BLE-Geräten daher strukturell nicht möglich. Sie unterscheiden sich grundlegend von WLAN-Geräten.
+- **Z-Wave – verzögerte Statuserkennung:** Z-Wave ist ein Mesh-Netzwerk ohne dauerhafte Verbindung. Ob ein Knoten noch "lebt", wird von Z-Wave JS nur reaktiv geprüft — also nur dann, wenn tatsächlich mit dem Gerät kommuniziert wird (z. B. ein Befehl gesendet oder ein Ping ausgeführt wird). Trennt man ein Z-Wave-Gerät physisch vom Strom, kann der Status in Home Assistant deshalb noch lange als "verfügbar" stehen bleiben, bis das Gerät das nächste Mal aktiv angesprochen wird. Connection Observer kann nur auf tatsächliche `state_changed`-Events reagieren — bleibt dieses Event aus, bleibt auch die Erkennung aus. **Workaround:** Entweder eine Automation einrichten, die kritische Z-Wave-Geräte per Service `zwave_js.ping` regelmäßig aktiv anpingt (damit HA den Status zeitnah aktualisiert), oder wie bei passiven BLE-Geräten das [Watch-Label](#watch-label--eigene-offline-indikatoren) mit einem Template-Sensor nutzen, der den `last_updated`-Zeitstempel überwacht.
 - **Zigbee2MQTT – Verfügbarkeitsprüfung erforderlich:** Connection Observer reagiert auf den `unavailable`-Status von Entitäten. Zigbee2MQTT setzt diesen Status standardmäßig **nicht** — die Verfügbarkeitsprüfung muss in Z2M aktiviert werden: **Einstellungen → Verfügbarkeit → aktiviert**. Ohne diese Einstellung werden Z2M-Geräte nicht erkannt.
 - **Nur eine Instanz:** Connection Observer unterstützt eine einzige Integrationsinstanz pro HA-Installation.
 - **30-Tage-Ereignisaufbewahrung:** Ereignisse, die älter als 30 Tage sind, werden automatisch aus dem Speicher entfernt.

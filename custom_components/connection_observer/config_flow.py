@@ -27,6 +27,7 @@ from .const import (
     CONF_PROTOCOL_DELAYS,
     CONF_PROTOCOLS,
     CONF_REPAIRS_THRESHOLD,
+    CONF_STARTUP_CONFIRM_DELAY,
     CONF_SUMMARY_DAYS,
     CONF_SUMMARY_TIME,
     CONF_TMPL_IMM_MSG,
@@ -37,6 +38,7 @@ from .const import (
     CONF_TMPL_SUM_LINE_RESOLVED,
     CONF_TMPL_SUM_TITLE,
     CONF_WATCH_LABEL,
+    DEFAULT_STARTUP_CONFIRM_MINUTES,
     DOMAIN,
     KNOWN_PROTOCOLS,
     LANG_DE,
@@ -383,6 +385,9 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(CONF_ALERT_DELAY, default=0): _MINUTES_SELECTOR,
                     vol.Optional(CONF_COOLDOWN, default=0): _MINUTES_SELECTOR,
                     vol.Optional(CONF_MIN_OFFLINE_DURATION, default=0): _MINUTES_SELECTOR,
+                    vol.Optional(
+                        CONF_STARTUP_CONFIRM_DELAY, default=DEFAULT_STARTUP_CONFIRM_MINUTES
+                    ): _MINUTES_SELECTOR,
                     vol.Optional(CONF_INCLUDE_AREA, default=False): selector.BooleanSelector(),
                     vol.Optional(CONF_INCLUDE_DEVICE_INFO, default=False): selector.BooleanSelector(),
                     vol.Optional(CONF_EXCLUDED_DOMAINS, default=[]): _DOMAIN_SELECTOR,
@@ -558,6 +563,10 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_MIN_OFFLINE_DURATION,
                         default=cur.get(CONF_MIN_OFFLINE_DURATION, 0),
+                    ): _MINUTES_SELECTOR,
+                    vol.Optional(
+                        CONF_STARTUP_CONFIRM_DELAY,
+                        default=cur.get(CONF_STARTUP_CONFIRM_DELAY, DEFAULT_STARTUP_CONFIRM_MINUTES),
                     ): _MINUTES_SELECTOR,
                     vol.Optional(
                         CONF_INCLUDE_AREA,

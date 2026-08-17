@@ -1,6 +1,6 @@
 # Connection Observer – Documentatie (Nederlands)
 
-**Versie:** 1.3.7  
+**Versie:** 1.3.9  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -57,7 +57,7 @@ Connection Observer bepaalt via het HA-apparaatregister bij welk *apparaat* een 
 
 Wanneer Home Assistant herstart, hebben alle integraties even nodig om hun apparaten opnieuw te verbinden. Tijdens dit venster gaan veel entiteiten kort door `unavailable`. Connection Observer wacht 60 seconden na het volledig opstarten van HA voordat het verbrekingen begint bij te houden. Dit voorkomt een stroom van valse alarmen bij elke herstart.
 
-Een apparaat dat na deze 60 seconden nog steeds `unavailable` is, wordt nogmaals gecontroleerd en pas als offline gemarkeerd als het minstens 150 seconden na de herstart *nog steeds* onbereikbaar is — deze tweede bevestiging geldt ongeacht de ingestelde alert-vertraging, omdat sommige integraties (WiFi-handshakes, Zigbee-/Z-Wave-mesh-opbouw) legitiem langer dan een minuut kunnen duren om alle apparaten opnieuw te verbinden *(vanaf v1.3.5)*.
+Een apparaat dat na deze 60 seconden nog steeds `unavailable` is, wordt nogmaals gecontroleerd en pas als offline gemarkeerd als het na deze hercontroletijd *nog steeds* onbereikbaar is — deze tweede bevestiging geldt ongeacht de ingestelde alert-vertraging, omdat sommige integraties (WiFi-handshakes, Zigbee-/Z-Wave-mesh-opbouw) legitiem langer dan een minuut kunnen duren om alle apparaten opnieuw te verbinden *(vanaf v1.3.5)*. Deze hercontroletijd is standaard **5 minuten** en instelbaar in de geavanceerde opties — verhoog deze als meerdere apparaten tegelijk verbinding maken met dezelfde router *(instelbaar vanaf v1.3.9)*.
 
 ### Permanente opslag
 
@@ -768,6 +768,7 @@ recorder:
 - **Alleen-cloud integraties:** Apparaten die uitsluitend via een clouddienst verbinden, worden mogelijk niet gedetecteerd als de integratie geen `unavailable`-status instelt bij cloudproblemen.
 - **Poll-integraties:** Een verbreking wordt pas gedetecteerd na de volgende pollcyclus.
 - **Passieve BLE-apparaten (BTHome etc.):** Bluetooth Low Energy-sensoren zoals BTHome deur-/raamsensoren onderhouden geen persistente verbinding — ze zenden periodieke berichten uit. Als zo'n apparaat offline gaat (bijv. batterij verwijderd), stelt Home Assistant de entiteiten pas op `unavailable` na een eigen interne time-out, die enkele uren kan bedragen. Connection Observer kan pas reageren zodra HA `unavailable` meldt. Realtime bewaking is voor passieve BLE-apparaten structureel niet mogelijk, in tegenstelling tot WiFi-apparaten. **Oplossing vanaf v1.1.0:** Gebruik de [Watch label](#watch-label--aangepaste-offline-indicatoren)-functie met een template binaire sensor die `last_updated` bewaakt — dit maakt detectie binnen enkele minuten mogelijk.
+- **Z-Wave – vertraagde statusdetectie:** Z-Wave is een mesh-netwerk zonder persistente verbinding. Of een node nog "leeft" wordt door Z-Wave JS alleen reactief gecontroleerd — dus alleen wanneer daadwerkelijk met het apparaat wordt gecommuniceerd (een commando wordt verzonden, of het wordt gepingd). Als je een Z-Wave-apparaat fysiek loskoppelt van de stroom, kan de status in Home Assistant daardoor lange tijd "beschikbaar" blijven, tot het apparaat de volgende keer actief wordt aangesproken. Connection Observer kan alleen reageren op daadwerkelijke `state_changed`-events — blijft dat event uit, dan blijft ook de detectie uit. **Workaround:** Stel een automatisering in die kritieke Z-Wave-apparaten periodiek pingt via de service `zwave_js.ping` (zodat de status in HA actueel blijft), of gebruik, net als bij passieve BLE-apparaten, de [Watch label](#watch-label--aangepaste-offline-indicatoren)-functie met een template-sensor die de `last_updated`-tijdstempel bewaakt.
 - **Zigbee2MQTT – beschikbaarheidscontrole vereist:** Connection Observer reageert op de `unavailable`-status van entiteiten. Zigbee2MQTT stelt deze status standaard **niet** in — beschikbaarheidscontroles moeten worden ingeschakeld in Z2M: **Instellingen → Beschikbaarheid → ingeschakeld**. Zonder deze instelling worden Z2M-apparaten niet gedetecteerd.
 - **Slechts één instantie:** Connection Observer ondersteunt één integratie-instantie per HA-installatie.
 - **30 dagen bewaring:** Gebeurtenissen ouder dan 30 dagen worden automatisch verwijderd.

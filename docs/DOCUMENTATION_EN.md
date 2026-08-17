@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (English)
 
-**Version:** 1.3.7  
+**Version:** 1.3.9  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -59,7 +59,7 @@ Some devices (notably Z-Wave) expose entities for capabilities they advertise bu
 
 When Home Assistant restarts, all integrations need a moment to reconnect their devices. During this window, many entities briefly pass through `unavailable`. Connection Observer waits 60 seconds after HA has fully started before it begins tracking disconnects. This prevents a flood of false alarms every time HA is restarted.
 
-Any device still `unavailable` after that 60-second window is checked once more, and only flagged offline if it is *still* unavailable at least 150 seconds after the restart — this second confirmation applies regardless of your configured alert delay, since some integrations (WiFi handshakes, Zigbee/Z-Wave mesh routing) can legitimately take longer than a minute to reconnect every device *(v1.3.5+)*.
+Any device still `unavailable` after that 60-second window is checked once more, and only flagged offline if it is *still* unavailable at least a few minutes after the restart — this second confirmation applies regardless of your configured alert delay, since some integrations (WiFi handshakes, Zigbee/Z-Wave mesh routing) can legitimately take longer than a minute to reconnect every device *(v1.3.5+)*. This re-check window defaults to **5 minutes** and is configurable via [Startup re-check delay](#startup-re-check-delay) in Section 5 — increase it further if you have many devices reconnecting to the same router/coordinator simultaneously *(configurable since v1.3.9)*.
 
 ### Persistent storage
 
@@ -224,6 +224,10 @@ Entire entity domains can be excluded in the options page (same as in the Advanc
 Set the number of hours a device must be offline before a persistent issue is created in **Settings → Repairs**. Set to `0` to disable. Default: **24 hours**.
 
 See [Section 7](#7-ha-repairs-integration) for details.
+
+### Startup re-check delay
+
+After a restart, a device still `unavailable` once the startup grace period ends is not immediately flagged offline — it's re-checked once more after this many minutes, and only reported if it's genuinely still unavailable by then. Default: **5 minutes** *(v1.3.9+)*. Increase this if you have several devices that reconnect simultaneously after a restart (e.g. many WiFi devices on one router, which can legitimately take longer than a couple of minutes to all re-establish their connection). See [Startup protection](#startup-protection) in Section 2 for background.
 
 ### Notification templates
 
@@ -807,6 +811,7 @@ recorder:
 - **Cloud-only integrations:** Devices that connect exclusively through a cloud service may not be detected if the integration does not set entities to `unavailable` when the cloud is unreachable.
 - **Polling integrations:** A disconnect may only be detected after the next poll cycle, introducing a short delay.
 - **Passive BLE devices (BTHome etc.):** Bluetooth Low Energy sensors such as BTHome door/window sensors do not maintain a persistent connection — they broadcast periodic advertisements. If such a device goes offline (e.g. battery removed), Home Assistant only sets its entities to `unavailable` after its own internal timeout, which can be several hours. Connection Observer can only react once HA reports `unavailable`, so real-time detection is not possible via the standard path. **Solution (v1.1.0):** Use the [watch label feature](#watch-label--custom-offline-indicators) to build a template sensor that tracks the last-seen timestamp and label it — Connection Observer then monitors *that* sensor instead of the raw `unavailable` state.
+- **Z-Wave – delayed status detection:** Z-Wave is a mesh network with no persistent connection. Whether a node is still "alive" is only checked reactively by Z-Wave JS — i.e. only when the device is actually communicated with (a command is sent, or it's pinged). If you physically unplug a Z-Wave device, Home Assistant's state can therefore stay "available" for a long time, until the device is next actively addressed. Connection Observer can only react to actual `state_changed` events — if that event never fires, detection won't happen either. **Workaround:** Either set up an automation that periodically pings critical Z-Wave devices using the `zwave_js.ping` service (so HA's state stays current), or, similar to passive BLE devices, use the [watch label feature](#watch-label--custom-offline-indicators) with a template sensor that tracks the `last_updated` timestamp.
 - **Zigbee2MQTT – availability checks required:** Connection Observer reacts to the `unavailable` state of entities. Zigbee2MQTT does **not** set this state by default — availability checks must be enabled in Z2M: **Settings → Availability → enabled**. Without this setting, Z2M devices will not be detected.
 - **One instance only:** Connection Observer supports a single integration instance per HA installation.
 - **30-day event retention:** Events older than 30 days are automatically pruned from storage.

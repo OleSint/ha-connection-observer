@@ -38,6 +38,7 @@ from .const import (
     CONF_PROTOCOL_DELAYS,
     CONF_PROTOCOLS,
     CONF_REPAIRS_THRESHOLD,
+    CONF_STARTUP_CONFIRM_DELAY,
     CONF_SUMMARY_DAYS,
     CONF_SUMMARY_TIME,
     CONF_TMPL_IMM_MSG,
@@ -48,12 +49,12 @@ from .const import (
     CONF_TMPL_SUM_LINE_RESOLVED,
     CONF_TMPL_SUM_TITLE,
     CONF_WATCH_LABEL,
+    DEFAULT_STARTUP_CONFIRM_MINUTES,
     DOMAIN,
     LABEL_CRITICAL,
     LABEL_IGNORE,
     LABEL_WATCH,
     STARTUP_GRACE_SECONDS,
-    STARTUP_SCAN_CONFIRM_SECONDS,
     STORAGE_KEY,
     STORAGE_VERSION,
     WATCHDOG_INTERVAL_SECONDS,
@@ -430,10 +431,15 @@ class ConnectionObserverCoordinator:
 
         A device still reporting `unavailable` at this point is not necessarily a
         real outage — many integrations (WiFi/mesh handshakes, Zigbee/Z-Wave routing)
-        take longer than the startup grace period to reconnect every device. Each
-        candidate is therefore re-checked after STARTUP_SCAN_CONFIRM_SECONDS before an
-        event is actually created (see the min_delay_seconds param on _on_disconnect).
+        take longer than the startup grace period to reconnect every device, especially
+        with several devices reconnecting simultaneously. Each candidate is therefore
+        re-checked after CONF_STARTUP_CONFIRM_DELAY minutes (default
+        DEFAULT_STARTUP_CONFIRM_MINUTES, user-configurable) before an event is actually
+        created (see the min_delay_seconds param on _on_disconnect).
         """
+        startup_confirm_seconds = (
+            int(self._cfg.get(CONF_STARTUP_CONFIRM_DELAY, DEFAULT_STARTUP_CONFIRM_MINUTES)) * 60
+        )
         er = async_get_entity_registry(self.hass)
         configured_protocols: list[str] = self._cfg.get(CONF_PROTOCOLS, [])
         seen_device_keys: set[str] = set()
@@ -482,7 +488,7 @@ class ConnectionObserverCoordinator:
             seen_device_keys.add(device_key)
             self._on_disconnect(
                 entity_id, protocol or "unknown", is_critical=is_critical,
-                min_delay_seconds=STARTUP_SCAN_CONFIRM_SECONDS,
+                min_delay_seconds=startup_confirm_seconds,
             )
 
         # Watch-label entities (binary sensor / template sensor "offline" signal)
@@ -501,7 +507,7 @@ class ConnectionObserverCoordinator:
             seen_device_keys.add(device_key)
             self._on_disconnect(
                 entity_id, self._get_protocol_for_watch_entity(entity_id),
-                min_delay_seconds=STARTUP_SCAN_CONFIRM_SECONDS,
+                min_delay_seconds=startup_confirm_seconds,
             )
 
         if seen_device_keys:
@@ -776,6 +782,11 @@ class ConnectionObserverCoordinator:
         is_critical: bool = False,
         min_delay_seconds: int = 0,
     ) -> None:
+        # Captured now, before any alert delay — _create_event uses this as the
+        # event's disconnected_at so the recorded outage start (and any duration
+        # computed from it) reflects when the device actually went unavailable,
+        # not when the delay happened to finish confirming it.
+        first_unavailable_at = dt_util.now()
         device_key, device_name = self._resolve_device(entity_id)
         for ev in self._events:
             if ev.device_key == device_key and ev.reconnected_at is None and not ev.included_in_summary:
@@ -797,7 +808,8 @@ class ConnectionObserverCoordinator:
         if alert_delay_seconds > 0:
             @callback
             def _confirm(_now: Any, _eid: str = entity_id, _dk: str = device_key,
-                         _dn: str = device_name, _proto: str = protocol) -> None:
+                         _dn: str = device_name, _proto: str = protocol,
+                         _since: datetime = first_unavailable_at) -> None:
                 self._pending_disconnects.pop(_dk, None)
                 state = self.hass.states.get(_eid)
                 if state:
@@ -808,11 +820,14 @@ class ConnectionObserverCoordinator:
                         else state.state == "unavailable"
                     )
                     if still_offline:
-                        self._create_event(_dk, _dn, _eid, _proto)
+                        self._create_event(_dk, _dn, _eid, _proto, disconnected_at=_since)
             cancel = async_call_later(self.hass, alert_delay_seconds, _confirm)
             self._pending_disconnects[device_key] = cancel
         else:
-            self._create_event(device_key, device_name, entity_id, protocol, is_critical=is_critical)
+            self._create_event(
+                device_key, device_name, entity_id, protocol,
+                is_critical=is_critical, disconnected_at=first_unavailable_at,
+            )
 
     @callback
     def _on_reconnect(self, entity_id: str) -> None:
@@ -847,6 +862,7 @@ class ConnectionObserverCoordinator:
         entity_id: str,
         protocol: str,
         is_critical: bool = False,
+        disconnected_at: datetime | None = None,
     ) -> None:
         area_name = self._get_area_name(entity_id) if self._cfg.get(CONF_INCLUDE_AREA) else None
         device_model = self._get_device_model(entity_id) if self._cfg.get(CONF_INCLUDE_DEVICE_INFO) else None
@@ -854,7 +870,7 @@ class ConnectionObserverCoordinator:
             device_key=device_key,
             device_name=device_name,
             protocol=protocol,
-            disconnected_at=dt_util.now(),
+            disconnected_at=disconnected_at or dt_util.now(),
             trigger_entity_id=entity_id,
             area_name=area_name,
             device_model=device_model,

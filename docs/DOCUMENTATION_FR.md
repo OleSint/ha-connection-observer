@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (Français)
 
-**Version:** 1.3.7  
+**Version:** 1.3.9  
 **Dépôt :** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -57,7 +57,7 @@ Connection Observer détermine à quel *appareil* appartient une entité via le 
 
 Lorsque Home Assistant redémarre, toutes les intégrations ont besoin d'un moment pour reconnecter leurs appareils. Durant cette fenêtre, de nombreuses entités passent brièvement par `unavailable`. Connection Observer attend 60 secondes après le démarrage complet de HA avant de commencer le suivi des déconnexions. Cela évite un déluge de fausses alarmes à chaque redémarrage de HA.
 
-Un appareil encore `unavailable` après ces 60 secondes est vérifié une seconde fois et n'est marqué hors ligne que s'il est *toujours* injoignable au moins 150 secondes après le redémarrage — cette seconde confirmation s'applique indépendamment du délai d'alerte configuré, car certaines intégrations (connexion WiFi, routage de maillage Zigbee/Z-Wave) peuvent légitimement prendre plus d'une minute pour reconnecter tous les appareils *(à partir de la v1.3.5)*.
+Un appareil encore `unavailable` après ces 60 secondes est vérifié une seconde fois et n'est marqué hors ligne que s'il est *toujours* injoignable après ce délai de re-vérification — cette seconde confirmation s'applique indépendamment du délai d'alerte configuré, car certaines intégrations (connexion WiFi, routage de maillage Zigbee/Z-Wave) peuvent légitimement prendre plus d'une minute pour reconnecter tous les appareils *(à partir de la v1.3.5)*. Ce délai est de **5 minutes** par défaut et configurable dans les options avancées — augmentez-le si plusieurs appareils se reconnectent simultanément au même routeur *(configurable depuis la v1.3.9)*.
 
 ### Stockage persistant
 
@@ -766,6 +766,7 @@ recorder:
 - **Intégrations cloud uniquement :** Les appareils connectés exclusivement via un service cloud peuvent ne pas être détectés si l'intégration ne passe pas les entités à `unavailable`.
 - **Intégrations par sondage :** Une déconnexion peut n'être détectée qu'après le prochain cycle de sondage.
 - **Appareils BLE passifs (BTHome etc.) :** Les capteurs Bluetooth Low Energy comme les capteurs de porte/fenêtre BTHome ne maintiennent pas de connexion persistante — ils diffusent des annonces périodiques. Si un tel appareil passe hors ligne (p. ex. batterie retirée), Home Assistant ne met ses entités à `unavailable` qu'après son propre délai interne, qui peut atteindre plusieurs heures. Connection Observer ne peut réagir qu'une fois que HA signale `unavailable`. La surveillance en temps réel n'est donc structurellement pas possible pour les appareils BLE passifs, contrairement aux appareils WiFi. **Solution depuis la v1.1.0 :** Utilisez la fonction [Watch label](#watch-label--indicateurs-hors-ligne-personnalisés) avec un capteur binaire template qui surveille `last_updated` — cela permet une détection en quelques minutes.
+- **Z-Wave – détection d'état retardée :** Z-Wave est un réseau maillé sans connexion persistante. La vivacité d'un nœud n'est vérifiée que de manière réactive par Z-Wave JS — c'est-à-dire uniquement lorsque l'appareil est réellement sollicité (envoi d'une commande, ou ping). Si vous débranchez physiquement un appareil Z-Wave, son état dans Home Assistant peut donc rester « disponible » pendant longtemps, jusqu'à la prochaine sollicitation active. Connection Observer ne peut réagir qu'à de véritables événements `state_changed` — si cet événement ne se produit jamais, la détection non plus. **Contournement :** Mettez en place une automatisation qui pingue régulièrement les appareils Z-Wave critiques via le service `zwave_js.ping` (pour que l'état de HA reste à jour), ou, comme pour les appareils BLE passifs, utilisez la fonction [Watch label](#watch-label--indicateurs-hors-ligne-personnalisés) avec un capteur template qui surveille l'horodatage `last_updated`.
 - **Zigbee2MQTT – contrôle de disponibilité requis :** Connection Observer réagit à l'état `unavailable` des entités. Zigbee2MQTT ne définit **pas** cet état par défaut — les contrôles de disponibilité doivent être activés dans Z2M : **Paramètres → Disponibilité → activé**. Sans ce paramètre, les appareils Z2M ne seront pas détectés.
 - **Une seule instance :** Connection Observer supporte une seule instance par installation HA.
 - **Conservation des événements 30 jours :** Les événements de plus de 30 jours sont automatiquement supprimés.

@@ -39,13 +39,15 @@
           "alert_delay": "Globale vertraging (minuten offline voordat een gebeurtenis wordt aangemaakt)",
           "cooldown": "Minimale tijd tussen directe meldingen per apparaat (0 = geen limiet)",
           "min_offline_duration": "Minimale offline-duur om in de samenvatting te verschijnen (0 = alle gebeurtenissen)",
+          "startup_confirm_delay": "Hercontrole-vertraging bij opstarten (minuten) voordat een reeds offline apparaat wordt gemeld",
           "include_area": "Ruimte / zone opnemen in meldingen",
           "include_device_info": "Fabrikant en model opnemen in meldingen",
           "excluded_domains": "Uitgesloten entiteitsdomeinen (bijv. sensor, button)",
           "excluded_devices": "Uitgesloten apparaten (optioneel)"
         },
         "data_description": {
-          "alert_delay": "0 = direct. Standaardwaarde voor alle protocollen, tenzij overschreven in de volgende stap."
+          "alert_delay": "0 = direct. Standaardwaarde voor alle protocollen, tenzij overschreven in de volgende stap.",
+          "startup_confirm_delay": "Na een herstart wordt een nog steeds onbeschikbaar apparaat pas na dit aantal minuten opnieuw gecontroleerd voordat het als offline wordt gemeld. Verhoog dit als meerdere apparaten tegelijk opnieuw verbinden (bijv. veel WiFi-apparaten op één router)."
         }
       },
       "expert": {
@@ -292,6 +294,7 @@
           "alert_delay": "Globale vertraging (minuten offline voordat een gebeurtenis wordt aangemaakt)",
           "cooldown": "Minimale tijd tussen meldingen per apparaat (minuten, 0 = geen limiet)",
           "min_offline_duration": "Minimale offline-duur voor samenvatting (minuten, 0 = alle gebeurtenissen)",
+          "startup_confirm_delay": "Hercontrole-vertraging bij opstarten (minuten) voordat een reeds offline apparaat wordt gemeld",
           "include_area": "Ruimte / zone opnemen in meldingen",
           "include_device_info": "Fabrikant en model opnemen in meldingen",
           "excluded_domains": "Uitgesloten entiteitsdomeinen (bijv. sensor, button)",
@@ -299,7 +302,8 @@
           "repairs_threshold": "HA Repairs-melding na N uur offline (0 = uitgeschakeld)"
         },
         "data_description": {
-          "alert_delay": "0 = direct. Standaardwaarde voor alle protocollen, tenzij overschreven in de Expert-stap."
+          "alert_delay": "0 = direct. Standaardwaarde voor alle protocollen, tenzij overschreven in de Expert-stap.",
+          "startup_confirm_delay": "Na een herstart wordt een nog steeds onbeschikbaar apparaat pas na dit aantal minuten opnieuw gecontroleerd voordat het als offline wordt gemeld. Verhoog dit als meerdere apparaten tegelijk opnieuw verbinden (bijv. veel WiFi-apparaten op één router)."
         }
       },
       "expert": {

@@ -39,13 +39,15 @@
           "alert_delay": "Globale Verzögerung (Minuten offline bevor ein Ereignis erstellt wird)",
           "cooldown": "Mindestabstand zwischen Sofortbenachrichtigungen pro Gerät (0 = kein Limit)",
           "min_offline_duration": "Mindestausfallzeit für die Zusammenfassung (0 = alle Ereignisse)",
+          "startup_confirm_delay": "Bestätigungszeit beim Start (Minuten), bevor ein bereits offline erkanntes Gerät gemeldet wird",
           "include_area": "Raum / Bereich in Benachrichtigungen anzeigen",
           "include_device_info": "Hersteller & Modell in Benachrichtigungen anzeigen",
           "excluded_domains": "Ausgeschlossene Entitätsdomänen (z. B. sensor, button)",
           "excluded_devices": "Ausgeschlossene Geräte (optional)"
         },
         "data_description": {
-          "alert_delay": "0 = sofort. Dieser Wert gilt für alle Protokolle, sofern im nächsten Schritt kein eigener Wert gesetzt wird."
+          "alert_delay": "0 = sofort. Dieser Wert gilt für alle Protokolle, sofern im nächsten Schritt kein eigener Wert gesetzt wird.",
+          "startup_confirm_delay": "Nach einem Neustart wird ein noch unavailable Gerät erst nach dieser Anzahl Minuten erneut geprüft, bevor es als offline gemeldet wird. Erhöhen, wenn mehrere Geräte gleichzeitig neu verbinden (z. B. viele WLAN-Geräte am selben Router)."
         }
       },
       "expert": {
@@ -292,6 +294,7 @@
           "alert_delay": "Globale Verzögerung (Minuten offline bevor ein Ereignis erstellt wird)",
           "cooldown": "Mindestabstand zwischen Benachrichtigungen pro Gerät (Minuten, 0 = kein Limit)",
           "min_offline_duration": "Mindestausfallzeit für Zusammenfassung (Minuten, 0 = alle)",
+          "startup_confirm_delay": "Bestätigungszeit beim Start (Minuten), bevor ein bereits offline erkanntes Gerät gemeldet wird",
           "include_area": "Raum / Bereich in Benachrichtigungen anzeigen",
           "include_device_info": "Hersteller & Modell in Benachrichtigungen anzeigen",
           "excluded_domains": "Ausgeschlossene Entitätsdomänen (z. B. sensor, button)",
@@ -299,7 +302,8 @@
           "repairs_threshold": "HA-Reparaturen-Eintrag nach N Stunden offline (0 = deaktiviert)"
         },
         "data_description": {
-          "alert_delay": "0 = sofort. Dieser Wert gilt für alle Protokolle, sofern im Experte-Schritt kein eigener Wert gesetzt wird."
+          "alert_delay": "0 = sofort. Dieser Wert gilt für alle Protokolle, sofern im Experte-Schritt kein eigener Wert gesetzt wird.",
+          "startup_confirm_delay": "Nach einem Neustart wird ein noch unavailable Gerät erst nach dieser Anzahl Minuten erneut geprüft, bevor es als offline gemeldet wird. Erhöhen, wenn mehrere Geräte gleichzeitig neu verbinden (z. B. viele WLAN-Geräte am selben Router)."
         }
       },
       "expert": {
