@@ -257,6 +257,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.10 *(released)*
+
+**Bugfix: Real disconnects could be permanently masked by a "status"/button entity on the same device**  
+The v1.3.6 fix ("a device is only offline once *all* of its entities are unavailable") had an unintended side effect: `device_class: connectivity` binary sensors (e.g. ESPHome's built-in "Status" sensor, which reports connectivity *as its value* and is designed to never itself become `unavailable`) and `button` entities (stateless action triggers) were being counted as proof the device was still reachable — permanently suppressing detection for any device that has one of these, no matter how long the real outage. Both entity types are now excluded from the "is any other entity still available" check, so genuine disconnects on such devices are detected again while the original v1.3.6 fix (for entities that legitimately never report, e.g. some Z-Wave capabilities) still applies.
+
 ### v1.3.9 *(released)*
 
 **Bugfix: `disconnected_at` reflected when the alert delay finished, not when the device actually went offline**  

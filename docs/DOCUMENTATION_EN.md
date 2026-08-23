@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (English)
 
-**Version:** 1.3.9  
+**Version:** 1.3.10  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -53,7 +53,7 @@ Most devices expose multiple entities in Home Assistant. A Zigbee plug might hav
 
 Connection Observer resolves which *device* an entity belongs to via the HA device registry, and only creates **one event per device** — regardless of how many entities it has. This means one notification per device, not five.
 
-Some devices (notably Z-Wave) expose entities for capabilities they advertise but never actually report — those can sit at `unavailable` permanently even though the rest of the device is fine. A device is only flagged offline once *all* of its entities are unavailable; if at least one other entity on the device is still reporting a real state, that single stuck entity is not treated as a disconnect *(v1.3.6+)*.
+Some devices (notably Z-Wave) expose entities for capabilities they advertise but never actually report — those can sit at `unavailable` permanently even though the rest of the device is fine. A device is only flagged offline once *all* of its entities are unavailable; if at least one other entity on the device is still reporting a real state, that single stuck entity is not treated as a disconnect *(v1.3.6+)*. `button` entities and `device_class: connectivity` binary sensors (e.g. ESPHome's built-in "Status" sensor) are excluded from this check, since they're designed to never themselves go `unavailable` and would otherwise permanently mask a real disconnect on the rest of the device *(v1.3.10+)*.
 
 ### Startup protection
 

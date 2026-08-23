@@ -1436,14 +1436,28 @@ class ConnectionObserverCoordinator:
         only genuinely offline once ALL of its entities are unavailable — if any
         other entity is still reporting a real state, this one entity's
         unavailable status is not treated as a disconnect.
+
+        Two entity types are excluded from counting as "still available", since
+        they are structurally unreliable as proof of reachability:
+        - `device_class: connectivity` binary sensors (e.g. ESPHome's built-in
+          "Status" sensor) report connectivity *as their value* and are designed
+          to never themselves go `unavailable` — treating them as proof of life
+          would mean a device with one of these can never be flagged offline.
+        - `button` entities are stateless action triggers (last-pressed time or
+          "unknown"); their state doesn't reflect current reachability.
         """
         er = async_get_entity_registry(self.hass)
         for entry in er.entities.values():
             if entry.device_id != device_id or entry.entity_id == exclude_entity_id:
                 continue
+            if entry.entity_id.startswith("button."):
+                continue
             state = self.hass.states.get(entry.entity_id)
-            if state is not None and state.state != "unavailable":
-                return True
+            if state is None or state.state == "unavailable":
+                continue
+            if state.attributes.get("device_class") == "connectivity":
+                continue
+            return True
         return False
 
     def _resolve_device(self, entity_id: str) -> tuple[str, str]:

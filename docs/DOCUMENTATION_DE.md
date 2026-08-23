@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation (Deutsch)
 
-**Version:** 1.3.9  
+**Version:** 1.3.10  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -53,7 +53,7 @@ Die meisten Geräte haben mehrere Entitäten in Home Assistant. Ein Zigbee-Steck
 
 Connection Observer ermittelt über die HA-Geräteregistrierung, zu welchem *Gerät* eine Entität gehört, und erstellt nur **ein Ereignis pro Gerät** — unabhängig davon, wie viele Entitäten es hat. Das bedeutet eine Benachrichtigung pro Gerät, nicht fünf.
 
-Manche Geräte (insbesondere Z-Wave) haben Entitäten für Fähigkeiten, die sie zwar ankündigen, aber nie tatsächlich melden — diese können dauerhaft auf `unavailable` stehen, obwohl der Rest des Geräts einwandfrei funktioniert. Ein Gerät wird erst als offline markiert, wenn *alle* seine Entitäten unavailable sind; meldet mindestens eine andere Entität desselben Geräts weiterhin einen echten Zustand, wird diese eine hängende Entität nicht als Verbindungsabbruch gewertet *(ab v1.3.6)*.
+Manche Geräte (insbesondere Z-Wave) haben Entitäten für Fähigkeiten, die sie zwar ankündigen, aber nie tatsächlich melden — diese können dauerhaft auf `unavailable` stehen, obwohl der Rest des Geräts einwandfrei funktioniert. Ein Gerät wird erst als offline markiert, wenn *alle* seine Entitäten unavailable sind; meldet mindestens eine andere Entität desselben Geräts weiterhin einen echten Zustand, wird diese eine hängende Entität nicht als Verbindungsabbruch gewertet *(ab v1.3.6)*. `button`-Entitäten und Binary Sensors mit `device_class: connectivity` (z. B. ESPHomes eingebauter "Status"-Sensor) sind von dieser Prüfung ausgenommen, da sie bewusst nie selbst `unavailable` werden — sonst würden sie einen echten Verbindungsabbruch des restlichen Geräts dauerhaft verdecken *(ab v1.3.10)*.
 
 ### Startschutz
 
