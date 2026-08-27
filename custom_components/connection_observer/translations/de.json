@@ -18,11 +18,15 @@
         "description": "Lege fest, wie und wann du Benachrichtigungen erhältst. Sofort und Zusammenfassung können gleichzeitig aktiv sein.",
         "data": {
           "notify_service": "Benachrichtigungsdienst(e)",
+          "notify_target": "Benachrichtigungsziel (optional)",
           "notify_immediate": "Sofortbenachrichtigung bei Verbindungsabbruch",
           "notify_summary": "Geplante Zusammenfassung",
           "summary_time": "Uhrzeit der Zusammenfassung",
           "summary_days": "Tage der Zusammenfassung",
           "notify_reconnect": "Benachrichtigung bei Wiederverbindung (opt-in)"
+        },
+        "data_description": {
+          "notify_target": "Nur nötig, wenn dein Notify-Dienst mehrere Empfänger gleichzeitig anschreibt (z. B. ein gebündelter Telegram- oder E-Mail-Dienst seit HA 2026.7.x) und du gezielt nur einen erreichen willst — trag hier den Zielwert dieses Empfängers ein (z. B. eine Chat-ID oder E-Mail-Adresse)."
         }
       },
       "test": {
@@ -280,11 +284,15 @@
         "title": "Connection Observer – Benachrichtigungen",
         "data": {
           "notify_service": "Benachrichtigungsdienst(e)",
+          "notify_target": "Benachrichtigungsziel (optional)",
           "notify_immediate": "Sofortbenachrichtigung bei Verbindungsabbruch",
           "notify_summary": "Geplante Zusammenfassung",
           "summary_time": "Uhrzeit der Zusammenfassung",
           "summary_days": "Tage der Zusammenfassung",
           "notify_reconnect": "Benachrichtigung bei Wiederverbindung"
+        },
+        "data_description": {
+          "notify_target": "Nur nötig, wenn dein Notify-Dienst mehrere Empfänger gleichzeitig anschreibt (z. B. ein gebündelter Telegram- oder E-Mail-Dienst seit HA 2026.7.x) und du gezielt nur einen erreichen willst — trag hier den Zielwert dieses Empfängers ein (z. B. eine Chat-ID oder E-Mail-Adresse)."
         }
       },
       "advanced": {

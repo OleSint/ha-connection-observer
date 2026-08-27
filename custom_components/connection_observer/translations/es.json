@@ -18,11 +18,15 @@
         "description": "Elige cómo y cuándo recibir alertas. Los modos inmediato y resumen pueden estar activos simultáneamente.",
         "data": {
           "notify_service": "Servicio(s) de notificación",
+          "notify_target": "Destino de la notificación (opcional)",
           "notify_immediate": "Notificación inmediata al desconectarse",
           "notify_summary": "Resumen programado",
           "summary_time": "Hora del resumen",
           "summary_days": "Días del resumen",
           "notify_reconnect": "Notificar al reconectarse (opt-in)"
+        },
+        "data_description": {
+          "notify_target": "Solo necesario si tu servicio de notificación envía a varios destinatarios a la vez (p. ej. un servicio de Telegram o correo agrupado desde HA 2026.7.x) y quieres llegar solo a uno — introduce aquí el valor de destino de ese destinatario (p. ej. un ID de chat o una dirección de correo)."
         }
       },
       "test": {
@@ -280,11 +284,15 @@
         "title": "Connection Observer – Notificaciones",
         "data": {
           "notify_service": "Servicio(s) de notificación",
+          "notify_target": "Destino de la notificación (opcional)",
           "notify_immediate": "Notificación inmediata al desconectarse",
           "notify_summary": "Resumen programado",
           "summary_time": "Hora del resumen",
           "summary_days": "Días del resumen",
           "notify_reconnect": "Notificar al reconectarse"
+        },
+        "data_description": {
+          "notify_target": "Solo necesario si tu servicio de notificación envía a varios destinatarios a la vez (p. ej. un servicio de Telegram o correo agrupado desde HA 2026.7.x) y quieres llegar solo a uno — introduce aquí el valor de destino de ese destinatario (p. ej. un ID de chat o una dirección de correo)."
         }
       },
       "advanced": {

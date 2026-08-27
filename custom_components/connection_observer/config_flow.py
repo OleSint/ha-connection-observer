@@ -24,6 +24,7 @@ from .const import (
     CONF_NOTIFY_RECONNECT,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_SUMMARY,
+    CONF_NOTIFY_TARGET,
     CONF_PROTOCOL_DELAYS,
     CONF_PROTOCOLS,
     CONF_REPAIRS_THRESHOLD,
@@ -303,6 +304,7 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_NOTIFY_SERVICE): _notify_selector(notify_services),
+                    vol.Optional(CONF_NOTIFY_TARGET, default=""): selector.TextSelector(),
                     vol.Optional(CONF_NOTIFY_IMMEDIATE, default=False): selector.BooleanSelector(),
                     vol.Optional(CONF_NOTIFY_SUMMARY, default=True): selector.BooleanSelector(),
                     vol.Optional(CONF_SUMMARY_TIME, default="08:00:00"): selector.TimeSelector(),
@@ -329,19 +331,23 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if isinstance(services, str):
                     services = [services] if services else []
                 failed: list[str] = []
+                target = str(self._data.get(CONF_NOTIFY_TARGET, "")).strip()
                 for svc in services:
                     try:
                         domain, service_name = svc.split(".", 1)
+                        test_data: dict[str, Any] = {
+                            "title": "Connection Observer – Test",
+                            "message": (
+                                "✅ Test notification from Connection Observer. "
+                                "Your notification service is working correctly!"
+                            ),
+                        }
+                        if target:
+                            test_data["target"] = target
                         await self.hass.services.async_call(
                             domain,
                             service_name,
-                            {
-                                "title": "Connection Observer – Test",
-                                "message": (
-                                    "✅ Test notification from Connection Observer. "
-                                    "Your notification service is working correctly!"
-                                ),
-                            },
+                            test_data,
                             blocking=True,
                         )
                     except Exception as exc:  # noqa: BLE001
@@ -508,6 +514,9 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                     vol.Required(
                         CONF_NOTIFY_SERVICE, default=cur.get(CONF_NOTIFY_SERVICE, [])
                     ): _notify_selector(notify_services),
+                    vol.Optional(
+                        CONF_NOTIFY_TARGET, default=cur.get(CONF_NOTIFY_TARGET, "")
+                    ): selector.TextSelector(),
                     vol.Optional(
                         CONF_NOTIFY_IMMEDIATE,
                         default=cur.get(CONF_NOTIFY_IMMEDIATE, False),
@@ -684,19 +693,23 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                 if isinstance(services, str):
                     services = [services] if services else []
                 failed: list[str] = []
+                target = str(self._data.get(CONF_NOTIFY_TARGET, self._cur().get(CONF_NOTIFY_TARGET, ""))).strip()
                 for svc in services:
                     try:
                         domain, service_name = svc.split(".", 1)
+                        test_data: dict[str, Any] = {
+                            "title": "Connection Observer – Test",
+                            "message": (
+                                "✅ Test notification from Connection Observer. "
+                                "Your notification service is working correctly!"
+                            ),
+                        }
+                        if target:
+                            test_data["target"] = target
                         await self.hass.services.async_call(
                             domain,
                             service_name,
-                            {
-                                "title": "Connection Observer – Test",
-                                "message": (
-                                    "✅ Test notification from Connection Observer. "
-                                    "Your notification service is working correctly!"
-                                ),
-                            },
+                            test_data,
                             blocking=True,
                         )
                     except Exception as exc:  # noqa: BLE001

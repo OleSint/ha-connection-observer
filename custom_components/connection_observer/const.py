@@ -244,6 +244,7 @@ CONF_NOTIFY_SUMMARY = "notify_summary"
 CONF_SUMMARY_TIME = "summary_time"
 CONF_SUMMARY_DAYS = "summary_days"
 CONF_NOTIFY_RECONNECT = "notify_reconnect"
+CONF_NOTIFY_TARGET = "notify_target"  # optional target passed to every notify call (e.g. recipient/chat_id for grouped notify entities)
 CONF_LANGUAGE = "language"
 
 # Config keys – advanced

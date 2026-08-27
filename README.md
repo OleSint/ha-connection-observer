@@ -257,6 +257,11 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.11 *(released)*
+
+**New: Optional notification target, for HA's post-2026.7.x grouped notify services**  
+Since Home Assistant 2026.7.x reworked the `notify` platform, some integrations (SMTP, Telegram bots with multiple configured chats, etc.) no longer expose one distinct `notify.*` entity per recipient — a single grouped entity now sends to every configured recipient at once, with no way to address just one. Connection Observer's notification settings now include an optional **Notification target** field; when set, it's passed as the `target` value on every notification call, letting you reach a single specific recipient behind a grouped notify service (e.g. one Telegram chat ID or one email address).
+
 ### v1.3.10 *(released)*
 
 **Bugfix: Real disconnects could be permanently masked by a "status"/button entity on the same device**  

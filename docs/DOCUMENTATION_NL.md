@@ -1,6 +1,6 @@
 # Connection Observer – Documentatie (Nederlands)
 
-**Versie:** 1.3.10  
+**Versie:** 1.3.11  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -206,6 +206,10 @@ Naast de wizard-instellingen biedt de optiepagina ook:
 ### Testmelding
 
 Via de optiepagina kun je op elk moment een testmelding versturen zonder de integratie opnieuw te configureren. Vink **Testmelding nu verzenden** aan om een testbericht naar al je geconfigureerde diensten te sturen voordat de nieuwe instellingen worden opgeslagen.
+
+### Meldingsdoel *(vanaf v1.3.11)*
+
+Een optioneel veld naast de meldingsdienst(en). Sinds Home Assistant 2026.7.x de werking van het `notify`-platform heeft veranderd, bieden sommige integraties (bijv. SMTP, of Telegram-bots met meerdere geconfigureerde chats) niet langer een aparte `notify.*`-entiteit per ontvanger — in plaats daarvan stuurt één gebundelde entiteit naar alle geconfigureerde ontvangers tegelijk, zonder mogelijkheid om er maar één te kiezen. Werkt jouw meldingsdienst zo en wil je gericht slechts één specifieke ontvanger bereiken, vul dan hier de doelwaarde van die ontvanger in (bijv. een e-mailadres of een Telegram-chat-ID) — deze wordt bij elke melding van deze integratie als `target`-veld meegestuurd. Laat leeg als je meldingsdienst al precies de juiste persoon bereikt.
 
 ### Uitgesloten entiteitsdomeinen
 

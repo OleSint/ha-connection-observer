@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (English)
 
-**Version:** 1.3.10  
+**Version:** 1.3.11  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -214,6 +214,10 @@ In addition to the wizard settings, the options page also exposes:
 ### Test notification
 
 After saving your settings you are taken to a brief test step. Tick **Send test notification now** and click Submit to send a live test to all configured services. Untick to skip. This is useful whenever you change your notification services.
+
+### Notification target *(v1.3.11+)*
+
+An optional field alongside the notification service(s). Since Home Assistant 2026.7.x changed how the `notify` platform works, some integrations (e.g. SMTP, or Telegram bots with multiple configured chats) no longer expose one distinct `notify.*` entity per recipient — instead a single grouped entity sends to every configured recipient at once, with no way to pick just one. If your notify service behaves this way and you want to reach only one specific recipient, enter that recipient's target value here (e.g. an email address or a Telegram chat ID) — it's passed as the `target` field on every notification this integration sends. Leave empty if your notify service already targets exactly who you want.
 
 ### Domain exclusions
 

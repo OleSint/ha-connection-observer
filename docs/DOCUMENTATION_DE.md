@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation (Deutsch)
 
-**Version:** 1.3.10  
+**Version:** 1.3.11  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -208,6 +208,10 @@ Zusätzlich zu den Wizard-Einstellungen bietet die Optionsseite:
 ### Testbenachrichtigung
 
 Nach dem Speichern der Einstellungen folgt ein kurzer Testschritt. Aktiviere **Testbenachrichtigung jetzt senden** und klicke auf Weiter, um einen Live-Test an alle konfigurierten Dienste zu senden. Deaktiviere das Kontrollkästchen, um den Schritt zu überspringen. Besonders nützlich, wenn du den Benachrichtigungsdienst gewechselt hast.
+
+### Benachrichtigungsziel *(ab v1.3.11)*
+
+Ein optionales Feld neben dem Benachrichtigungsdienst. Seit Home Assistant 2026.7.x die `notify`-Plattform umgebaut hat, bieten manche Integrationen (z. B. SMTP oder Telegram-Bots mit mehreren konfigurierten Chats) keine einzelne `notify.*`-Entität pro Empfänger mehr — stattdessen sendet eine gebündelte Entität an alle konfigurierten Empfänger gleichzeitig, ohne Auswahlmöglichkeit für nur einen. Verhält sich dein Notify-Dienst so und du willst gezielt nur einen bestimmten Empfänger erreichen, trage hier den Zielwert dieses Empfängers ein (z. B. eine E-Mail-Adresse oder eine Telegram-Chat-ID) — er wird bei jeder Benachrichtigung dieser Integration als `target`-Feld mitgeschickt. Leer lassen, wenn dein Notify-Dienst ohnehin schon genau die richtige Person erreicht.
 
 ### Domänenausschlüsse
 

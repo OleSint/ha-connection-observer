@@ -18,11 +18,15 @@
         "description": "Kies hoe en wanneer je waarschuwingen ontvangt. De directe melding en de samenvatting kunnen tegelijkertijd actief zijn.",
         "data": {
           "notify_service": "Meldingsdienst(en)",
+          "notify_target": "Meldingsdoel (optioneel)",
           "notify_immediate": "Directe melding bij verbindingsverlies",
           "notify_summary": "Geplande samenvatting",
           "summary_time": "Tijd van samenvatting",
           "summary_days": "Dagen van samenvatting",
           "notify_reconnect": "Melding bij herverbinding (opt-in)"
+        },
+        "data_description": {
+          "notify_target": "Alleen nodig als je meldingsdienst meerdere ontvangers tegelijk aanschrijft (bijv. een gebundelde Telegram- of e-maildienst sinds HA 2026.7.x) en je gericht slechts één wilt bereiken — vul hier de doelwaarde van die ontvanger in (bijv. een chat-ID of e-mailadres)."
         }
       },
       "test": {
@@ -280,11 +284,15 @@
         "title": "Connection Observer – Meldingen",
         "data": {
           "notify_service": "Meldingsdienst(en)",
+          "notify_target": "Meldingsdoel (optioneel)",
           "notify_immediate": "Directe melding bij verbindingsverlies",
           "notify_summary": "Geplande samenvatting",
           "summary_time": "Tijd van samenvatting",
           "summary_days": "Dagen van samenvatting",
           "notify_reconnect": "Melding bij herverbinding"
+        },
+        "data_description": {
+          "notify_target": "Alleen nodig als je meldingsdienst meerdere ontvangers tegelijk aanschrijft (bijv. een gebundelde Telegram- of e-maildienst sinds HA 2026.7.x) en je gericht slechts één wilt bereiken — vul hier de doelwaarde van die ontvanger in (bijv. een chat-ID of e-mailadres)."
         }
       },
       "advanced": {

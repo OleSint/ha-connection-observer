@@ -35,6 +35,7 @@ from .const import (
     CONF_NOTIFY_RECONNECT,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_SUMMARY,
+    CONF_NOTIFY_TARGET,
     CONF_PROTOCOL_DELAYS,
     CONF_PROTOCOLS,
     CONF_REPAIRS_THRESHOLD,
@@ -1386,9 +1387,17 @@ class ConnectionObserverCoordinator:
             _LOGGER.error("Connection Observer: invalid notify service: %s", service)
             return
         domain, service_name = parts
+        service_data: dict[str, Any] = {"title": title, "message": message}
+        # Some notify platforms bundle multiple recipients behind a single
+        # entity/service (e.g. SMTP or Telegram groups since HA's notify
+        # platform changes in 2026.7.x) and only send to one specific
+        # recipient if a target is explicitly passed alongside the call.
+        target = str(self._cfg.get(CONF_NOTIFY_TARGET, "")).strip()
+        if target:
+            service_data["target"] = target
         try:
             await self.hass.services.async_call(
-                domain, service_name, {"title": title, "message": message}, blocking=False
+                domain, service_name, service_data, blocking=False
             )
         except Exception as err:  # noqa: BLE001
             _LOGGER.error("Connection Observer: notification failed via %s: %s", service, err)

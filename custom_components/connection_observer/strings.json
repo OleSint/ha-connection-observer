@@ -18,11 +18,15 @@
         "description": "Choose how and when to receive alerts. Immediate and summary modes can both be active simultaneously.",
         "data": {
           "notify_service": "Notification service(s)",
+          "notify_target": "Notification target (optional)",
           "notify_immediate": "Immediate notification on disconnect",
           "notify_summary": "Scheduled summary notification",
           "summary_time": "Summary time",
           "summary_days": "Summary days",
           "notify_reconnect": "Notify on reconnect (opt-in)"
+        },
+        "data_description": {
+          "notify_target": "Only needed if your notify service sends to multiple recipients at once (e.g. a grouped Telegram or email service since HA 2026.7.x) and you want to reach just one — enter that recipient's target value here (e.g. a chat ID or email address)."
         }
       },
       "test": {
@@ -280,11 +284,15 @@
         "title": "Connection Observer – Notifications",
         "data": {
           "notify_service": "Notification service(s)",
+          "notify_target": "Notification target (optional)",
           "notify_immediate": "Immediate notification on disconnect",
           "notify_summary": "Scheduled summary notification",
           "summary_time": "Summary time",
           "summary_days": "Summary days",
           "notify_reconnect": "Notify on reconnect"
+        },
+        "data_description": {
+          "notify_target": "Only needed if your notify service sends to multiple recipients at once (e.g. a grouped Telegram or email service since HA 2026.7.x) and you want to reach just one — enter that recipient's target value here (e.g. a chat ID or email address)."
         }
       },
       "advanced": {

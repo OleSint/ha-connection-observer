@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (Français)
 
-**Version:** 1.3.10  
+**Version:** 1.3.11  
 **Dépôt :** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -206,6 +206,10 @@ En plus des paramètres de l'assistant, la page d'options propose également :
 ### Notification de test
 
 Après avoir enregistré vos paramètres, une étape de test apparaît. Cochez **Envoyer une notification de test maintenant** et cliquez sur Soumettre pour envoyer un test en direct. Utile après chaque changement de service de notification.
+
+### Cible de notification *(à partir de la v1.3.11)*
+
+Un champ optionnel à côté du service de notification. Depuis que Home Assistant 2026.7.x a modifié le fonctionnement de la plateforme `notify`, certaines intégrations (ex. SMTP, ou les bots Telegram avec plusieurs chats configurés) n'exposent plus une entité `notify.*` distincte par destinataire — une entité groupée envoie désormais à tous les destinataires configurés en même temps, sans possibilité d'en choisir un seul. Si votre service de notification fonctionne ainsi et que vous souhaitez atteindre uniquement un destinataire précis, indiquez ici sa valeur cible (ex. une adresse e-mail ou un identifiant de chat Telegram) — elle sera transmise en tant que champ `target` à chaque notification envoyée par cette intégration. Laissez vide si votre service de notification cible déjà exactement la bonne personne.
 
 ### Exclusions de domaines
 

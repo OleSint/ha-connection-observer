@@ -18,11 +18,15 @@
         "description": "Choisissez comment et quand recevoir des alertes. Les modes immédiat et résumé peuvent être actifs simultanément.",
         "data": {
           "notify_service": "Service(s) de notification",
+          "notify_target": "Cible de notification (facultatif)",
           "notify_immediate": "Notification immédiate lors d'une déconnexion",
           "notify_summary": "Résumé planifié",
           "summary_time": "Heure du résumé",
           "summary_days": "Jours du résumé",
           "notify_reconnect": "Notifier lors de la reconnexion (opt-in)"
+        },
+        "data_description": {
+          "notify_target": "Utile uniquement si votre service de notification envoie à plusieurs destinataires à la fois (ex. un service Telegram ou e-mail groupé depuis HA 2026.7.x) et que vous voulez n'en atteindre qu'un seul — indiquez ici la valeur cible de ce destinataire (ex. un identifiant de chat ou une adresse e-mail)."
         }
       },
       "test": {
@@ -280,11 +284,15 @@
         "title": "Connection Observer – Notifications",
         "data": {
           "notify_service": "Service(s) de notification",
+          "notify_target": "Cible de notification (facultatif)",
           "notify_immediate": "Notification immédiate lors d'une déconnexion",
           "notify_summary": "Résumé planifié",
           "summary_time": "Heure du résumé",
           "summary_days": "Jours du résumé",
           "notify_reconnect": "Notifier lors de la reconnexion"
+        },
+        "data_description": {
+          "notify_target": "Utile uniquement si votre service de notification envoie à plusieurs destinataires à la fois (ex. un service Telegram ou e-mail groupé depuis HA 2026.7.x) et que vous voulez n'en atteindre qu'un seul — indiquez ici la valeur cible de ce destinataire (ex. un identifiant de chat ou une adresse e-mail)."
         }
       },
       "advanced": {
