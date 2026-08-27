@@ -26,7 +26,7 @@
           "notify_reconnect": "Notify on reconnect (opt-in)"
         },
         "data_description": {
-          "notify_target": "Only needed if your notify service sends to multiple recipients at once (e.g. a grouped Telegram or email service since HA 2026.7.x) and you want to reach just one — enter that recipient's target value here (e.g. a chat ID or email address)."
+          "notify_target": "Only needed if your notify service sends to multiple recipients at once and you want to reach just one. If your service is notify.send_message, enter the specific recipient entity_id here (e.g. notify.gmxolaf3_olaf_exchange). For other services (e.g. telegram_bot.send_message), enter the raw target value that service expects instead (e.g. a chat ID)."
         }
       },
       "test": {
@@ -292,7 +292,7 @@
           "notify_reconnect": "Notify on reconnect"
         },
         "data_description": {
-          "notify_target": "Only needed if your notify service sends to multiple recipients at once (e.g. a grouped Telegram or email service since HA 2026.7.x) and you want to reach just one — enter that recipient's target value here (e.g. a chat ID or email address)."
+          "notify_target": "Only needed if your notify service sends to multiple recipients at once and you want to reach just one. If your service is notify.send_message, enter the specific recipient entity_id here (e.g. notify.gmxolaf3_olaf_exchange). For other services (e.g. telegram_bot.send_message), enter the raw target value that service expects instead (e.g. a chat ID)."
         }
       },
       "advanced": {

@@ -26,7 +26,7 @@
           "notify_reconnect": "Benachrichtigung bei Wiederverbindung (opt-in)"
         },
         "data_description": {
-          "notify_target": "Nur nötig, wenn dein Notify-Dienst mehrere Empfänger gleichzeitig anschreibt (z. B. ein gebündelter Telegram- oder E-Mail-Dienst seit HA 2026.7.x) und du gezielt nur einen erreichen willst — trag hier den Zielwert dieses Empfängers ein (z. B. eine Chat-ID oder E-Mail-Adresse)."
+          "notify_target": "Nur nötig, wenn dein Notify-Dienst mehrere Empfänger gleichzeitig anschreibt und du gezielt nur einen erreichen willst. Bei notify.send_message trägst du hier die Entity-ID des gewünschten Empfängers ein (z. B. notify.gmxolaf3_olaf_exchange). Bei anderen Diensten (z. B. telegram_bot.send_message) trägst du stattdessen den Rohwert ein, den dieser Dienst erwartet (z. B. eine Chat-ID)."
         }
       },
       "test": {
@@ -292,7 +292,7 @@
           "notify_reconnect": "Benachrichtigung bei Wiederverbindung"
         },
         "data_description": {
-          "notify_target": "Nur nötig, wenn dein Notify-Dienst mehrere Empfänger gleichzeitig anschreibt (z. B. ein gebündelter Telegram- oder E-Mail-Dienst seit HA 2026.7.x) und du gezielt nur einen erreichen willst — trag hier den Zielwert dieses Empfängers ein (z. B. eine Chat-ID oder E-Mail-Adresse)."
+          "notify_target": "Nur nötig, wenn dein Notify-Dienst mehrere Empfänger gleichzeitig anschreibt und du gezielt nur einen erreichen willst. Bei notify.send_message trägst du hier die Entity-ID des gewünschten Empfängers ein (z. B. notify.gmxolaf3_olaf_exchange). Bei anderen Diensten (z. B. telegram_bot.send_message) trägst du stattdessen den Rohwert ein, den dieser Dienst erwartet (z. B. eine Chat-ID)."
         }
       },
       "advanced": {

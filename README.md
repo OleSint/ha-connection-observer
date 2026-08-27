@@ -257,6 +257,16 @@ Alle Einstellungen — sowie Benachrichtigungsvorlagen und der HA-Reparaturen-Sc
 
 ## Changelog
 
+### v1.3.13 *(released)*
+
+**Bugfix: The notification target field didn't work with the generic `notify.send_message` action**  
+v1.3.11's optional notification target was always passed inside the service call's *data* payload (`data.target`), which only legacy flat notify services (e.g. `telegram_bot.send_message`) understand. The generic, entity-based `notify.send_message` action — the modern way multi-recipient services like SMTP now expose individual recipients since HA 2026.7.x — instead expects the recipient as a proper `target: {entity_id: ...}` selector on the service call itself. Connection Observer now uses the correct mechanism automatically depending on which service is selected: an `entity_id` target selector for `notify.send_message`, and the previous data-field behavior for everything else. The field's description was also clarified to explain which value format to enter for each case.
+
+### v1.3.12 *(released)*
+
+**Bugfix: A device already reported in a summary while still offline could get a duplicate, parallel event**  
+The scheduled/catch-up summary marks every event it reports as "included in summary" — including ongoing outages that haven't reconnected yet, so they can be worded as "still offline" in the message. The three checks that dedupe "is this device already tracked as offline?" incorrectly also required the existing event to *not* be summary-included, so a device whose open event had already appeared in a summary could get a second, parallel open event created for it — even though it never actually reconnected. Both events would then show up simultaneously as offline for the same device. The dedupe checks now correctly ignore the summary flag and rely solely on whether the device has an unresolved event. Existing duplicates from before this fix are automatically merged (keeping the earliest one) on the next startup or options save.
+
 ### v1.3.11 *(released)*
 
 **New: Optional notification target, for HA's post-2026.7.x grouped notify services**  

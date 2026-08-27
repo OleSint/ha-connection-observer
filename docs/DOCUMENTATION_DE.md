@@ -1,6 +1,6 @@
 # Connection Observer – Dokumentation (Deutsch)
 
-**Version:** 1.3.11  
+**Version:** 1.3.13  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -211,7 +211,12 @@ Nach dem Speichern der Einstellungen folgt ein kurzer Testschritt. Aktiviere **T
 
 ### Benachrichtigungsziel *(ab v1.3.11)*
 
-Ein optionales Feld neben dem Benachrichtigungsdienst. Seit Home Assistant 2026.7.x die `notify`-Plattform umgebaut hat, bieten manche Integrationen (z. B. SMTP oder Telegram-Bots mit mehreren konfigurierten Chats) keine einzelne `notify.*`-Entität pro Empfänger mehr — stattdessen sendet eine gebündelte Entität an alle konfigurierten Empfänger gleichzeitig, ohne Auswahlmöglichkeit für nur einen. Verhält sich dein Notify-Dienst so und du willst gezielt nur einen bestimmten Empfänger erreichen, trage hier den Zielwert dieses Empfängers ein (z. B. eine E-Mail-Adresse oder eine Telegram-Chat-ID) — er wird bei jeder Benachrichtigung dieser Integration als `target`-Feld mitgeschickt. Leer lassen, wenn dein Notify-Dienst ohnehin schon genau die richtige Person erreicht.
+Ein optionales Feld neben dem Benachrichtigungsdienst. Seit Home Assistant 2026.7.x die `notify`-Plattform umgebaut hat, bieten manche Integrationen (z. B. SMTP oder Telegram-Bots mit mehreren konfigurierten Chats) keine einzelne `notify.*`-Entität pro Empfänger mehr — stattdessen sendet eine gebündelte Entität an alle konfigurierten Empfänger gleichzeitig, ohne Auswahlmöglichkeit für nur einen. Verhält sich dein Notify-Dienst so und du willst gezielt nur einen bestimmten Empfänger erreichen, trage hier den Zielwert dieses Empfängers ein. **Was genau du einträgst, hängt vom oben gewählten Dienst ab:**
+
+- **`notify.send_message`** (der generische, entitätsbasierte Dienst): trage die **Entity-ID** des gewünschten Empfängers ein, z. B. `notify.gmxolaf3_olaf_exchange`. Das wird als echtes Ziel-Selector-Feld übergeben, so wie es die moderne Notify-Plattform erwartet.
+- **Jeder andere Dienst** (z. B. `telegram_bot.send_message`, oder ein alter, flacher `notify.*`-Dienst): trage den **Rohwert ein, den dieser Dienst selbst als `target`-Parameter erwartet** — z. B. eine Telegram-Chat-ID (eine Zahl, z. B. `-1001234567890`). Das wird als `target`-Feld in die Service-Daten gepackt, genau wie es für diese Plattformen schon immer funktioniert hat.
+
+Leer lassen, wenn dein Notify-Dienst ohnehin schon genau die richtige Person erreicht.
 
 ### Domänenausschlüsse
 

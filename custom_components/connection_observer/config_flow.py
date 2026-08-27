@@ -342,12 +342,17 @@ class ConnectionObserverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                                 "Your notification service is working correctly!"
                             ),
                         }
+                        test_target: dict[str, Any] | None = None
                         if target:
-                            test_data["target"] = target
+                            if domain == "notify" and service_name == "send_message":
+                                test_target = {"entity_id": target}
+                            else:
+                                test_data["target"] = target
                         await self.hass.services.async_call(
                             domain,
                             service_name,
                             test_data,
+                            target=test_target,
                             blocking=True,
                         )
                     except Exception as exc:  # noqa: BLE001
@@ -704,12 +709,17 @@ class ConnectionObserverOptionsFlow(config_entries.OptionsFlow):
                                 "Your notification service is working correctly!"
                             ),
                         }
+                        test_target: dict[str, Any] | None = None
                         if target:
-                            test_data["target"] = target
+                            if domain == "notify" and service_name == "send_message":
+                                test_target = {"entity_id": target}
+                            else:
+                                test_data["target"] = target
                         await self.hass.services.async_call(
                             domain,
                             service_name,
                             test_data,
+                            target=test_target,
                             blocking=True,
                         )
                     except Exception as exc:  # noqa: BLE001

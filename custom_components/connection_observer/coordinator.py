@@ -356,6 +356,7 @@ class ConnectionObserverCoordinator:
         self._refresh_label_devices()
         await self._purge_excluded_events()
         await self._purge_label_ignored_events()
+        await self._purge_duplicate_open_events()
 
     async def async_unload(self) -> None:
         for cancel_fn in self._pending_disconnects.values():
@@ -396,6 +397,7 @@ class ConnectionObserverCoordinator:
         self._refresh_label_devices()
         await self._purge_excluded_events()
         await self._purge_label_ignored_events()
+        await self._purge_duplicate_open_events()
         await self._purge_stale_protocol_events()
         await self._scan_initial_states()
 
@@ -481,7 +483,7 @@ class ConnectionObserverCoordinator:
             if device_key in seen_device_keys:
                 continue
             if any(
-                ev.device_key == device_key and ev.reconnected_at is None and not ev.included_in_summary
+                ev.device_key == device_key and ev.reconnected_at is None
                 for ev in self._events
             ):
                 continue
@@ -501,7 +503,7 @@ class ConnectionObserverCoordinator:
             if device_key in seen_device_keys:
                 continue
             if any(
-                ev.device_key == device_key and ev.reconnected_at is None and not ev.included_in_summary
+                ev.device_key == device_key and ev.reconnected_at is None
                 for ev in self._events
             ):
                 continue
@@ -790,7 +792,7 @@ class ConnectionObserverCoordinator:
         first_unavailable_at = dt_util.now()
         device_key, device_name = self._resolve_device(entity_id)
         for ev in self._events:
-            if ev.device_key == device_key and ev.reconnected_at is None and not ev.included_in_summary:
+            if ev.device_key == device_key and ev.reconnected_at is None:
                 return
         if device_key in self._pending_disconnects:
             return
@@ -1071,6 +1073,42 @@ class ConnectionObserverCoordinator:
                 "Connection Observer: purged observer_ignore-labelled device(s) from offline list: %s",
                 ", ".join(purged),
             )
+
+    async def _purge_duplicate_open_events(self) -> None:
+        """Collapse duplicate open events for the same device into one.
+
+        A bug present through v1.3.11 (fixed here) let a second open event be
+        created for a device whose existing open event had already been
+        included in a summary — even though the device had never actually
+        reconnected. This leaves exactly one open event per device: the
+        earliest one, which reflects the true original outage start; any
+        later duplicates are discarded.
+        """
+        open_by_device: dict[str, list[DisconnectEvent]] = {}
+        for ev in self._events:
+            if ev.reconnected_at is None:
+                open_by_device.setdefault(ev.device_key, []).append(ev)
+
+        duplicates = {dk: evs for dk, evs in open_by_device.items() if len(evs) > 1}
+        if not duplicates:
+            return
+
+        to_drop: set[int] = set()
+        purged: list[str] = []
+        for dk, evs in duplicates.items():
+            evs.sort(key=lambda e: e.disconnected_at)
+            keep = evs[0]
+            for ev in evs[1:]:
+                to_drop.add(id(ev))
+                purged.append(ev.device_name)
+            _LOGGER.info(
+                "Connection Observer: merged %d duplicate open event(s) for %s, keeping the one since %s",
+                len(evs) - 1, keep.device_name, keep.disconnected_at,
+            )
+
+        self._events = [ev for ev in self._events if id(ev) not in to_drop]
+        await self._save_store()
+        self._async_notify_listeners()
 
     async def _purge_stale_protocol_events(self) -> None:
         """Close open events for protocols that are no longer monitored.
@@ -1388,16 +1426,27 @@ class ConnectionObserverCoordinator:
             return
         domain, service_name = parts
         service_data: dict[str, Any] = {"title": title, "message": message}
+        call_target: dict[str, Any] | None = None
         # Some notify platforms bundle multiple recipients behind a single
         # entity/service (e.g. SMTP or Telegram groups since HA's notify
         # platform changes in 2026.7.x) and only send to one specific
-        # recipient if a target is explicitly passed alongside the call.
+        # recipient if a target is explicitly supplied. How that target is
+        # passed depends on the call style:
+        # - Legacy flat services (e.g. telegram_bot.send_message) accept the
+        #   recipient as a plain value inside the service *data* (e.g. a
+        #   chat_id).
+        # - The generic, entity-based notify.send_message action instead
+        #   expects the recipient as an entity_id via the service call's
+        #   *target* selector (HA's standard target mechanism), not as data.
         target = str(self._cfg.get(CONF_NOTIFY_TARGET, "")).strip()
         if target:
-            service_data["target"] = target
+            if domain == "notify" and service_name == "send_message":
+                call_target = {"entity_id": target}
+            else:
+                service_data["target"] = target
         try:
             await self.hass.services.async_call(
-                domain, service_name, service_data, blocking=False
+                domain, service_name, service_data, target=call_target, blocking=False
             )
         except Exception as err:  # noqa: BLE001
             _LOGGER.error("Connection Observer: notification failed via %s: %s", service, err)

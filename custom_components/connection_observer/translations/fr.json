@@ -26,7 +26,7 @@
           "notify_reconnect": "Notifier lors de la reconnexion (opt-in)"
         },
         "data_description": {
-          "notify_target": "Utile uniquement si votre service de notification envoie à plusieurs destinataires à la fois (ex. un service Telegram ou e-mail groupé depuis HA 2026.7.x) et que vous voulez n'en atteindre qu'un seul — indiquez ici la valeur cible de ce destinataire (ex. un identifiant de chat ou une adresse e-mail)."
+          "notify_target": "Utile uniquement si votre service de notification envoie à plusieurs destinataires à la fois et que vous voulez n'en atteindre qu'un seul. Avec notify.send_message, indiquez ici l'entity_id du destinataire visé (ex. notify.gmxolaf3_olaf_exchange). Avec d'autres services (ex. telegram_bot.send_message), indiquez plutôt la valeur brute attendue par ce service (ex. un identifiant de chat)."
         }
       },
       "test": {
@@ -292,7 +292,7 @@
           "notify_reconnect": "Notifier lors de la reconnexion"
         },
         "data_description": {
-          "notify_target": "Utile uniquement si votre service de notification envoie à plusieurs destinataires à la fois (ex. un service Telegram ou e-mail groupé depuis HA 2026.7.x) et que vous voulez n'en atteindre qu'un seul — indiquez ici la valeur cible de ce destinataire (ex. un identifiant de chat ou une adresse e-mail)."
+          "notify_target": "Utile uniquement si votre service de notification envoie à plusieurs destinataires à la fois et que vous voulez n'en atteindre qu'un seul. Avec notify.send_message, indiquez ici l'entity_id du destinataire visé (ex. notify.gmxolaf3_olaf_exchange). Avec d'autres services (ex. telegram_bot.send_message), indiquez plutôt la valeur brute attendue par ce service (ex. un identifiant de chat)."
         }
       },
       "advanced": {

@@ -1,6 +1,6 @@
 # Connection Observer – Documentation (English)
 
-**Version:** 1.3.11  
+**Version:** 1.3.13  
 **Repository:** [github.com/OleSint/ha-connection-observer](https://github.com/OleSint/ha-connection-observer)
 
 ---
@@ -217,7 +217,12 @@ After saving your settings you are taken to a brief test step. Tick **Send test 
 
 ### Notification target *(v1.3.11+)*
 
-An optional field alongside the notification service(s). Since Home Assistant 2026.7.x changed how the `notify` platform works, some integrations (e.g. SMTP, or Telegram bots with multiple configured chats) no longer expose one distinct `notify.*` entity per recipient — instead a single grouped entity sends to every configured recipient at once, with no way to pick just one. If your notify service behaves this way and you want to reach only one specific recipient, enter that recipient's target value here (e.g. an email address or a Telegram chat ID) — it's passed as the `target` field on every notification this integration sends. Leave empty if your notify service already targets exactly who you want.
+An optional field alongside the notification service(s). Since Home Assistant 2026.7.x changed how the `notify` platform works, some integrations (e.g. SMTP, or Telegram bots with multiple configured chats) no longer expose one distinct `notify.*` entity per recipient — instead a single grouped entity sends to every configured recipient at once, with no way to pick just one. If your notify service behaves this way and you want to reach only one specific recipient, enter that recipient's target value here — it's passed to every notification this integration sends. **What to enter depends on the service you selected above:**
+
+- **`notify.send_message`** (the generic, entity-based action): enter the specific recipient's **entity_id**, e.g. `notify.gmxolaf3_olaf_exchange`. This is passed as a proper target selector, matching how HA's modern notify platform expects a recipient to be addressed.
+- **Any other service** (e.g. `telegram_bot.send_message`, or a legacy flat `notify.*` service): enter the **raw value that service itself expects** as its `target` parameter — for example a Telegram chat ID (a number, e.g. `-1001234567890`). This gets passed as a `target` field in the service call data, the same way it always worked for these platforms.
+
+Leave empty if your notify service already targets exactly who you want.
 
 ### Domain exclusions
 
